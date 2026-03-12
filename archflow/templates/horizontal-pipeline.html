@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>[System Name] Architecture</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    min-height:100vh; background:#080c10;
+    font-family:'JetBrains Mono','Fira Code',monospace;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:32px 16px; color:#c9d1d9;
+  }
+  .title-sub  { font-size:10px; letter-spacing:4px; color:#4a5568;
+                margin-bottom:6px; text-align:center; text-transform:uppercase; }
+  .title-main { font-size:22px; font-weight:700; color:#e6edf3;
+                letter-spacing:-0.5px; text-align:center; margin-bottom:28px; }
+  .phase-banner {
+    background:#0d1117; border:1px solid #333; border-radius:6px;
+    padding:10px 24px; margin-bottom:32px; font-size:11px;
+    min-width:400px; max-width:700px; text-align:center;
+    transition:color 0.4s,border-color 0.4s;
+  }
+  .component {
+    background:#0d1117; border:1px solid #21262d; border-radius:10px;
+    padding:14px; text-align:center;
+    transition:border-color 0.4s,box-shadow 0.4s; min-width:130px;
+  }
+  .component-icon  { font-size:22px; margin-bottom:6px; }
+  .component-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
+  .component-sub   { font-size:8px; color:#4a5568; margin-bottom:6px; line-height:1.4; }
+  .component-body  { font-size:8px; color:#8b949e; line-height:1.7; }
+  .arrow-col  { flex:1; padding:0 8px; display:flex; flex-direction:column; gap:8px; }
+  .arrow-wrap { display:flex; flex-direction:column; }
+  .arrow-line {
+    height:2px; background:#21262d; border-radius:1px;
+    position:relative; overflow:hidden; transition:background 0.4s;
+  }
+  .arrow-line .shimmer {
+    display:none; position:absolute; top:0; left:-20%;
+    width:20%; height:100%; background:white; opacity:0.85;
+    animation:slide 0.7s linear infinite;
+  }
+  .arrow-line.active .shimmer { display:block; }
+  .arrow-lbl       { text-align:center; font-size:9px; color:#4a5568; margin-top:3px; }
+  .arrow-lbl.above { margin-top:0; margin-bottom:3px; }
+  .vert-line { width:2px; background:#21262d; transition:background 0.4s; margin:0 auto; }
+  .storage-pipeline {
+    display:flex; align-items:center; gap:0;
+    background:#0a0f14; border:1px solid #21262d;
+    border-radius:12px; padding:14px 12px; position:relative;
+  }
+  .storage-title {
+    position:absolute; top:-10px; left:16px;
+    background:#080c10; padding:0 8px;
+    font-size:9px; letter-spacing:3px; color:#e8b84b; text-transform:uppercase;
+  }
+  .storage-item {
+    flex:1; background:#0d1117; border:1px solid #21262d;
+    border-radius:8px; padding:10px; text-align:center; min-width:80px;
+    transition:border-color 0.4s,box-shadow 0.4s;
+  }
+  .storage-sep { width:16px; text-align:center; font-size:10px; color:#21262d; flex-shrink:0; }
+  .insights { margin-top:32px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .insight-card {
+    background:#0d1117; border:1px solid #21262d; border-radius:8px;
+    padding:10px 16px; text-align:center; min-width:150px;
+  }
+  .insight-label { font-size:9px; letter-spacing:2px; margin-bottom:3px; text-transform:uppercase; }
+  .insight-value { font-size:10px; color:#8b949e; }
+  @keyframes slide { from { left:-20%; } to { left:120%; } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+</style>
+</head>
+<body>
+
+<div class="title-sub">[SYSTEM CATEGORY]</div>
+<div class="title-main">[System Name] · [One-line description]</div>
+<div class="phase-banner" id="phase-banner">▶ Waiting...</div>
+
+<!-- MAIN ROW -->
+<div style="display:flex;align-items:center;width:100%;max-width:1000px;">
+
+  <div class="component" id="c-input">
+    <div class="component-icon">👤</div>
+    <div class="component-label" style="color:#00d4ff">INPUT</div>
+    <div class="component-sub">[entry_point.py]</div>
+    <div class="component-body">[method()]<br>[what it does]</div>
+  </div>
+
+  <div class="arrow-col">
+    <div class="arrow-wrap">
+      <div class="arrow-line" id="arr-1"><div class="shimmer"></div></div>
+      <div class="arrow-lbl">[data label] →</div>
+    </div>
+    <div class="arrow-wrap">
+      <div class="arrow-lbl above">← [response label]</div>
+      <div class="arrow-line" id="arr-1b"></div>
+    </div>
+  </div>
+
+  <div class="component" id="c-orch">
+    <div class="component-icon">⚙️</div>
+    <div class="component-label" style="color:#ff6b35">ORCHESTRATOR</div>
+    <div class="component-sub">[orchestrator.py]</div>
+    <div class="component-body">[run()]<br>[what it does]</div>
+  </div>
+
+  <div class="arrow-col">
+    <div class="arrow-wrap">
+      <div class="arrow-line" id="arr-2"><div class="shimmer"></div></div>
+      <div class="arrow-lbl">[data label] →</div>
+    </div>
+  </div>
+
+  <div class="component" id="c-proc">
+    <div class="component-icon">🔄</div>
+    <div class="component-label" style="color:#a78bfa">PROCESSOR</div>
+    <div class="component-sub">[processor.py]</div>
+    <div class="component-body">[process()]<br>[what it does]</div>
+  </div>
+
+  <div class="arrow-col">
+    <div class="arrow-wrap">
+      <div class="arrow-line" id="arr-3"><div class="shimmer"></div></div>
+      <div class="arrow-lbl">result →</div>
+    </div>
+  </div>
+
+  <div class="component" id="c-output">
+    <div class="component-icon">📦</div>
+    <div class="component-label" style="color:#3fb950">OUTPUT</div>
+    <div class="component-sub">[output.py]</div>
+    <div class="component-body">[serialize()]<br>[what it returns]</div>
+  </div>
+
+</div>
+
+<!-- VERTICAL CONNECTORS -->
+<div style="display:flex;width:100%;max-width:1000px;margin-top:0;">
+  <div style="min-width:130px;"></div>
+  <div style="flex:1;"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
+    <div class="vert-line" id="vl-orch" style="height:24px;"></div>
+  </div>
+  <div style="flex:1;"></div>
+  <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
+    <div class="vert-line" id="vl-proc" style="height:24px;"></div>
+  </div>
+  <div style="flex:1;"></div>
+  <div style="min-width:130px;"></div>
+</div>
+
+<!-- STORAGE ROW -->
+<div style="display:flex;align-items:flex-start;width:100%;max-width:1000px;">
+  <div style="min-width:130px;"></div>
+  <div class="storage-pipeline" style="flex:1;margin:0 8px;">
+    <div class="storage-title">EXTERNAL SERVICES</div>
+    <div class="storage-item" id="s-1">
+      <div style="font-size:16px;margin-bottom:4px;">🗄️</div>
+      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 1]</div>
+      <div style="font-size:8px;color:#4a5568;">[description]</div>
+    </div>
+    <div class="storage-sep">·</div>
+    <div class="storage-item" id="s-2">
+      <div style="font-size:16px;margin-bottom:4px;">🧠</div>
+      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 2]</div>
+      <div style="font-size:8px;color:#4a5568;">[description]</div>
+    </div>
+    <div class="storage-sep">·</div>
+    <div class="storage-item" id="s-3">
+      <div style="font-size:16px;margin-bottom:4px;">💾</div>
+      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 3]</div>
+      <div style="font-size:8px;color:#4a5568;">[description]</div>
+    </div>
+  </div>
+  <div style="min-width:130px;"></div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="insights">
+  <div class="insight-card">
+    <div class="insight-label" style="color:#00d4ff">[LABEL 1]</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-label" style="color:#ff6b35">[LABEL 2]</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-label" style="color:#e8b84b">[LABEL 3]</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-label" style="color:#3fb950">[LABEL 4]</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+</div>
+
+<script>
+  const phases = [
+    "[Phase 0: what triggers the system]",
+    "[Phase 1: orchestrator receives and routes]",
+    "[Phase 2: external service consulted]",
+    "[Phase 3: processor runs core logic]",
+    "[Phase 4: result returned to caller]",
+  ];
+  const phaseColors = ["#00d4ff","#ff6b35","#e8b84b","#a78bfa","#3fb950"];
+  let phase = 0;
+
+  function litComponent(id, color) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = color;
+    el.style.boxShadow = `0 0 18px ${color}44`;
+  }
+  function litArrow(id, color, shimmer = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background = color;
+    if (shimmer) el.classList.add("active");
+  }
+  function litStorage(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = "#e8b84b";
+    el.style.boxShadow = "0 0 14px #e8b84b33";
+  }
+  function resetAll() {
+    document.querySelectorAll(".component,.storage-item").forEach(el => {
+      el.style.borderColor = "#21262d"; el.style.boxShadow = "none";
+    });
+    document.querySelectorAll(".arrow-line,.vert-line").forEach(el => {
+      el.style.background = "#21262d"; el.classList.remove("active");
+    });
+  }
+  function applyPhase() {
+    const banner = document.getElementById("phase-banner");
+    banner.textContent = "▶ " + phases[phase];
+    banner.style.color = phaseColors[phase];
+    banner.style.borderColor = phaseColors[phase] + "55";
+    resetAll();
+    if (phase === 0) { litComponent("c-input", phaseColors[0]); litArrow("arr-1", phaseColors[0], true); }
+    if (phase === 1) { litComponent("c-orch",  phaseColors[1]); litArrow("vl-orch", phaseColors[1]); }
+    if (phase === 2) { litArrow("vl-orch", phaseColors[2]); litStorage("s-1"); litStorage("s-2"); }
+    if (phase === 3) { litComponent("c-proc",   phaseColors[3]); litArrow("arr-2", phaseColors[3], true); }
+    if (phase === 4) { litComponent("c-output", phaseColors[4]); litArrow("arr-3", phaseColors[4], true); litArrow("arr-1b", phaseColors[4]); }
+  }
+  applyPhase();
+  setInterval(() => { phase = (phase + 1) % phases.length; applyPhase(); }, 1500);
+</script>
+</body>
+</html>

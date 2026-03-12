@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>[System Name] Multi-Agent Architecture</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    min-height:100vh; background:#080c10;
+    font-family:'JetBrains Mono','Fira Code',monospace;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:32px 16px; color:#c9d1d9;
+  }
+  .title-sub  { font-size:10px; letter-spacing:4px; color:#4a5568;
+                margin-bottom:6px; text-align:center; text-transform:uppercase; }
+  .title-main { font-size:22px; font-weight:700; color:#e6edf3;
+                letter-spacing:-0.5px; text-align:center; margin-bottom:28px; }
+  .phase-banner {
+    background:#0d1117; border:1px solid #333; border-radius:6px;
+    padding:10px 24px; margin-bottom:32px; font-size:11px;
+    min-width:400px; max-width:700px; text-align:center;
+    transition:color 0.4s,border-color 0.4s;
+  }
+  .component {
+    background:#0d1117; border:1px solid #21262d; border-radius:10px;
+    padding:14px; text-align:center;
+    transition:border-color 0.4s,box-shadow 0.4s; min-width:130px;
+  }
+  .component-icon  { font-size:22px; margin-bottom:6px; }
+  .component-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
+  .component-sub   { font-size:8px; color:#4a5568; margin-bottom:6px; line-height:1.4; }
+  .component-body  { font-size:8px; color:#8b949e; line-height:1.7; }
+  .agent-card {
+    background:#0d1117; border:1px solid #21262d; border-radius:8px;
+    padding:12px; text-align:center; flex:1;
+    transition:border-color 0.4s,box-shadow 0.4s;
+  }
+  .arrow-col  { flex:1; padding:0 8px; display:flex; flex-direction:column; gap:8px; }
+  .arrow-wrap { display:flex; flex-direction:column; }
+  .arrow-line {
+    height:2px; background:#21262d; border-radius:1px;
+    position:relative; overflow:hidden; transition:background 0.4s;
+  }
+  .arrow-line .shimmer {
+    display:none; position:absolute; top:0; left:-20%;
+    width:20%; height:100%; background:white; opacity:0.85;
+    animation:slide 0.7s linear infinite;
+  }
+  .arrow-line.active .shimmer { display:block; }
+  .arrow-lbl       { text-align:center; font-size:9px; color:#4a5568; margin-top:3px; }
+  .arrow-lbl.above { margin-top:0; margin-bottom:3px; }
+  .vert-line { width:2px; background:#21262d; transition:background 0.4s; margin:0 auto; }
+  .storage-pipeline {
+    display:flex; align-items:center; gap:0;
+    background:#0a0f14; border:1px solid #21262d;
+    border-radius:12px; padding:14px 12px; position:relative;
+  }
+  .storage-title {
+    position:absolute; top:-10px; left:16px;
+    background:#080c10; padding:0 8px;
+    font-size:9px; letter-spacing:3px; color:#e8b84b; text-transform:uppercase;
+  }
+  .storage-item {
+    flex:1; background:#0d1117; border:1px solid #21262d;
+    border-radius:8px; padding:10px; text-align:center; min-width:80px;
+    transition:border-color 0.4s,box-shadow 0.4s;
+  }
+  .storage-sep { width:16px; text-align:center; font-size:10px; color:#21262d; flex-shrink:0; }
+  .insights { margin-top:32px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .insight-card {
+    background:#0d1117; border:1px solid #21262d; border-radius:8px;
+    padding:10px 16px; text-align:center; min-width:150px;
+  }
+  .insight-label { font-size:9px; letter-spacing:2px; margin-bottom:3px; text-transform:uppercase; }
+  .insight-value { font-size:10px; color:#8b949e; }
+  .proc-indicator { display:none; font-size:9px; color:#f0883e; margin-top:8px; }
+  .proc-indicator.visible { display:block; animation:blink 0.5s linear infinite; }
+  @keyframes slide { from { left:-20%; } to { left:120%; } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+</style>
+</head>
+<body>
+
+<div class="title-sub">[SYSTEM CATEGORY]</div>
+<div class="title-main">[System Name] · Multi-Agent Architecture</div>
+<div class="phase-banner" id="phase-banner">▶ Waiting...</div>
+
+<!-- TOP ROW: User → Orchestrator -->
+<div style="display:flex;align-items:center;width:100%;max-width:900px;">
+
+  <div class="component" id="c-user">
+    <div class="component-icon">👤</div>
+    <div class="component-label" style="color:#00d4ff">USER</div>
+    <div class="component-sub">[entry_point.py]</div>
+    <div class="component-body">[trigger method]<br>[input type]</div>
+  </div>
+
+  <div class="arrow-col">
+    <div class="arrow-wrap">
+      <div class="arrow-line" id="arr-user"><div class="shimmer"></div></div>
+      <div class="arrow-lbl">request →</div>
+    </div>
+    <div class="arrow-wrap">
+      <div class="arrow-lbl above">← result</div>
+      <div class="arrow-line" id="arr-user-back"></div>
+    </div>
+  </div>
+
+  <div class="component" id="c-orch">
+    <div class="component-icon">⚙️</div>
+    <div class="component-label" style="color:#ff6b35">ORCHESTRATOR</div>
+    <div class="component-sub">[orchestrator.py]</div>
+    <div class="component-body">[run()]<br>[dispatch strategy]</div>
+    <div class="proc-indicator" id="proc-orch">● DISPATCHING</div>
+  </div>
+
+</div>
+
+<!-- VERT DROPS: Orchestrator → Agents -->
+<div style="display:flex;justify-content:flex-end;width:100%;max-width:900px;padding-right:65px;">
+  <div style="display:flex;gap:52px;">
+    <div class="vert-line" id="vl-a1" style="height:20px;width:2px;"></div>
+    <div class="vert-line" id="vl-a2" style="height:20px;width:2px;"></div>
+    <div class="vert-line" id="vl-a3" style="height:20px;width:2px;"></div>
+  </div>
+</div>
+
+<!-- AGENTS ROW -->
+<div style="display:flex;justify-content:flex-end;gap:12px;width:100%;max-width:900px;">
+
+  <div class="agent-card" id="a1">
+    <div style="font-size:18px;margin-bottom:5px;">🤖</div>
+    <div style="font-size:9px;font-weight:700;color:#a78bfa;letter-spacing:1px;margin-bottom:3px;">[AGENT 1]</div>
+    <div style="font-size:8px;color:#4a5568;margin-bottom:4px;">[agent1.py]</div>
+    <div style="font-size:8px;color:#8b949e;line-height:1.6;">[what it does]</div>
+  </div>
+
+  <div class="agent-card" id="a2">
+    <div style="font-size:18px;margin-bottom:5px;">🤖</div>
+    <div style="font-size:9px;font-weight:700;color:#a78bfa;letter-spacing:1px;margin-bottom:3px;">[AGENT 2]</div>
+    <div style="font-size:8px;color:#4a5568;margin-bottom:4px;">[agent2.py]</div>
+    <div style="font-size:8px;color:#8b949e;line-height:1.6;">[what it does]</div>
+  </div>
+
+  <div class="agent-card" id="a3">
+    <div style="font-size:18px;margin-bottom:5px;">🤖</div>
+    <div style="font-size:9px;font-weight:700;color:#a78bfa;letter-spacing:1px;margin-bottom:3px;">[AGENT 3]</div>
+    <div style="font-size:8px;color:#4a5568;margin-bottom:4px;">[agent3.py]</div>
+    <div style="font-size:8px;color:#8b949e;line-height:1.6;">[what it does]</div>
+  </div>
+
+</div>
+
+<!-- VERT DROPS: Agents → Shared Services -->
+<div style="display:flex;justify-content:flex-end;width:100%;max-width:900px;padding-right:65px;">
+  <div style="display:flex;gap:52px;">
+    <div class="vert-line" id="vl-s1" style="height:20px;width:2px;"></div>
+    <div class="vert-line" id="vl-s2" style="height:20px;width:2px;"></div>
+    <div class="vert-line" id="vl-s3" style="height:20px;width:2px;"></div>
+  </div>
+</div>
+
+<!-- SHARED SERVICES -->
+<div style="display:flex;justify-content:flex-end;width:100%;max-width:900px;">
+  <div class="storage-pipeline" style="flex:1;max-width:480px;">
+    <div class="storage-title">SHARED SERVICES</div>
+    <div class="storage-item" id="s-llm">
+      <div style="font-size:16px;margin-bottom:4px;">🧠</div>
+      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[LLM]</div>
+      <div style="font-size:8px;color:#4a5568;">[model name]</div>
+    </div>
+    <div class="storage-sep">·</div>
+    <div class="storage-item" id="s-vdb">
+      <div style="font-size:16px;margin-bottom:4px;">🔍</div>
+      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[VECTOR DB]</div>
+      <div style="font-size:8px;color:#4a5568;">[service name]</div>
+    </div>
+    <div class="storage-sep">·</div>
+    <div class="storage-item" id="s-tools">
+      <div style="font-size:16px;margin-bottom:4px;">🧩</div>
+      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[TOOLS]</div>
+      <div style="font-size:8px;color:#4a5568;">[tool names]</div>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="insights">
+  <div class="insight-card">
+    <div class="insight-label" style="color:#ff6b35">ORCHESTRATOR</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-label" style="color:#a78bfa">AGENTS</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-label" style="color:#e8b84b">SERVICES</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+  <div class="insight-card">
+    <div class="insight-label" style="color:#3fb950">OUTPUT</div>
+    <div class="insight-value">[Key architectural fact]</div>
+  </div>
+</div>
+
+<script>
+  const phases = [
+    "[Phase 0: user triggers the system]",
+    "[Phase 1: orchestrator receives and plans dispatch]",
+    "[Phase 2: agents run in parallel]",
+    "[Phase 3: agents call shared services]",
+    "[Phase 4: orchestrator collects and synthesizes results]",
+    "[Phase 5: response returned to user]",
+  ];
+  const phaseColors = ["#00d4ff","#ff6b35","#a78bfa","#e8b84b","#ff6b35","#3fb950"];
+  let phase = 0;
+
+  function litComponent(id, color) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = color;
+    el.style.boxShadow = `0 0 18px ${color}44`;
+  }
+  function litArrow(id, color, shimmer = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background = color;
+    if (shimmer) el.classList.add("active");
+  }
+  function litStorage(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = "#e8b84b";
+    el.style.boxShadow = "0 0 14px #e8b84b33";
+  }
+  function resetAll() {
+    document.querySelectorAll(".component,.agent-card,.storage-item").forEach(el => {
+      el.style.borderColor = "#21262d"; el.style.boxShadow = "none";
+    });
+    document.querySelectorAll(".arrow-line,.vert-line").forEach(el => {
+      el.style.background = "#21262d"; el.classList.remove("active");
+    });
+    document.getElementById("proc-orch").classList.remove("visible");
+  }
+  function applyPhase() {
+    const banner = document.getElementById("phase-banner");
+    banner.textContent = "▶ " + phases[phase];
+    banner.style.color = phaseColors[phase];
+    banner.style.borderColor = phaseColors[phase] + "55";
+    resetAll();
+    if (phase === 0) { litComponent("c-user", phaseColors[0]); litArrow("arr-user", phaseColors[0], true); }
+    if (phase === 1) {
+      litComponent("c-orch", phaseColors[1]);
+      document.getElementById("proc-orch").classList.add("visible");
+    }
+    if (phase === 2) {
+      ["vl-a1","vl-a2","vl-a3"].forEach(id => litArrow(id, phaseColors[2]));
+      ["a1","a2","a3"].forEach(id => litComponent(id, phaseColors[2]));
+    }
+    if (phase === 3) {
+      ["vl-s1","vl-s2","vl-s3"].forEach(id => litArrow(id, phaseColors[3]));
+      ["s-llm","s-vdb","s-tools"].forEach(id => litStorage(id));
+    }
+    if (phase === 4) { litComponent("c-orch", phaseColors[4]); }
+    if (phase === 5) { litComponent("c-user", phaseColors[5]); litArrow("arr-user-back", phaseColors[5]); }
+  }
+  applyPhase();
+  setInterval(() => { phase = (phase + 1) % phases.length; applyPhase(); }, 1500);
+</script>
+</body>
+</html>

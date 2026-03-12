@@ -1,0 +1,160 @@
+# Animation Reference
+
+The JS phase engine that drives all diagram animation.
+Follow this pattern exactly in every generated file.
+
+===================================================================
+CORE PATTERN
+===================================================================
+
+  const phases = [
+    "Phase 0: plain-language description of what is happening...",
+    "Phase 1: next step in the flow...",
+    // 4-8 phases total — sweet spot for readability
+  ];
+
+  // One accent color per phase, matching the active component's role
+  const phaseColors = [
+    "#00d4ff",  // phase 0 — user/input (cyan)
+    "#ff6b35",  // phase 1 — orchestrator (orange)
+    "#a78bfa",  // phase 2 — agents (purple)
+    "#e8b84b",  // phase 3 — storage (yellow)
+    "#3fb950",  // phase 4 — output (green)
+  ];
+
+  let phase = 0;
+
+  // ── HELPERS ──────────────────────────────────────────────────
+
+  function litComponent(id, color) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = color;
+    el.style.boxShadow = `0 0 18px ${color}44`;
+  }
+
+  function litArrow(id, color, shimmer = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background = color;
+    if (shimmer) el.classList.add("active");
+  }
+
+  function litStorage(id) {
+    // Storage items always glow yellow
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = "#e8b84b";
+    el.style.boxShadow = "0 0 14px #e8b84b33";
+  }
+
+  function resetAll() {
+    document.querySelectorAll(
+      ".component, .agent-card, .storage-item"
+    ).forEach(el => {
+      el.style.borderColor = "#21262d";
+      el.style.boxShadow = "none";
+    });
+    document.querySelectorAll(".arrow-line, .vert-line").forEach(el => {
+      el.style.background = "#21262d";
+      el.classList.remove("active");
+    });
+  }
+
+  // ── MAIN APPLY FUNCTION ───────────────────────────────────────
+
+  function applyPhase() {
+    const banner = document.getElementById("phase-banner");
+    banner.textContent = "▶ " + phases[phase];
+    banner.style.color = phaseColors[phase];
+    banner.style.borderColor = phaseColors[phase] + "55";
+
+    resetAll();
+
+    // Light up the relevant elements for THIS phase.
+    // Use === for a moving spotlight (only active node glows).
+    // Use >= to keep earlier nodes lit as animation progresses.
+    // Moving spotlight is recommended for most diagrams.
+
+    if (phase === 0) {
+      litComponent("c-input", phaseColors[0]);
+    }
+    if (phase === 1) {
+      litArrow("arr-1", phaseColors[1], true); // true = shimmer
+      litComponent("c-orch", phaseColors[1]);
+    }
+    if (phase === 2) {
+      litArrow("vl-orch", phaseColors[2]);      // vert connector
+      litStorage("s-llm");
+    }
+    if (phase === 3) {
+      litComponent("c-proc", phaseColors[3]);
+      litArrow("arr-2", phaseColors[3], true);
+    }
+    if (phase === 4) {
+      litComponent("c-output", phaseColors[4]);
+      litArrow("arr-back", phaseColors[4]);
+    }
+  }
+
+  // ── TICK ─────────────────────────────────────────────────────
+
+  applyPhase();
+  setInterval(() => {
+    phase = (phase + 1) % phases.length;
+    applyPhase();
+  }, 1500); // 1500ms per phase — do not go below 1200ms
+
+===================================================================
+TIMING GUIDE
+===================================================================
+
+  1500ms    → default, works for 4-6 phases
+  1800ms    → use for 7-8 phases (more reading time per label)
+  1200ms    → minimum — below this feels rushed
+
+===================================================================
+SPOTLIGHT VS CUMULATIVE
+===================================================================
+
+  SPOTLIGHT (===)
+    Only the currently active components glow.
+    Everything else resets to dim.
+    Best for: most diagrams, especially pipelines with 5+ phases.
+
+  CUMULATIVE (>=)
+    Each phase adds to what's already lit.
+    Components stay glowing once activated.
+    Best for: short 3-4 phase flows where you want to show
+    the full path building up visually.
+
+===================================================================
+STORAGE ITEM ANIMATION
+===================================================================
+
+Storage items always use yellow (#e8b84b) regardless of phase color.
+This visually distinguishes the external services tier from the
+main processing layer at all times.
+
+  litStorage("s-vectordb");   // always yellow glow
+  litStorage("s-llm");        // always yellow glow
+
+===================================================================
+PROCESSING INDICATOR (optional)
+===================================================================
+
+For components that represent a slow/async operation (LLM call,
+heavy transform), add a blinking indicator while active:
+
+  HTML inside the component:
+    <div class="proc-indicator" id="proc-llm">● PROCESSING</div>
+
+  CSS:
+    .proc-indicator { display:none; font-size:9px; color:#f0883e;
+                      margin-top:8px; }
+    .proc-indicator.visible { display:block;
+                               animation:blink 0.5s linear infinite; }
+
+  JS — toggle in applyPhase():
+    document.getElementById("proc-llm")
+      .classList.toggle("visible", phase === 2);
