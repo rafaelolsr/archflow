@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400">
+  <defs>
+    <radialGradient id="bg-radial" cx="35%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="60%" stop-color="#060d1a"/>
+      <stop offset="100%" stop-color="#030810"/>
+    </radialGradient>
+    <radialGradient id="glow-core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-node" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="line-vert" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1a2e" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0a1225" stop-opacity="0.7"/>
+    </linearGradient>
+    <filter id="glow-sm">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-md">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-lg">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="card-shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#00d4ff" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Deep space background -->
+  <rect width="1200" height="400" fill="url(#bg-radial)"/>
+
+  <!-- Scattered particles / stars -->
+  <g fill="#00d4ff">
+    <circle cx="45" cy="32" r="1" opacity="0.3"/>
+    <circle cx="112" cy="78" r="0.7" opacity="0.5"/>
+    <circle cx="198" cy="22" r="1.2" opacity="0.2"/>
+    <circle cx="287" cy="95" r="0.8" opacity="0.4"/>
+    <circle cx="340" cy="15" r="0.6" opacity="0.3"/>
+    <circle cx="455" cy="48" r="1" opacity="0.25"/>
+    <circle cx="520" cy="12" r="0.8" opacity="0.35"/>
+    <circle cx="678" cy="30" r="1.1" opacity="0.2"/>
+    <circle cx="745" cy="68" r="0.7" opacity="0.45"/>
+    <circle cx="832" cy="25" r="0.9" opacity="0.3"/>
+    <circle cx="920" cy="55" r="1.3" opacity="0.2"/>
+    <circle cx="1005" cy="18" r="0.6" opacity="0.4"/>
+    <circle cx="1088" cy="42" r="1" opacity="0.25"/>
+    <circle cx="1155" cy="75" r="0.8" opacity="0.35"/>
+    <circle cx="68" cy="355" r="0.9" opacity="0.3"/>
+    <circle cx="155" cy="380" r="0.7" opacity="0.25"/>
+    <circle cx="310" cy="365" r="1.1" opacity="0.2"/>
+    <circle cx="488" cy="385" r="0.8" opacity="0.35"/>
+    <circle cx="620" cy="370" r="1" opacity="0.2"/>
+    <circle cx="790" cy="358" r="0.6" opacity="0.4"/>
+    <circle cx="945" cy="375" r="1.2" opacity="0.2"/>
+    <circle cx="1070" cy="362" r="0.7" opacity="0.3"/>
+    <circle cx="1150" cy="388" r="0.9" opacity="0.25"/>
+    <circle cx="85" cy="195" r="0.6" opacity="0.2"/>
+    <circle cx="1120" cy="210" r="0.8" opacity="0.2"/>
+    <circle cx="30" cy="140" r="1" opacity="0.15"/>
+    <circle cx="1175" cy="155" r="0.7" opacity="0.2"/>
+    <circle cx="560" cy="385" r="0.5" opacity="0.3"/>
+    <circle cx="700" cy="15" r="0.9" opacity="0.15"/>
+  </g>
+  <!-- Larger faint particles -->
+  <g fill="#00d4ff">
+    <circle cx="180" cy="310" r="2" opacity="0.08"/>
+    <circle cx="420" cy="45" r="2.5" opacity="0.06"/>
+    <circle cx="880" cy="340" r="2" opacity="0.07"/>
+    <circle cx="1050" cy="90" r="1.8" opacity="0.08"/>
+    <circle cx="60" cy="260" r="2.2" opacity="0.05"/>
+  </g>
+
+  <!-- Ambient glow centers -->
+  <ellipse cx="300" cy="200" rx="280" ry="180" fill="url(#glow-core)"/>
+  <ellipse cx="160" cy="180" rx="80" ry="60" fill="url(#glow-node)" opacity="0.3"/>
+
+  <!-- ═══════════════ CONNECTION LINES ═══════════════ -->
+
+  <!-- Main hub outgoing lines (from orchestrator card) -->
+  <!-- To API card (top-right) -->
+  <path d="M 310 165 Q 370 130 410 110" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.5" filter="url(#glow-sm)"/>
+  <!-- To Agent card (right) -->
+  <path d="M 310 195 Q 380 195 420 200" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.5" filter="url(#glow-sm)"/>
+  <!-- To Storage card (bottom-right) -->
+  <path d="M 310 225 Q 360 270 410 295" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.4" filter="url(#glow-sm)"/>
+  <!-- To Input card (top-left) -->
+  <path d="M 180 155 Q 165 120 160 95" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.45" filter="url(#glow-sm)"/>
+  <!-- To Output card (bottom-left) -->
+  <path d="M 190 230 Q 175 275 165 305" stroke="#00d4ff" stroke-width="1" fill="none" opacity="0.35" filter="url(#glow-sm)"/>
+
+  <!-- Diamond junction nodes on lines -->
+  <g filter="url(#glow-sm)">
+    <polygon points="360,148 366,154 360,160 354,154" fill="#0a1628" stroke="#00d4ff" stroke-width="1" opacity="0.7"/>
+    <polygon points="365,195 371,201 365,207 359,201" fill="#0a1628" stroke="#00d4ff" stroke-width="1" opacity="0.7"/>
+    <polygon points="355,260 361,266 355,272 349,266" fill="#0a1628" stroke="#00d4ff" stroke-width="1" opacity="0.6"/>
+    <polygon points="168,118 174,124 168,130 162,124" fill="#0a1628" stroke="#00d4ff" stroke-width="1" opacity="0.6"/>
+    <polygon points="178,268 184,274 178,280 172,274" fill="#0a1628" stroke="#00d4ff" stroke-width="1" opacity="0.5"/>
+  </g>
+
+  <!-- ═══════════════ CARDS (left side) ═══════════════ -->
+
+  <!-- Card: Input (top-left) -->
+  <g filter="url(#card-shadow)">
+    <rect x="105" y="42" width="120" height="58" rx="8" fill="url(#card-bg)" stroke="#00d4ff" stroke-width="0.8" opacity="0.85"/>
+    <text x="115" y="58" fill="#00d4ff" font-family="monospace" font-size="9" font-weight="700" letter-spacing="1">INPUT</text>
+    <text x="115" y="72" fill="#5a7a9e" font-family="monospace" font-size="7">api/routes.py</text>
+    <text x="115" y="83" fill="#3d5a80" font-family="monospace" font-size="6.5">handle_request()</text>
+    <text x="115" y="92" fill="#3d5a80" font-family="monospace" font-size="6.5">validate_input()</text>
+  </g>
+
+  <!-- Card: Orchestrator (center-left, main hub) -->
+  <g filter="url(#card-shadow)">
+    <rect x="130" y="148" width="180" height="85" rx="8" fill="url(#card-bg)" stroke="#00d4ff" stroke-width="1.2" opacity="0.95"/>
+    <text x="145" y="168" fill="#ff6b35" font-family="monospace" font-size="10" font-weight="700" letter-spacing="1">ORCHESTRATOR</text>
+    <text x="145" y="183" fill="#5a7a9e" font-family="monospace" font-size="7">core/engine.py</text>
+    <line x1="145" y1="189" x2="295" y2="189" stroke="#1a3050" stroke-width="0.5"/>
+    <text x="145" y="201" fill="#6e9ecf" font-family="monospace" font-size="7">def run(self):</text>
+    <text x="145" y="212" fill="#3d5a80" font-family="monospace" font-size="6.5">  steps = compose()</text>
+    <text x="145" y="223" fill="#3d5a80" font-family="monospace" font-size="6.5">  return execute(steps)</text>
+  </g>
+
+  <!-- Card: Output (bottom-left) -->
+  <g filter="url(#card-shadow)">
+    <rect x="110" y="300" width="120" height="58" rx="8" fill="url(#card-bg)" stroke="#00d4ff" stroke-width="0.8" opacity="0.75"/>
+    <text x="120" y="317" fill="#3fb950" font-family="monospace" font-size="9" font-weight="700" letter-spacing="1">OUTPUT</text>
+    <text x="120" y="331" fill="#5a7a9e" font-family="monospace" font-size="7">api/response.py</text>
+    <text x="120" y="342" fill="#3d5a80" font-family="monospace" font-size="6.5">serialize(result)</text>
+    <text x="120" y="351" fill="#3d5a80" font-family="monospace" font-size="6.5">return json</text>
+  </g>
+
+  <!-- Card: API / Processor (top-right of hub) -->
+  <g filter="url(#card-shadow)">
+    <rect x="410" y="82" width="140" height="62" rx="8" fill="url(#card-bg)" stroke="#00d4ff" stroke-width="0.8" opacity="0.8"/>
+    <text x="422" y="99" fill="#a78bfa" font-family="monospace" font-size="9" font-weight="700" letter-spacing="1">PROCESSOR</text>
+    <text x="422" y="113" fill="#5a7a9e" font-family="monospace" font-size="7">transform/pipeline.py</text>
+    <text x="422" y="124" fill="#3d5a80" font-family="monospace" font-size="6.5">enrich(data)</text>
+    <text x="422" y="135" fill="#3d5a80" font-family="monospace" font-size="6.5">validate(schema)</text>
+  </g>
+
+  <!-- Card: Agent / Domain (middle-right) -->
+  <g filter="url(#card-shadow)">
+    <rect x="420" y="172" width="130" height="58" rx="8" fill="url(#card-bg)" stroke="#00d4ff" stroke-width="0.8" opacity="0.8"/>
+    <text x="432" y="189" fill="#e8b84b" font-family="monospace" font-size="9" font-weight="700" letter-spacing="1">STORAGE</text>
+    <text x="432" y="203" fill="#5a7a9e" font-family="monospace" font-size="7">db/repository.py</text>
+    <text x="432" y="214" fill="#3d5a80" font-family="monospace" font-size="6.5">query(filters)</text>
+    <text x="432" y="223" fill="#3d5a80" font-family="monospace" font-size="6.5">persist(entity)</text>
+  </g>
+
+  <!-- Card: Infra / External (bottom-right of hub) -->
+  <g filter="url(#card-shadow)">
+    <rect x="410" y="270" width="140" height="62" rx="8" fill="url(#card-bg)" stroke="#00d4ff" stroke-width="0.8" opacity="0.7"/>
+    <text x="422" y="287" fill="#f0883e" font-family="monospace" font-size="9" font-weight="700" letter-spacing="1">LLM SERVICE</text>
+    <text x="422" y="301" fill="#5a7a9e" font-family="monospace" font-size="7">integrations/llm.py</text>
+    <text x="422" y="312" fill="#3d5a80" font-family="monospace" font-size="6.5">completion(prompt)</text>
+    <text x="422" y="323" fill="#3d5a80" font-family="monospace" font-size="6.5">stream(messages)</text>
+  </g>
+
+  <!-- ═══════════════ RIGHT SIDE: TITLE + TAGLINE ═══════════════ -->
+
+  <text x="820" y="165" text-anchor="middle" fill="#e6edf3" font-family="'Segoe UI',system-ui,sans-serif" font-weight="700" font-size="52" letter-spacing="-1.5">archflow</text>
+
+  <text x="820" y="205" text-anchor="middle" fill="#8899aa" font-family="'Segoe UI',system-ui,sans-serif" font-weight="400" font-size="17">Turn any codebase into an</text>
+  <text x="820" y="230" text-anchor="middle" fill="#8899aa" font-family="'Segoe UI',system-ui,sans-serif" font-weight="400" font-size="17">animated architecture diagram</text>
+
+  <!-- Subtle accent line under title -->
+  <line x1="720" y1="250" x2="920" y2="250" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- Micro labels -->
+  <text x="820" y="275" text-anchor="middle" fill="#4a6080" font-family="monospace" font-size="10" letter-spacing="3">ANIMATED  ·  SELF-CONTAINED  ·  REAL CODE</text>
+
+</svg>

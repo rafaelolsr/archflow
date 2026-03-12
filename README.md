@@ -1,9 +1,13 @@
-# archflow
+<p align="center">
+  <img src="assets/banner.svg" alt="archflow" width="100%"/>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT"/></a>
+  <a href="https://claude.ai/code"><img src="https://img.shields.io/badge/Claude_Code-Plugin-orange?style=for-the-badge" alt="Claude Code"/></a>
+</p>
 
 **A Claude Code plugin that turns any codebase into an animated HTML architecture diagram.**
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-orange?style=for-the-badge)](https://claude.ai/code)
 
 Ask Claude to explain a system architecture. Instead of a wall of text or ASCII art, it reads your codebase, identifies the real components and flows, and generates a self-contained animated HTML file you open in any browser.
 
