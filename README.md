@@ -118,18 +118,27 @@ The skill routes to the right layout automatically. It reads only the files it n
 
 ## Design system
 
-Dark theme built for technical audiences.
+Dark and light themes with a toggle button in the top-right corner of every diagram. Theme preference persists across page reloads via localStorage.
+
+**Semantic accent colors** (same in both themes):
 
 | Color | Hex | Role |
 |---|---|---|
-| Background | `#080c10` | Body |
-| Cards | `#0d1117` | Component boxes |
 | Cyan | `#00d4ff` | Input / user layer |
 | Orange | `#ff6b35` | Orchestrator / coordinator |
 | Purple | `#a78bfa` | Agents / workers |
 | Yellow | `#e8b84b` | Storage / external services |
 | Green | `#3fb950` | Output / persistence |
 | Amber | `#f0883e` | LLM / AI core |
+
+**Theme colors** (flip between dark and light):
+
+| Element | Dark | Light |
+|---|---|---|
+| Background | `#080c10` | `#f4f5f7` |
+| Cards | `#0d1117` | `#ffffff` |
+| Borders | `#21262d` | `#d0d5dd` |
+| Primary text | `#e6edf3` | `#1a1a2e` |
 
 Font stack: `JetBrains Mono`, `Fira Code`, monospace.
 
