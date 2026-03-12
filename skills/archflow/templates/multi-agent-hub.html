@@ -118,17 +118,21 @@
 
 </div>
 
-<!-- VERT DROPS: Orchestrator → Agents -->
-<div style="display:flex;justify-content:flex-end;width:100%;max-width:900px;padding-right:65px;">
-  <div style="display:flex;gap:52px;">
+<!-- VERT DROPS: Orchestrator → Agents (mirrors agents row flex structure) -->
+<div style="display:flex;gap:12px;width:100%;max-width:900px;">
+  <div style="flex:1;display:flex;justify-content:center;">
     <div class="vert-line" id="vl-a1" style="height:20px;width:2px;"></div>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;">
     <div class="vert-line" id="vl-a2" style="height:20px;width:2px;"></div>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;">
     <div class="vert-line" id="vl-a3" style="height:20px;width:2px;"></div>
   </div>
 </div>
 
 <!-- AGENTS ROW -->
-<div style="display:flex;justify-content:flex-end;gap:12px;width:100%;max-width:900px;">
+<div style="display:flex;gap:12px;width:100%;max-width:900px;">
 
   <div class="agent-card" id="a1">
     <div style="font-size:18px;margin-bottom:5px;">🤖</div>
@@ -153,18 +157,22 @@
 
 </div>
 
-<!-- VERT DROPS: Agents → Shared Services -->
-<div style="display:flex;justify-content:flex-end;width:100%;max-width:900px;padding-right:65px;">
-  <div style="display:flex;gap:52px;">
+<!-- VERT DROPS: Agents → Shared Services (mirrors agents row flex structure) -->
+<div style="display:flex;gap:12px;width:100%;max-width:900px;">
+  <div style="flex:1;display:flex;justify-content:center;">
     <div class="vert-line" id="vl-s1" style="height:20px;width:2px;"></div>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;">
     <div class="vert-line" id="vl-s2" style="height:20px;width:2px;"></div>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;">
     <div class="vert-line" id="vl-s3" style="height:20px;width:2px;"></div>
   </div>
 </div>
 
 <!-- SHARED SERVICES -->
-<div style="display:flex;justify-content:flex-end;width:100%;max-width:900px;">
-  <div class="storage-pipeline" style="flex:1;max-width:480px;">
+<div style="display:flex;width:100%;max-width:900px;">
+  <div class="storage-pipeline" style="flex:1;">
     <div class="storage-title">SHARED SERVICES</div>
     <div class="storage-item" id="s-llm">
       <div style="font-size:16px;margin-bottom:4px;">🧠</div>

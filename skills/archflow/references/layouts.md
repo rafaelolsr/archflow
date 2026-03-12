@@ -95,25 +95,37 @@ HTML skeleton:
     <div class="component" id="c-orch">...</div>
   </div>
 
-  <!-- VERT DROPS to agents -->
-  <div style="display:flex;justify-content:center;gap:60px;width:100%;max-width:600px;margin:4px 0;">
-    <div class="vert-line" id="vl-a1" style="height:20px;width:2px;"></div>
-    <div class="vert-line" id="vl-a2" style="height:20px;width:2px;"></div>
-    <div class="vert-line" id="vl-a3" style="height:20px;width:2px;"></div>
+  <!-- VERT DROPS to agents (mirrors agents row flex structure) -->
+  <div style="display:flex;gap:12px;width:100%;max-width:700px;">
+    <div style="flex:1;display:flex;justify-content:center;">
+      <div class="vert-line" id="vl-a1" style="height:20px;width:2px;"></div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;">
+      <div class="vert-line" id="vl-a2" style="height:20px;width:2px;"></div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;">
+      <div class="vert-line" id="vl-a3" style="height:20px;width:2px;"></div>
+    </div>
   </div>
 
   <!-- AGENTS ROW -->
-  <div style="display:flex;justify-content:center;gap:12px;width:100%;max-width:700px;">
+  <div style="display:flex;gap:12px;width:100%;max-width:700px;">
     <div class="agent-card" id="a1">...</div>
     <div class="agent-card" id="a2">...</div>
     <div class="agent-card" id="a3">...</div>
   </div>
 
-  <!-- VERT DROPS to services -->
-  <div style="display:flex;justify-content:center;gap:60px;width:100%;max-width:600px;margin:4px 0;">
-    <div class="vert-line" id="vl-s1" style="height:20px;width:2px;"></div>
-    <div class="vert-line" id="vl-s2" style="height:20px;width:2px;"></div>
-    <div class="vert-line" id="vl-s3" style="height:20px;width:2px;"></div>
+  <!-- VERT DROPS to services (mirrors agents row flex structure) -->
+  <div style="display:flex;gap:12px;width:100%;max-width:700px;">
+    <div style="flex:1;display:flex;justify-content:center;">
+      <div class="vert-line" id="vl-s1" style="height:20px;width:2px;"></div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;">
+      <div class="vert-line" id="vl-s2" style="height:20px;width:2px;"></div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;">
+      <div class="vert-line" id="vl-s3" style="height:20px;width:2px;"></div>
+    </div>
   </div>
 
   <!-- SHARED SERVICES -->
@@ -192,3 +204,81 @@ HTML skeleton:
     </div>
     <div style="min-width:[serve width];flex:1;"></div>
   </div>
+
+===================================================================
+VERTICAL CONNECTOR ALIGNMENT — CRITICAL RULE
+===================================================================
+
+Vertical connector rows (vert-line divs between tiers) MUST mirror the
+exact flex layout of the row they connect to. Misaligned connectors are
+the #1 visual bug in generated diagrams.
+
+THE RULE:
+  The connector row's child div structure MUST replicate the sizing
+  of the adjacent component row it connects to.
+
+PATTERN A — Connecting to a row of equal-width flex items:
+  If the row above uses: display:flex; gap:Xpx; with flex:1 children,
+  the connector row MUST also use: display:flex; gap:Xpx; with flex:1
+  children (each centering a vert-line).
+
+  GOOD:
+    <!-- Agent row: flex:1 cards, gap:10px -->
+    <div style="display:flex;gap:10px;width:100%;max-width:1100px;">
+      <div class="agent-card" style="flex:1;">...</div>
+      <div class="agent-card" style="flex:1;">...</div>
+    </div>
+    <!-- Connector mirrors same layout -->
+    <div style="display:flex;gap:10px;width:100%;max-width:1100px;">
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" style="height:16px;width:2px;"></div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" style="height:16px;width:2px;"></div>
+      </div>
+    </div>
+
+  BAD (fixed gap doesn't match flex cards):
+    <div style="display:flex;justify-content:flex-end;padding-right:30px;">
+      <div style="display:flex;gap:38px;">
+        <div class="vert-line">...</div>
+        <div class="vert-line">...</div>
+      </div>
+    </div>
+
+PATTERN B — Connecting to a row of component + arrow-col alternating:
+  If the row uses: component(min-width:Xpx) + arrow-col(flex:1) + ...
+  the connector row MUST replicate each slot with matching min-width
+  and flex spacers.
+
+  GOOD:
+    <!-- Shared path: component 110px, arrow flex:1, component 120px, ... -->
+    <div style="display:flex;align-items:center;width:100%;max-width:1100px;">
+      <div style="display:flex;justify-content:center;min-width:110px;">
+        <div class="vert-line" style="height:20px;"></div>
+      </div>
+      <div style="flex:1;max-width:60px;"></div>
+      <div style="display:flex;justify-content:center;min-width:120px;">
+        <div class="vert-line" style="height:20px;"></div>
+      </div>
+      <!-- ... mirrors every slot in the row above -->
+    </div>
+
+  BAD (uniform flex:1 doesn't match alternating layout):
+    <div style="display:flex;">
+      <div style="flex:1;"><div class="vert-line">...</div></div>
+      <div style="flex:1;"></div>
+      <div style="flex:1;"><div class="vert-line">...</div></div>
+    </div>
+
+NEVER:
+  → Use fixed px gaps (gap:38px) to align with flex:1 cards
+  → Use justify-content:flex-end with padding to "eyeball" alignment
+  → Use uniform flex:1 grids to connect to rows with mixed widths
+  → Omit gap from connector rows when the adjacent row has gap
+
+ALWAYS:
+  → Copy the exact flex structure from the row you're connecting to
+  → Match gap values between connector and component rows
+  → Match min-width values for fixed-width components
+  → Match flex:1 + max-width for arrow-col spacers
