@@ -1,0 +1,13 @@
+{
+  "name": "archflow",
+  "description": "Analyzes a codebase and generates a beautiful animated HTML architecture diagram — components, data flows, pipelines, agents, external services.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Rafael Oliveira",
+    "url": "https://github.com/rafaelolsr"
+  },
+  "homepage": "https://github.com/rafaelolsr/archflow",
+  "repository": "https://github.com/rafaelolsr/archflow",
+  "license": "MIT",
+  "keywords": ["architecture", "diagram", "visualization", "animation", "codebase"]
+}

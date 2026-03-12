@@ -1,14 +1,14 @@
 # archflow
 
-**A Claude Code skill that turns any codebase into an animated HTML architecture diagram.**
+**A Claude Code plugin that turns any codebase into an animated HTML architecture diagram.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude_Code-Skill-orange?style=for-the-badge)](https://claude.ai/code)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-orange?style=for-the-badge)](https://claude.ai/code)
 
 Ask Claude to explain a system architecture. Instead of a wall of text or ASCII art, it reads your codebase, identifies the real components and flows, and generates a self-contained animated HTML file you open in any browser.
 
 ```
-/archflow
+/archflow:archflow
 ```
 
 ---
@@ -41,21 +41,21 @@ archflow fixes that. It reads the actual code first, builds a mental model of th
 
 ## Install
 
-**Clone and install:**
+**Option 1 — Local plugin (development / testing):**
 
 ```bash
 git clone https://github.com/rafaelolsr/archflow.git
-cp -r archflow/archflow ~/.claude/skills/
+claude --plugin-dir ./archflow
 ```
 
-**Install the slash command (optional but recommended):**
+**Option 2 — Permanent install:**
 
 ```bash
-mkdir -p ~/.claude/commands
-cp ~/.claude/skills/archflow/prompts/archflow.md ~/.claude/commands/
+git clone https://github.com/rafaelolsr/archflow.git
+claude plugin install archflow --plugin-dir ./archflow
 ```
 
-No restart needed — Claude Code picks up skills and commands automatically.
+No restart needed — run `/reload-plugins` to pick up the plugin.
 
 ---
 
@@ -64,7 +64,7 @@ No restart needed — Claude Code picks up skills and commands automatically.
 Navigate to any project in Claude Code and run:
 
 ```
-/archflow
+/archflow:archflow
 ```
 
 Or trigger it with natural language — any of these work:
@@ -88,22 +88,28 @@ Claude Code will:
 
 ---
 
-## How it works
+## Plugin structure
 
 ```
 archflow/
-├── SKILL.md                      ← workflow orchestrator
-├── references/
-│   ├── analysis.md               ← how to read and model a codebase
-│   ├── layouts.md                ← layout decision guide + HTML skeletons
-│   ├── design-system.md          ← colors, typography, base CSS
-│   └── animation.md              ← JS phase engine and animation patterns
-├── templates/
-│   ├── horizontal-pipeline.html  ← API / RAG systems
-│   ├── multi-agent-hub.html      ← orchestrator + parallel agents
-│   └── medallion-pipeline.html   ← ETL / Delta Live Tables
-└── prompts/
-    └── archflow.md               ← /archflow slash command
+├── .claude-plugin/
+│   └── plugin.json               ← plugin manifest
+├── skills/
+│   └── archflow/
+│       ├── SKILL.md              ← workflow orchestrator (model-invoked)
+│       ├── references/
+│       │   ├── analysis.md       ← how to read and model a codebase
+│       │   ├── layouts.md        ← layout decision guide + HTML skeletons
+│       │   ├── design-system.md  ← colors, typography, base CSS
+│       │   └── animation.md      ← JS phase engine and animation patterns
+│       └── templates/
+│           ├── horizontal-pipeline.html  ← API / RAG systems
+│           ├── multi-agent-hub.html      ← orchestrator + parallel agents
+│           └── medallion-pipeline.html   ← ETL / Delta Live Tables
+├── commands/
+│   └── archflow.md               ← /archflow:archflow slash command
+├── README.md
+└── .gitignore
 ```
 
 The skill routes to the right layout automatically. It reads only the files it needs — entry points, orchestration files, config — then fills in the closest template with real names and flows from your code.
