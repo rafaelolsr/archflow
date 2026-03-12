@@ -6,75 +6,99 @@
 <title>[System Name] Architecture</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg-body:#080c10; --bg-card:#0d1117; --bg-storage:#0a0f14;
+    --border:#21262d; --border-subtle:#30363d; --border-banner:#333;
+    --text-primary:#e6edf3; --text-secondary:#c9d1d9;
+    --text-muted:#8b949e; --text-dim:#4a5568;
+    --shimmer:white; --shadow-alpha:44;
+  }
+  body.light {
+    --bg-body:#f4f5f7; --bg-card:#ffffff; --bg-storage:#f0f1f3;
+    --border:#d0d5dd; --border-subtle:#e2e5ea; --border-banner:#c0c5cc;
+    --text-primary:#1a1a2e; --text-secondary:#333344;
+    --text-muted:#666677; --text-dim:#8b8b9e;
+    --shimmer:#333; --shadow-alpha:22;
+  }
   body {
-    min-height:100vh; background:#080c10;
+    min-height:100vh; background:var(--bg-body);
     font-family:'JetBrains Mono','Fira Code',monospace;
     display:flex; flex-direction:column;
     align-items:center; justify-content:center;
-    padding:32px 16px; color:#c9d1d9;
+    padding:32px 16px; color:var(--text-secondary);
   }
-  .title-sub  { font-size:10px; letter-spacing:4px; color:#4a5568;
+  .theme-toggle {
+    position:fixed; top:16px; right:16px; z-index:100;
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:20px; padding:6px 12px; cursor:pointer;
+    font-size:14px; color:var(--text-muted);
+    transition:border-color 0.3s,background 0.3s;
+  }
+  .theme-toggle:hover { border-color:var(--text-muted); }
+  .title-sub  { font-size:10px; letter-spacing:4px; color:var(--text-dim);
                 margin-bottom:6px; text-align:center; text-transform:uppercase; }
-  .title-main { font-size:22px; font-weight:700; color:#e6edf3;
+  .title-main { font-size:22px; font-weight:700; color:var(--text-primary);
                 letter-spacing:-0.5px; text-align:center; margin-bottom:28px; }
   .phase-banner {
-    background:#0d1117; border:1px solid #333; border-radius:6px;
+    background:var(--bg-card); border:1px solid var(--border-banner); border-radius:6px;
     padding:10px 24px; margin-bottom:32px; font-size:11px;
     min-width:400px; max-width:700px; text-align:center;
     transition:color 0.4s,border-color 0.4s;
   }
   .component {
-    background:#0d1117; border:1px solid #21262d; border-radius:10px;
+    background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
     padding:14px; text-align:center;
     transition:border-color 0.4s,box-shadow 0.4s; min-width:130px;
   }
   .component-icon  { font-size:22px; margin-bottom:6px; }
   .component-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
-  .component-sub   { font-size:8px; color:#4a5568; margin-bottom:6px; line-height:1.4; }
-  .component-body  { font-size:8px; color:#8b949e; line-height:1.7; }
+  .component-sub   { font-size:8px; color:var(--text-dim); margin-bottom:6px; line-height:1.4; }
+  .component-body  { font-size:8px; color:var(--text-muted); line-height:1.7; }
   .arrow-col  { flex:1; padding:0 8px; display:flex; flex-direction:column; gap:8px; }
   .arrow-wrap { display:flex; flex-direction:column; }
   .arrow-line {
-    height:2px; background:#21262d; border-radius:1px;
+    height:2px; background:var(--border); border-radius:1px;
     position:relative; overflow:hidden; transition:background 0.4s;
   }
   .arrow-line .shimmer {
     display:none; position:absolute; top:0; left:-20%;
-    width:20%; height:100%; background:white; opacity:0.85;
+    width:20%; height:100%; background:var(--shimmer); opacity:0.85;
     animation:slide 0.7s linear infinite;
   }
   .arrow-line.active .shimmer { display:block; }
-  .arrow-lbl       { text-align:center; font-size:9px; color:#4a5568; margin-top:3px; }
+  .arrow-lbl       { text-align:center; font-size:9px; color:var(--text-dim); margin-top:3px; }
   .arrow-lbl.above { margin-top:0; margin-bottom:3px; }
-  .vert-line { width:2px; background:#21262d; transition:background 0.4s; margin:0 auto; }
+  .vert-line { width:2px; background:var(--border); transition:background 0.4s; margin:0 auto; }
   .storage-pipeline {
     display:flex; align-items:center; gap:0;
-    background:#0a0f14; border:1px solid #21262d;
+    background:var(--bg-storage); border:1px solid var(--border);
     border-radius:12px; padding:14px 12px; position:relative;
   }
   .storage-title {
     position:absolute; top:-10px; left:16px;
-    background:#080c10; padding:0 8px;
+    background:var(--bg-body); padding:0 8px;
     font-size:9px; letter-spacing:3px; color:#e8b84b; text-transform:uppercase;
   }
   .storage-item {
-    flex:1; background:#0d1117; border:1px solid #21262d;
+    flex:1; background:var(--bg-card); border:1px solid var(--border);
     border-radius:8px; padding:10px; text-align:center; min-width:80px;
     transition:border-color 0.4s,box-shadow 0.4s;
   }
-  .storage-sep { width:16px; text-align:center; font-size:10px; color:#21262d; flex-shrink:0; }
+  .storage-sep { width:16px; text-align:center; font-size:10px; color:var(--border); flex-shrink:0; }
   .insights { margin-top:32px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
   .insight-card {
-    background:#0d1117; border:1px solid #21262d; border-radius:8px;
+    background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
     padding:10px 16px; text-align:center; min-width:150px;
   }
   .insight-label { font-size:9px; letter-spacing:2px; margin-bottom:3px; text-transform:uppercase; }
-  .insight-value { font-size:10px; color:#8b949e; }
+  .insight-value { font-size:10px; color:var(--text-muted); }
   @keyframes slide { from { left:-20%; } to { left:120%; } }
   @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">◐</button>
 
 <div class="title-sub">[SYSTEM CATEGORY]</div>
 <div class="title-main">[System Name] · [One-line description]</div>
@@ -161,19 +185,19 @@
     <div class="storage-item" id="s-1">
       <div style="font-size:16px;margin-bottom:4px;">🗄️</div>
       <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 1]</div>
-      <div style="font-size:8px;color:#4a5568;">[description]</div>
+      <div style="font-size:8px;color:var(--text-dim);">[description]</div>
     </div>
     <div class="storage-sep">·</div>
     <div class="storage-item" id="s-2">
       <div style="font-size:16px;margin-bottom:4px;">🧠</div>
       <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 2]</div>
-      <div style="font-size:8px;color:#4a5568;">[description]</div>
+      <div style="font-size:8px;color:var(--text-dim);">[description]</div>
     </div>
     <div class="storage-sep">·</div>
     <div class="storage-item" id="s-3">
       <div style="font-size:16px;margin-bottom:4px;">💾</div>
       <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 3]</div>
-      <div style="font-size:8px;color:#4a5568;">[description]</div>
+      <div style="font-size:8px;color:var(--text-dim);">[description]</div>
     </div>
   </div>
   <div style="min-width:130px;"></div>
@@ -200,6 +224,8 @@
 </div>
 
 <script>
+  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
+
   const phases = [
     "[Phase 0: what triggers the system]",
     "[Phase 1: orchestrator receives and routes]",
@@ -209,12 +235,14 @@
   ];
   const phaseColors = ["#00d4ff","#ff6b35","#e8b84b","#a78bfa","#3fb950"];
   let phase = 0;
+  const borderColor = () => getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const shadowAlpha = () => getComputedStyle(document.documentElement).getPropertyValue('--shadow-alpha').trim();
 
   function litComponent(id, color) {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.borderColor = color;
-    el.style.boxShadow = `0 0 18px ${color}44`;
+    el.style.boxShadow = `0 0 18px ${color}${shadowAlpha()}`;
   }
   function litArrow(id, color, shimmer = false) {
     const el = document.getElementById(id);
@@ -229,11 +257,12 @@
     el.style.boxShadow = "0 0 14px #e8b84b33";
   }
   function resetAll() {
+    const bc = borderColor();
     document.querySelectorAll(".component,.storage-item").forEach(el => {
-      el.style.borderColor = "#21262d"; el.style.boxShadow = "none";
+      el.style.borderColor = bc; el.style.boxShadow = "none";
     });
     document.querySelectorAll(".arrow-line,.vert-line").forEach(el => {
-      el.style.background = "#21262d"; el.classList.remove("active");
+      el.style.background = bc; el.classList.remove("active");
     });
   }
   function applyPhase() {

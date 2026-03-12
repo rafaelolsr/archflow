@@ -7,6 +7,9 @@ Follow this pattern exactly in every generated file.
 CORE PATTERN
 ===================================================================
 
+  // ── THEME RESTORE (place at top of script) ─────────────────
+  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
+
   const phases = [
     "Phase 0: plain-language description of what is happening...",
     "Phase 1: next step in the flow...",
@@ -24,13 +27,17 @@ CORE PATTERN
 
   let phase = 0;
 
-  // ── HELPERS ──────────────────────────────────────────────────
+  // ── THEME-AWARE HELPERS ────────────────────────────────────
+  // Read CSS custom properties so colors adapt to dark/light mode.
+
+  const borderColor = () => getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const shadowAlpha = () => getComputedStyle(document.documentElement).getPropertyValue('--shadow-alpha').trim();
 
   function litComponent(id, color) {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.borderColor = color;
-    el.style.boxShadow = `0 0 18px ${color}44`;
+    el.style.boxShadow = `0 0 18px ${color}${shadowAlpha()}`;
   }
 
   function litArrow(id, color, shimmer = false) {
@@ -49,14 +56,15 @@ CORE PATTERN
   }
 
   function resetAll() {
+    const bc = borderColor();
     document.querySelectorAll(
       ".component, .agent-card, .storage-item"
     ).forEach(el => {
-      el.style.borderColor = "#21262d";
+      el.style.borderColor = bc;
       el.style.boxShadow = "none";
     });
     document.querySelectorAll(".arrow-line, .vert-line").forEach(el => {
-      el.style.background = "#21262d";
+      el.style.background = bc;
       el.classList.remove("active");
     });
   }
@@ -104,6 +112,20 @@ CORE PATTERN
     phase = (phase + 1) % phases.length;
     applyPhase();
   }, 1500); // 1500ms per phase — do not go below 1200ms
+
+===================================================================
+THEME TOGGLE
+===================================================================
+
+The toggle button adds/removes the .light class on <body>.
+All theme-sensitive colors are read from CSS custom properties,
+so the phase engine works in both modes without changes.
+
+  borderColor() reads --border     (dark: #21262d, light: #d0d5dd)
+  shadowAlpha() reads --shadow-alpha (dark: 44, light: 22)
+
+Accent colors (phaseColors, litStorage yellow) are the same in
+both themes — they don't need CSS variables.
 
 ===================================================================
 TIMING GUIDE
