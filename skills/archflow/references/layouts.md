@@ -282,3 +282,89 @@ ALWAYS:
   → Match gap values between connector and component rows
   → Match min-width values for fixed-width components
   → Match flex:1 + max-width for arrow-col spacers
+
+===================================================================
+LAYOUT D — VERTICAL PIPELINE
+===================================================================
+
+Use when:
+  → Linear flows that read naturally top-to-bottom
+  → Reports where the diagram is embedded in a page (not full-width)
+  → Systems with 3-6 sequential steps
+  → The flow is more intuitive as a waterfall than left-to-right
+
+Visual shape:
+
+        [Input]
+           ↓
+      [Orchestrator]
+           ↓
+       [Processor]
+           ↓
+        [Output]
+           ↓
+  [Storage Row: DB | API | Cache]
+
+HTML skeleton:
+
+  <!-- VERTICAL FLOW -->
+  <div style="display:flex;flex-direction:column;align-items:center;
+              width:100%;max-width:480px;margin:0 auto;gap:0;">
+
+    <div class="component" id="c-input" style="width:100%;">...</div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="vert-line" id="vl-1" style="height:28px;"></div>
+      <div style="font-size:9px;color:var(--text-dim);
+                  font-family:var(--font-mono);margin:4px 0;">
+        data label ↓
+      </div>
+    </div>
+
+    <div class="component" id="c-orch" style="width:100%;">...</div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="vert-line" id="vl-2" style="height:28px;"></div>
+    </div>
+
+    <div class="component" id="c-proc" style="width:100%;">...</div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="vert-line" id="vl-3" style="height:28px;"></div>
+    </div>
+
+    <div class="component" id="c-output" style="width:100%;">...</div>
+  </div>
+
+  <!-- CONNECTOR TO STORAGE -->
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="vert-line" id="vl-storage" style="height:28px;"></div>
+  </div>
+
+  <!-- STORAGE ROW (horizontal, below vertical flow) -->
+  <div class="storage-pipeline" style="width:100%;max-width:600px;margin:0 auto;">
+    <div class="storage-title">EXTERNAL SERVICES</div>
+    <div class="storage-item" id="s-1">...</div>
+    <div class="storage-sep">·</div>
+    <div class="storage-item" id="s-2">...</div>
+    <div class="storage-sep">·</div>
+    <div class="storage-item" id="s-3">...</div>
+  </div>
+
+Vertical connector alignment:
+
+  Vertical layout is simpler than horizontal — all components are
+  stacked in a single column so no flex-mirroring is needed.
+  The vert-line elements center automatically via margin: 0 auto.
+
+  For branching (e.g., orchestrator dispatching to 2-3 parallel steps),
+  use a horizontal row within the vertical flow:
+
+  <div style="display:flex;gap:16px;width:100%;">
+    <div class="component" id="a-1" style="flex:1;">Agent 1</div>
+    <div class="component" id="a-2" style="flex:1;">Agent 2</div>
+    <div class="component" id="a-3" style="flex:1;">Agent 3</div>
+  </div>
+
+Phase engine works identically — litComponent/litArrow/litStorage
+target elements by ID regardless of layout direction.

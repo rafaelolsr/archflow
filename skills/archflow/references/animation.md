@@ -114,6 +114,23 @@ CORE PATTERN
   }, 1500); // 1500ms per phase — do not go below 1200ms
 
 ===================================================================
+LAYOUT-AGNOSTIC
+===================================================================
+
+The phase engine works with ANY layout direction — horizontal,
+vertical, hub, medallion. litComponent, litArrow, litStorage all
+target elements by ID, not by position. The same JS works for:
+
+  → Horizontal pipeline (flex-direction: row)
+  → Vertical pipeline (flex-direction: column)
+  → Multi-agent hub (mixed row + column)
+  → Medallion pipeline (sequential stages)
+
+For vertical layouts, use .vert-line elements as connectors
+between stacked components. litArrow() lights them the same way
+it lights horizontal .arrow-line elements.
+
+===================================================================
 THEME TOGGLE
 ===================================================================
 

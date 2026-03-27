@@ -583,6 +583,31 @@ CONNECTORS AND FLOW ARROWS
       stroke-width: 2; stroke-linecap: round;
     }
 
+  Vertical connector with label (for animated diagrams):
+    .vert-connector {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px; padding: 4px 0;
+    }
+    .vert-connector .vert-line {
+      width: 2px; height: 28px;
+      background: var(--border);
+      transition: background 0.4s;
+      position: relative; overflow: hidden;
+    }
+    .vert-connector .vert-line .shimmer {
+      display: none; position: absolute; top: -20%;
+      width: 100%; height: 20%;
+      background: var(--text); opacity: 0.85;
+      animation: slideV 0.7s linear infinite;
+    }
+    .vert-connector .vert-line.active .shimmer { display: block; }
+    @keyframes slideV { from { top: -20%; } to { top: 120%; } }
+    .vert-connector .conn-label {
+      font-family: var(--font-mono);
+      font-size: 8px; letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+
   Horizontal arrow character:
     .h-arrow::after {
       content: '→';
