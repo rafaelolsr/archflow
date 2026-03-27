@@ -682,19 +682,132 @@ SPLIT / COMPARISON PANELS
 ANIMATIONS
 ===================================================================
 
-  Staggered fade-in (use --i variable per element):
+  1. fadeUp — staggered page load reveal
+
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    CRITICAL: always use animation-fill-mode: both — elements stay
+    hidden before the animation starts. No flash of unstyled content.
+
+    Hero elements stagger on page load with increasing delays:
+
+      .hero-label   { animation: fadeUp 0.5s ease both; }
+      h1            { animation: fadeUp 0.5s ease 0.08s both; }
+      .subline      { animation: fadeUp 0.5s ease 0.16s both; }
+      .ctas         { animation: fadeUp 0.5s ease 0.24s both; }
+      .transform    { animation: fadeUp 0.7s ease 0.35s both; }
+
+    The word "both" is the key. Claude Code tends to forget it and
+    the stagger collapses — elements flash visible then animate.
+
+  2. blink — live indicator dots
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    Use on small colored dots next to section headers or status labels.
+    Signals "active system" without being aggressive. 1.8-2s loop.
+
+      .live-dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: blink 1.8s infinite;
+      }
+
+    Can also use as ::before pseudo-element on labels:
+      .label::before {
+        content: '';
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: blink 2s infinite;
+      }
+
+  3. pulse — highlighted data fields
+
+    @keyframes pulse {
+      0%, 100% { color: var(--accent); }
+      50% { color: color-mix(in srgb, var(--accent) 60%, var(--text-dim)); }
+    }
+
+    Apply to specific data values that need attention — the fields
+    that matter to the narrative. Draws the eye without being garish.
+    Tied directly to the story the report tells.
+
+      .field-highlight { animation: pulse 2.5s ease infinite; }
+
+  4. cascade — animated particles for transform visualizations
+
+    @keyframes cascade {
+      0%   { top: -6px; opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { top: calc(100% + 6px); opacity: 0; }
+    }
+
+    Six particles flowing through a blade/divider between panels.
+    Each particle is absolutely positioned with varied duration,
+    delay, and opacity so they NEVER sync up:
+
+      particle 1 → accent-color,  3.4s, delay 0s
+      particle 2 → white,         2.8s, delay 0.6s, opacity 0.5
+      particle 3 → accent2-color, 3.8s, delay 1.2s
+      particle 4 → accent-color,  2.6s, delay 1.9s, opacity 0.7
+      particle 5 → accent2-color, 4.0s, delay 0.4s
+      particle 6 → white,         3.1s, delay 2.4s, opacity 0.4
+
+    Different durations + different delays = never looks mechanical.
+    Color sequence should echo the transformation story
+    (e.g., orange entering → teal exiting).
+
+    HTML:
+      <div class="blade">
+        <div class="particle" style="background:var(--accent);
+             animation:cascade 3.4s linear infinite;"></div>
+        <div class="particle" style="background:#fff;opacity:0.5;
+             animation:cascade 2.8s linear 0.6s infinite;"></div>
+        <div class="particle" style="background:var(--accent2);
+             animation:cascade 3.8s linear 1.2s infinite;"></div>
+        <!-- ... 3 more particles with varied timing -->
+      </div>
+
+    CSS:
+      .particle {
+        position: absolute;
+        left: 50%; width: 4px; height: 4px;
+        border-radius: 50%;
+        transform: translateX(-50%);
+      }
+
+    IMPORTANT: Claude Code will try to simplify or remove cascade
+    particles because they look complex. Never replace CSS keyframe
+    animations with JS. Keep all 6 particles with varied timing.
+
+  5. fadeScale — for KPI cards and badges
+
     @keyframes fadeScale {
       from { opacity: 0; transform: scale(0.92); }
       to   { opacity: 1; transform: scale(1); }
     }
 
-    .card { animation: fadeUp 0.4s ease-out both; animation-delay: calc(var(--i, 0) * 0.05s); }
+  6. Hover transitions (NOT keyframe animations — CSS transitions):
 
-  Scroll-triggered reveal (preferred for report sections):
+    Primary buttons → background shifts to accent, translateY(-2px)
+    Secondary buttons → border and text brighten
+    Cards → border brightens, subtle box-shadow, translateY(-2px)
+    Nav links → color eases to --text
+
+    All use transition: 0.2s — fast enough to feel responsive,
+    slow enough to be perceptible. Always 0.2s, not 0.3s.
+
+  7. Scroll-triggered reveal (for below-fold sections):
+
     Instead of animating everything on load, reveal sections
     as they enter the viewport via IntersectionObserver:
 
@@ -709,6 +822,7 @@ ANIMATIONS
 
     Style: sections start with opacity:0, transform:translateY(20px),
     and transition to visible state when the .visible class is added.
+    Use cubic-bezier(0.16, 1, 0.3, 1) for smooth deceleration.
 
   Reduced motion:
     @media (prefers-reduced-motion: reduce) {
@@ -719,9 +833,8 @@ ANIMATIONS
       }
     }
 
-  Archflow keyframes (always include for the diagram):
+  Archflow diagram keyframes (always include for the phase engine):
     @keyframes slide { from { left: -20%; } to { left: 120%; } }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 ===================================================================
 RESPONSIVE DESIGN
