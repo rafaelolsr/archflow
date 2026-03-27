@@ -138,18 +138,22 @@ WORKFLOW — SLIDE DECK (/archflow-slides)
 DESIGN PRINCIPLES
 ===================================================================
 
-  → THINK before coding. Commit to an aesthetic direction first.
-  → Write CUSTOM CSS per report. Don't reuse a generic template.
-  → Pick DISTINCTIVE fonts. Never Inter, Roboto, Arial.
-  → Use NAMED PALETTES (Blueprint, Terminal Mono, etc.), not random hex.
-  → Create DEPTH through card tiers (hero, raised, recessed).
-  → Build VISUAL HIERARCHY with varying sizes, weights, and space.
-  → Add ATMOSPHERE with background gradients, grids, or SVG decoration.
-  → The ANIMATED DIAGRAM is the hero — give it maximum visual weight.
-  → Use MERMAID for supplementary diagrams (sequence, ER, state).
-  → Create BESPOKE components when the data demands them.
+Think MAGAZINE, not JIRA. Think PRODUCT PAGE, not ADMIN PANEL.
+
+  → Use a DISPLAY FONT (Bebas Neue, Bricolage Grotesque) at 72-148px
+    for the hero heading. Not 28px. MASSIVE.
+  → Keep the palette TIGHT — 2 accent colors + neutrals. Don't use 6+.
+  → Add TEXTURE — film grain, dot grid, or SVG grid. Never flat.
+  → Use GENEROUS whitespace — 40-80px section padding. Let it breathe.
+  → Every section has a UNIQUE layout. Don't repeat card grids.
+    Mix: full-bleed, split panels, stat bars, entity lists, timelines.
+  → Prefer FULL-WIDTH flowing layouts over sidebar+content grids.
+  → The ANIMATED DIAGRAM is the hero section — maximum visual weight.
+  → Create BESPOKE components for the data (bar viz, comparison panels,
+    distribution charts, particle animations).
+  → Write CUSTOM CSS per report. Every output should look unique.
   → Apply the SQUINT TEST: sections must be distinct when blurred.
-  → Apply the SWAP TEST: design must survive font/color changes.
+  → If it looks like a Bootstrap dashboard, redesign it.
 
 ===================================================================
 OUTPUT RULES

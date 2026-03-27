@@ -8,18 +8,174 @@ Do NOT copy-paste rigidly. Design each report uniquely.
 DESIGN PHILOSOPHY
 ===================================================================
 
-Every archflow output should feel intentionally designed, not
-template-stamped. Before writing CSS:
+Every archflow output should feel like a bespoke editorial page —
+NOT a generic developer dashboard with rows of identical cards.
+
+Think MAGAZINE, not JIRA. Think PRODUCT PAGE, not ADMIN PANEL.
+
+Before writing CSS:
 
   1. THINK about the project's character (5 seconds)
-  2. Pick a font pairing that matches
-  3. Pick a color palette / aesthetic direction
-  4. Pick a background atmosphere
+  2. Pick a DISPLAY FONT for the hero heading (bold, dramatic)
+  3. Pick a body + mono font pairing
+  4. Pick a color palette — MINIMAL (2-3 accent colors max)
+  5. Pick a background texture (grain, grid, gradient, or clean)
 
-Forbidden: generic Inter + purple gradients, uniform card styling,
-emoji icons in headers, gradient text on headings, animated glowing
-shadows, cyan-magenta-pink neon combos. If the swap test makes your
-design indistinguishable from a generic template, redesign it.
+Rules:
+  → Use display fonts (Bebas Neue, Bricolage Grotesque, Red Hat Display)
+    at LARGE sizes (80-148px) for hero headings. Not just 28-48px.
+  → Keep the color palette TIGHT — 2 accent colors + neutrals.
+    Don't use 6+ colors. Constraint creates elegance.
+  → Every section should have UNIQUE layout. Don't repeat the same
+    card grid pattern. Mix: full-bleed, split panels, stat bars,
+    entity lists, code panels, timeline steps.
+  → Add TEXTURE: film grain via SVG noise, dot grids, or subtle
+    patterns. Flat solid backgrounds feel dead.
+  → Use generous WHITESPACE. Padding 40-80px on sections.
+    Don't cram content. Let it breathe.
+  → Prefer FULL-WIDTH flowing layouts over sidebar + content grids.
+    TOC sidebar is optional, not default.
+
+Forbidden: generic Inter + purple gradients, uniform card grids,
+emoji icons in headers, gradient text, animated glowing shadows,
+cyan-magenta-pink neon combos, rows of identical cards.
+
+If your design looks like a Bootstrap dashboard, redesign it.
+
+===================================================================
+TEXTURE OVERLAYS
+===================================================================
+
+Add subtle texture to avoid flat, dead backgrounds:
+
+  Film grain (subtle, editorial feel):
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity: 0.6;
+    }
+
+  SVG grid (technical, developer feel):
+    <div style="position:fixed;inset:0;z-index:-1;opacity:0.25;pointer-events:none;">
+      <svg width="100%" height="100%">
+        <defs>
+          <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path d="M 48 0 L 0 0 0 48" fill="none" stroke="var(--accent)" stroke-width="0.4"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+      </svg>
+    </div>
+
+  Dot grid (minimal, enterprise):
+    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
+
+===================================================================
+DISPLAY TYPOGRAPHY
+===================================================================
+
+Reports need a HERO heading that commands attention.
+Use a display font at massive scale for the page title.
+
+  Recommended display fonts (load via Google Fonts):
+    Bebas Neue          → 72-148px, uppercase, industrial
+    Bricolage Grotesque → 48-96px, bold, characterful
+    Red Hat Display      → 48-80px, clean, enterprise
+    Outfit               → 48-80px, weight 800, geometric
+
+  Pattern:
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 11vw, 148px);
+      line-height: 0.9;
+      letter-spacing: 0.01em;
+    }
+
+  Use em + color to highlight a key word in the title:
+    h1 em { font-style: normal; color: var(--accent); }
+
+===================================================================
+STAT BARS / LARGE NUMBERS
+===================================================================
+
+For impressive metrics, use full-width stat bars with large numbers:
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+  }
+  .stat-cell {
+    padding: 40px 52px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 60px; line-height: 1;
+    color: var(--text); letter-spacing: 0.02em;
+  }
+  .stat-lbl {
+    font-family: var(--font-mono);
+    font-size: 10.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-top: 10px;
+  }
+
+===================================================================
+SPLIT / COMPARISON PANELS
+===================================================================
+
+Full-width split views for before/after, raw/clean, etc.:
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: 1fr 72px 1fr;
+    border: 1px solid var(--border);
+    min-height: 480px;
+    overflow: hidden;
+  }
+
+  .side-raw {
+    background: linear-gradient(135deg, #0a0500 0%, #060400 100%);
+    border-right: 1px solid rgba(accent-color, 0.15);
+    padding: 32px;
+  }
+
+  .blade {
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .side-clean {
+    background: linear-gradient(135deg, #020806 0%, #030806 100%);
+    border-left: 1px solid rgba(accent-color, 0.15);
+    padding: 32px;
+  }
+
+  Add animated particles between panels for dynamic feel.
+
+===================================================================
+STICKY NAV BAR
+===================================================================
+
+Alternative to TOC sidebar — a top navigation bar:
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 52px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: rgba(5,5,5,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
 
 ===================================================================
 THEME SYSTEM — DARK / LIGHT TOGGLE
