@@ -2,20 +2,18 @@
 name: archflow
 description: >
   Analyzes a codebase and generates animated HTML architecture reports —
-  diagrams, data flows, component directories, metrics, and insights.
-  Use this skill whenever the user asks to "visualize the codebase",
-  "explain the architecture", "generate a diagram of the system",
-  "show how the code flows", "create an architecture diagram", "animate
-  the data flow", "explain this repo visually", "show me how this works
-  as a diagram", or "generate an architecture report".
-  Always use this skill over generic responses when architecture
-  explanation + visual output is the goal.
+  beautiful, bespoke visualizations with interactive animated diagrams
+  showing how the system works. Use this skill whenever the user asks to
+  "visualize the codebase", "explain the architecture", "generate a diagram",
+  "show how the code flows", "create an architecture diagram", "animate the
+  data flow", "explain this repo visually", "show me how this works",
+  or "generate an architecture report".
 ---
 
 # Codebase Visualizer
 
-Analyzes a codebase and produces animated HTML architecture outputs.
-Three output modes: full report (default), diagram-only, and slide deck.
+Analyzes a codebase and produces beautiful, self-contained HTML
+architecture outputs with animated flow diagrams.
 
 ===================================================================
 OUTPUT MODES
@@ -26,55 +24,61 @@ OUTPUT MODES
   /archflow-slides    → Slide deck presentation
 
 ===================================================================
-REFERENCE FILES — LOAD BEFORE GENERATING
-===================================================================
-
-  ALWAYS read (all modes):
-
-    references/analysis.md      → how to read and model a codebase
-    references/layouts.md       → which layout to pick and how to build it
-    references/design-system.md → colors, typography, CSS classes
-    references/animation.md     → JS phase engine and arrow/glow patterns
-
-  REPORT MODE — also read:
-
-    references/report-sections.md → report structure + component catalog
-    references/navigation.md      → sticky TOC sidebar + scroll spy
-
-  SLIDE MODE — also read:
-
-    references/slide-patterns.md  → slide deck system + slide types
-
-  Templates — pick the closest match:
-
-    Diagram-only templates:
-      templates/horizontal-pipeline.html   → API / RAG / request-response
-      templates/multi-agent-hub.html       → orchestrator + parallel agents
-      templates/medallion-pipeline.html    → ETL / Delta Live Tables
-
-    Report templates:
-      templates/report-pipeline.html       → full report with pipeline diagram
-      templates/report-hub.html            → full report with hub diagram
-      templates/report-medallion.html      → full report with medallion diagram
-
-    Slide template:
-      templates/slide-deck.html            → slide deck presentation
-
-===================================================================
 WORKFLOW — FULL REPORT (default: /archflow)
 ===================================================================
 
-  1. Read references/analysis.md       → analyze the codebase
-  2. Read references/layouts.md        → decide the layout pattern
-  3. Read references/design-system.md  → internalize the design rules
-  4. Read references/animation.md      → understand both animation systems
-  5. Read references/report-sections.md → plan the report sections
-  6. Read references/navigation.md     → plan the TOC sidebar
-  7. Pick the closest report template from templates/report-*.html
-  8. Generate architecture-report.html replacing all [PLACEHOLDER]
-     content with real names, real flows, real services from the codebase
-  9. Present the file
-  10. Print a short summary (what the report covers + key observations)
+  1. ANALYZE
+     Read references/analysis.md → scan the codebase
+     Read references/layouts.md  → decide the diagram layout pattern
+
+  2. THINK (commit to a visual direction before coding)
+     Read references/design-system.md → CSS patterns library
+     Read references/libraries.md     → fonts, Mermaid, CDN imports
+     Read references/design-qa.md     → quality gates
+
+     Pick:
+       → A font pairing that matches the project character
+       → A color palette aesthetic (Blueprint, Terminal Mono, etc.)
+       → A background atmosphere (radial glow, dot grid, mesh)
+
+     Do NOT default to the same choices every time.
+     Each report should feel intentionally designed.
+
+  3. STRUCTURE
+     Read references/animation.md    → phase engine for the diagram
+     Read references/navigation.md   → TOC sidebar (if needed)
+
+     Plan the report sections. Include at minimum:
+       → Header (project name, description, date)
+       → Executive summary
+       → KPI metrics
+       → Animated architecture diagram (MANDATORY — the hero section)
+       → Component directory or data table
+       → Supporting content as the project demands
+         (data flow, benchmarks, external services, insights, etc.)
+       → Code references
+
+     Compose FREELY. Don't follow a rigid 10-section template.
+     Add sections the project needs. Skip sections it doesn't.
+     Create bespoke components (bar charts, comparison panels,
+     distribution bars) when the data calls for them.
+
+  4. STYLE
+     Write CUSTOM CSS for this specific report.
+     Don't reuse a generic template — design each report uniquely.
+     Use the patterns from design-system.md as building blocks,
+     but adapt them to this project's needs.
+
+     The animated diagram section uses its own CSS classes
+     (.component, .arrow-line, .vert-line, etc.) — keep those
+     as documented in design-system.md and animation.md.
+
+  5. DELIVER
+     → Output to ./architecture-report.html
+     → Single self-contained HTML file
+     → External deps: Google Fonts CDN + optional Mermaid CDN
+     → Present the file
+     → Print a short summary
 
 ===================================================================
 WORKFLOW — DIAGRAM ONLY (/archflow-diagram)
@@ -82,13 +86,17 @@ WORKFLOW — DIAGRAM ONLY (/archflow-diagram)
 
   1. Read references/analysis.md       → analyze the codebase
   2. Read references/layouts.md        → decide the layout
-  3. Read references/design-system.md  → internalize the design rules
+  3. Read references/design-system.md  → internalize diagram CSS
   4. Read references/animation.md      → understand the JS pattern
-  5. Pick the closest template from templates/ (diagram-only versions)
-  6. Generate architecture-diagram.html replacing template content
-     with real names, real flows, real services from the codebase
+  5. Pick the closest template from templates/
+  6. Generate architecture-diagram.html
   7. Present the file
-  8. Print a short summary (what the diagram shows + observations)
+  8. Print a short summary
+
+  Templates (diagram-only mode):
+    templates/horizontal-pipeline.html   → API / RAG / request-response
+    templates/multi-agent-hub.html       → orchestrator + parallel agents
+    templates/medallion-pipeline.html    → ETL / Delta Live Tables
 
 ===================================================================
 WORKFLOW — SLIDE DECK (/archflow-slides)
@@ -96,14 +104,30 @@ WORKFLOW — SLIDE DECK (/archflow-slides)
 
   1. Read references/analysis.md       → analyze the codebase
   2. Read references/layouts.md        → decide the layout
-  3. Read references/design-system.md  → internalize the design rules
-  4. Read references/animation.md      → understand the phase engine
-  5. Read references/slide-patterns.md → understand the slide system
-  6. Pick templates/slide-deck.html
-  7. Generate architecture-slides.html replacing template content
-     with real names, real flows, real services from the codebase
-  8. Present the file
-  9. Print a short summary
+  3. Read references/design-system.md  → CSS patterns
+  4. Read references/libraries.md      → fonts, CDN imports
+  5. Read references/animation.md      → phase engine
+  6. Read references/slide-patterns.md → slide system
+  7. Compose slide deck freely with animated diagram as hero slide
+  8. Output to ./architecture-slides.html
+  9. Present + summary
+
+===================================================================
+DESIGN PRINCIPLES
+===================================================================
+
+  → THINK before coding. Commit to an aesthetic direction first.
+  → Write CUSTOM CSS per report. Don't reuse a generic template.
+  → Pick DISTINCTIVE fonts. Never Inter, Roboto, Arial.
+  → Use NAMED PALETTES (Blueprint, Terminal Mono, etc.), not random hex.
+  → Create DEPTH through card tiers (hero, raised, recessed).
+  → Build VISUAL HIERARCHY with varying sizes, weights, and space.
+  → Add ATMOSPHERE with background gradients, grids, or SVG decoration.
+  → The ANIMATED DIAGRAM is the hero — give it maximum visual weight.
+  → Use MERMAID for supplementary diagrams (sequence, ER, state).
+  → Create BESPOKE components when the data demands them.
+  → Apply the SQUINT TEST: sections must be distinct when blurred.
+  → Apply the SWAP TEST: design must survive font/color changes.
 
 ===================================================================
 OUTPUT RULES
@@ -117,61 +141,30 @@ OUTPUT RULES
     → Max 8 components per row before layout gets crowded
     → After writing, call present_files
 
-  REPORT MODE output:
+  REPORT MODE:
     → File: ./architecture-report.html
-    → External deps allowed: Google Fonts CDN (body font)
-    → Optional: Mermaid CDN (only if data flow section uses Mermaid)
-    → Include TOC sidebar for reports with 5+ sections (almost always)
-    → 10-section structure as defined in report-sections.md
+    → External deps: Google Fonts CDN + optional Mermaid CDN
+    → Dark/light theme toggle with localStorage persistence
+    → Responsive layout (works on mobile)
+    → prefers-reduced-motion support
 
-  DIAGRAM-ONLY MODE output:
+  DIAGRAM-ONLY MODE:
     → File: ./architecture-diagram.html
     → Fully self-contained — zero external dependencies
-    → No Google Fonts, no Mermaid, no CDNs
 
-  SLIDE MODE output:
+  SLIDE MODE:
     → File: ./architecture-slides.html
-    → External deps allowed: Google Fonts CDN
-    → Animated diagram as the hero slide
+    → External deps: Google Fonts CDN
 
 ===================================================================
-ANALYSIS DEPTH — WHAT TO EXTRACT
+ANALYSIS DEPTH
 ===================================================================
 
-  For diagram-only mode, extract:
-    → Components and their roles
-    → Data flows between components (4-8 phases)
-    → External services
-    → 3-4 architectural insights
+  For diagram-only: components, data flows (4-8 phases), external
+  services, 3-4 insights.
 
-  For report mode, ALSO extract:
-    → Component count, external service count, flow phase count
-    → Primary language / framework
-    → File paths for each component (for the component directory table)
-    → Layer classification per component (Input / Orchestration / Processing / Storage / Output)
-    → Detailed data flow description (for the optional Mermaid or CSS pipeline section)
-    → 4-6 architectural insights (more than diagram mode)
-    → List of key files analyzed (for the code references section)
-
-  For slide mode, use the same depth as report mode.
-
-===================================================================
-DATA FLOW SECTION — MERMAID vs CSS PIPELINE
-===================================================================
-
-  The report's Data Flow section (section 6) can use either:
-
-  A) MERMAID SEQUENCE DIAGRAM
-     → Best for: complex flows with multiple actors, async calls, branching
-     → Requires Mermaid CDN script at end of body
-     → Use for: API systems, multi-agent orchestration, event-driven
-     → See design-system.md for Mermaid container CSS + CDN import
-
-  B) CSS PIPELINE
-     → Best for: simple linear flows with ≤6 steps
-     → Fully self-contained, no CDN needed
-     → Use for: ETL pipelines, simple request→process→response
-     → See design-system.md for .af-pipeline CSS
-
-  Choose the approach that best fits the codebase's data flow pattern.
-  When in doubt, prefer CSS pipeline (simpler, no CDN dependency).
+  For report/slides: ALSO extract component counts, file paths,
+  layer classifications, detailed data flow descriptions, 4-6
+  insights, and list of key files analyzed. Create bespoke
+  visualizations when the data supports it (benchmarks, metrics,
+  comparison panels, distribution charts).

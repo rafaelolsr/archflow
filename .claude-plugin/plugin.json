@@ -1,7 +1,7 @@
 {
   "name": "archflow",
   "description": "Analyzes a codebase and generates animated HTML architecture reports — diagrams, data flows, component directories, metrics, and insights.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Rafael Oliveira",
     "url": "https://github.com/rafaelolsr"

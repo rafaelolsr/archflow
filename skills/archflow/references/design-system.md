@@ -1,47 +1,33 @@
 # Design System
 
-Colors, typography, and CSS classes for the architecture diagram.
-Copy the base CSS block into every generated HTML file.
+CSS patterns, typography, and visual principles for archflow outputs.
+This is a patterns library — adapt and compose freely per project.
+Do NOT copy-paste rigidly. Design each report uniquely.
 
 ===================================================================
-COLOR PALETTE
+DESIGN PHILOSOPHY
 ===================================================================
 
-  Theme-sensitive colors (change between dark / light mode):
+Every archflow output should feel intentionally designed, not
+template-stamped. Before writing CSS:
 
-    Variable           Dark          Light
-    --bg-body          #080c10       #f4f5f7
-    --bg-card          #0d1117       #ffffff
-    --bg-storage       #0a0f14       #f0f1f3
-    --border           #21262d       #d0d5dd
-    --border-subtle    #30363d       #e2e5ea
-    --border-banner    #333          #c0c5cc
-    --text-primary     #e6edf3       #1a1a2e
-    --text-secondary   #c9d1d9       #333344
-    --text-muted       #8b949e       #666677
-    --text-dim         #4a5568       #8b8b9e
-    --shimmer          white         #333
-    --shadow-alpha     44            22
+  1. THINK about the project's character (5 seconds)
+  2. Pick a font pairing that matches
+  3. Pick a color palette / aesthetic direction
+  4. Pick a background atmosphere
 
-  Semantic accent assignments — same in both themes:
-
-    Cyan    #00d4ff   user / input / client layer
-    Orange  #ff6b35   orchestrator / coordinator / router
-    Purple  #a78bfa   agents / workers / sub-processes
-    Yellow  #e8b84b   storage / external services / RAG
-    Green   #3fb950   output / persistence / success state
-    Amber   #f0883e   LLM / AI inference / model core
-    Blue    #58a6ff   app layer / API responses / user-facing
-    Red     #f85149   errors / warnings (use sparingly)
+Forbidden: generic Inter + purple gradients, uniform card styling,
+emoji icons in headers, gradient text on headings, animated glowing
+shadows, cyan-magenta-pink neon combos. If the swap test makes your
+design indistinguishable from a generic template, redesign it.
 
 ===================================================================
-THEME TOGGLE
+THEME SYSTEM — DARK / LIGHT TOGGLE
 ===================================================================
 
-Every generated file includes a toggle button in the top-right corner.
-Dark is the default. Clicking the button adds/removes the .light class
-on <body>, which flips all CSS variable values. The preference is saved
-to localStorage so it persists across page reloads.
+Every generated file includes a toggle button. Dark is the default.
+The .light class on <body> flips all CSS variable values.
+Preference persists via localStorage.
 
   HTML — place immediately after <body>:
 
@@ -51,201 +37,714 @@ to localStorage so it persists across page reloads.
 
     if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
 
+  CSS pattern for theme variables:
+
+    :root {
+      --bg: #0e1014;
+      --bg2: #141720;
+      --surface: #1e2330;
+      --surface2: #252b3a;
+      --border: #2a3045;
+      --border2: #384054;
+      --text: #e2e8f4;
+      --text-dim: #6b7591;
+      --text-muted: #9aa5bd;
+      --accent: [primary accent from chosen palette];
+      --accent2: [secondary accent];
+      --font-body: [chosen body font];
+      --font-mono: [chosen mono font];
+    }
+    body.light {
+      --bg: #f8f9fa;
+      --bg2: #f0f1f5;
+      --surface: #ffffff;
+      --surface2: #f5f6f9;
+      --border: rgba(0,0,0,0.08);
+      --border2: rgba(0,0,0,0.15);
+      --text: #1a1a2e;
+      --text-dim: #6b7280;
+      --text-muted: #9aa5bd;
+    }
+
+  Accent colors stay the same in both themes — they are bright
+  enough to work on both dark and light backgrounds.
+
 ===================================================================
 TYPOGRAPHY
 ===================================================================
 
-  Font stack    → 'JetBrains Mono', 'Fira Code', monospace
-  Title main    → 22px, weight 700, var(--text-primary), letter-spacing -0.5px
-  Title sub     → 10px, weight 400, letter-spacing 4px, var(--text-dim), UPPERCASE
-  Section label → 9px, letter-spacing 3px, UPPERCASE, accent color
-  Card label    → 10px, weight 700, letter-spacing 1px, accent color
-  Card sublabel → 9px, color var(--text-dim), line-height 1.4
-  Card body     → 9px, color var(--text-muted), line-height 1.7
-  Phase banner  → 11px, accent color, transitions on color/border change
+Always load fonts via Google Fonts CDN:
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=[Body]+[Mono]&display=swap" rel="stylesheet">
+
+Font pairings — pick one per project, rotate across projects:
+
+  Body Font              Mono Font           Feel           Best For
+  DM Sans                Fira Code           Friendly       AI/ML, agents
+  Instrument Serif       JetBrains Mono      Editorial      Plan reviews, docs
+  IBM Plex Sans          IBM Plex Mono       Reliable       Architecture, APIs
+  Bricolage Grotesque    Fragment Mono       Bold           Data tables, dashboards
+  Plus Jakarta Sans      Azeret Mono         Approachable   Status reports
+  Outfit                 Space Mono          Geometric      Flowcharts, pipelines
+  Sora                   IBM Plex Mono       Precise        Schemas, databases
+  Fraunces               Source Code Pro     Warm           Project recaps
+  Geist                  Geist Mono          Sharp          Modern APIs
+  Red Hat Display        Red Hat Mono        Cohesive       System overviews
+  Libre Franklin         Inconsolata         Classic        Data-dense tables
+
+  ANTI-PATTERNS — never use as body font:
+    Inter, Roboto, Arial, Helvetica, system-ui alone.
+    These signal "AI-generated default."
+
+Typography scale (use clamp() for responsive sizing):
+
+  Element              Size                          Weight
+  Page title           clamp(28px, 5vw, 48px)        700
+  Section heading      clamp(18px, 3vw, 28px)        600
+  Body text            clamp(14px, 1.5vw, 16px)      400
+  Section label        10-11px (mono, uppercase)      600-700
+  Card label           9-10px (mono, uppercase)       700
+  Code / mono text     12-13px                        400
 
 ===================================================================
-BASE CSS — COPY INTO EVERY GENERATED FILE
+COLOR PALETTES — NAMED AESTHETICS
 ===================================================================
 
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+Pick a palette aesthetic per project. Don't use raw hex codes
+blindly — choose a named direction and derive colors from it.
 
-  /* THEME VARIABLES — dark default */
-  :root {
-    --bg-body: #080c10;
-    --bg-card: #0d1117;
-    --bg-storage: #0a0f14;
-    --border: #21262d;
-    --border-subtle: #30363d;
-    --border-banner: #333;
-    --text-primary: #e6edf3;
-    --text-secondary: #c9d1d9;
-    --text-muted: #8b949e;
-    --text-dim: #4a5568;
-    --shimmer: white;
-    --shadow-alpha: 44;
-  }
-  body.light {
-    --bg-body: #f4f5f7;
-    --bg-card: #ffffff;
-    --bg-storage: #f0f1f3;
-    --border: #d0d5dd;
-    --border-subtle: #e2e5ea;
-    --border-banner: #c0c5cc;
-    --text-primary: #1a1a2e;
-    --text-secondary: #333344;
-    --text-muted: #666677;
-    --text-dim: #8b8b9e;
-    --shimmer: #333;
-    --shadow-alpha: 22;
+  BLUEPRINT (cool, technical — APIs, backend systems):
+    --accent: #0891b2   (teal)
+    --accent2: #22d3ee  (cyan)
+    Warm: #d97706, Cool: #059669
+    Surface: cool grays (#161b22 → #1c2333)
+
+  TERMINAL MONO (code-first, developer tools):
+    --accent: #22d87a   (neon green)
+    --accent2: #00f5d4  (teal)
+    Warn: #f5a623, Danger: #f85149
+    Surface: deep charcoal (#0e1014 → #141720)
+
+  WARM SIGNAL (editorial, data platforms):
+    --accent: #14b8a6   (teal)
+    --accent2: #f59e0b  (amber)
+    Warm: #c2410c, Cool: #65a30d
+    Surface: warm darks (#120f0e → #1a1614)
+
+  NORDIC (calm, enterprise, cloud platforms):
+    --accent: #88c0d0   (ice blue)
+    --accent2: #a3be8c  (frost green)
+    Warm: #ebcb8b, Cool: #81a1c1
+    Surface: slate (#2e3440 → #3b4252)
+
+  MIDNIGHT EDITORIAL (premium, executive summaries):
+    --accent: #d4af37   (warm gold)
+    --accent2: #c0a060  (muted gold)
+    Surface: deep navy (#0a0e1a → #111827)
+
+===================================================================
+BACKGROUND ATMOSPHERE
+===================================================================
+
+Flat backgrounds feel dead. Add subtle depth:
+
+  Radial glow (default — works with most palettes):
+    background-image: radial-gradient(
+      ellipse at 50% 0%, rgba(accent, 0.06) 0%, transparent 60%
+    );
+
+  Multi-glow (richer depth, 2-3 positioned radials):
+    background-image:
+      radial-gradient(ellipse 60% 50% at 75% 50%, rgba(accent, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(accent2, 0.04) 0%, transparent 50%);
+
+  Dot grid (minimal, enterprise):
+    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
+
+  SVG grid decoration (Terminal Mono aesthetic):
+    <svg width="100%" height="100%">
+      <defs>
+        <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <path d="M 48 0 L 0 0 0 48" fill="none" stroke="var(--accent)" stroke-width="0.4"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+    </svg>
+
+===================================================================
+CARD COMPONENTS
+===================================================================
+
+The fundamental building block. Adapt per report — don't use
+a single rigid .af-card class for everything.
+
+  Base card:
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+  Depth tiers (vary within each report):
+
+    /* Elevated — KPIs, key metrics, hero findings */
+    .card--raised {
+      background: var(--surface2);
+      border-color: var(--border2);
+    }
+
+    /* Hero — executive summary, focal element */
+    .card--hero {
+      background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+      border-left: 3px solid var(--accent);
+      padding: 28px 32px;
+    }
+
+    /* Recessed — secondary content, code blocks */
+    .card--recessed {
+      background: var(--bg2);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+  Colored accent borders (use semantic colors):
+
+    .card--green  { border-left: 3px solid var(--accent); }
+    .card--red    { border-left: 3px solid #f85149; }
+    .card--amber  { border-left: 3px solid #f5a623; }
+    .card--blue   { border-left: 3px solid #58a6ff; }
+    .card--purple { border-left: 3px solid #c084fc; }
+
+===================================================================
+KPI / METRIC CARDS
+===================================================================
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
   }
 
-  body {
-    min-height: 100vh;
-    background: var(--bg-body);
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 16px;
-    color: var(--text-secondary);
-  }
-
-  /* THEME TOGGLE */
-  .theme-toggle {
-    position: fixed; top: 16px; right: 16px; z-index: 100;
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 6px 12px; cursor: pointer;
-    font-size: 14px; color: var(--text-muted);
-    transition: border-color 0.3s, background 0.3s;
-  }
-  .theme-toggle:hover { border-color: var(--text-muted); }
-
-  /* TITLE */
-  .title-sub {
-    font-size: 10px; letter-spacing: 4px; color: var(--text-dim);
-    margin-bottom: 6px; text-align: center; text-transform: uppercase;
-  }
-  .title-main {
-    font-size: 22px; font-weight: 700; color: var(--text-primary);
-    letter-spacing: -0.5px; text-align: center; margin-bottom: 28px;
-  }
-
-  /* PHASE BANNER */
-  .phase-banner {
-    background: var(--bg-card);
-    border: 1px solid var(--border-banner);
-    border-radius: 6px;
-    padding: 10px 24px;
-    margin-bottom: 32px;
-    font-size: 11px;
-    min-width: 400px;
-    max-width: 700px;
-    text-align: center;
-    transition: color 0.4s, border-color 0.4s;
-  }
-
-  /* COMPONENT CARD */
-  .component {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-    transition: border-color 0.4s, box-shadow 0.4s;
-    min-width: 120px;
-  }
-  .component-icon  { font-size: 22px; margin-bottom: 6px; }
-  .component-label { font-size: 10px; font-weight: 700;
-                     letter-spacing: 1px; margin-bottom: 3px; }
-  .component-sub   { font-size: 8px; color: var(--text-dim);
-                     margin-bottom: 6px; line-height: 1.4; }
-  .component-body  { font-size: 8px; color: var(--text-muted); line-height: 1.7; }
-
-  /* AGENT CARD (lighter variant for parallel workers) */
-  .agent-card {
-    background: var(--bg-card);
+  .kpi-card {
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 10px 12px;
-    text-align: center;
-    flex: 1;
-    transition: border-color 0.4s, box-shadow 0.4s;
+    padding: 16px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+
+  .kpi-card__val {
+    font-family: var(--font-mono);
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 700; letter-spacing: -1px; line-height: 1;
   }
 
-  /* ARROW */
-  .arrow-col  { flex: 1; padding: 0 8px;
-                display: flex; flex-direction: column; gap: 8px; }
-  .arrow-wrap { display: flex; flex-direction: column; }
-  .arrow-line {
-    height: 2px; background: var(--border);
-    border-radius: 1px; position: relative; overflow: hidden;
-    transition: background 0.4s;
+  .kpi-card__lbl {
+    font-family: var(--font-mono);
+    font-size: 9px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim);
+    margin-top: 6px;
   }
-  .arrow-line .shimmer {
-    display: none; position: absolute; top: 0; left: -20%;
-    width: 20%; height: 100%;
-    background: var(--shimmer); opacity: 0.85;
-    animation: slide 0.7s linear infinite;
-  }
-  .arrow-line.active .shimmer { display: block; }
-  .arrow-lbl       { text-align: center; font-size: 9px;
-                     color: var(--text-dim); margin-top: 3px; }
-  .arrow-lbl.above { margin-top: 0; margin-bottom: 3px; }
-
-  /* VERTICAL CONNECTOR */
-  .vert-line {
-    width: 2px; background: var(--border);
-    transition: background 0.4s; margin: 0 auto;
-  }
-
-  /* STORAGE / EXTERNAL SERVICES ROW */
-  .storage-pipeline {
-    display: flex; align-items: center; gap: 0;
-    background: var(--bg-storage);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 12px;
-    position: relative;
-  }
-  .storage-title {
-    position: absolute; top: -10px; left: 16px;
-    background: var(--bg-body); padding: 0 8px;
-    font-size: 9px; letter-spacing: 3px;
-    color: #e8b84b; text-transform: uppercase;
-  }
-  .storage-item {
-    flex: 1; background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px;
-    text-align: center; min-width: 80px;
-    transition: border-color 0.4s, box-shadow 0.4s;
-  }
-  .storage-sep { width: 16px; text-align: center;
-                 font-size: 10px; color: var(--border); flex-shrink: 0; }
-
-  /* INSIGHTS ROW */
-  .insights {
-    margin-top: 32px; display: flex; gap: 10px;
-    flex-wrap: wrap; justify-content: center;
-  }
-  .insight-card {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 16px;
-    text-align: center; min-width: 150px;
-  }
-  .insight-label { font-size: 9px; letter-spacing: 2px;
-                   margin-bottom: 3px; text-transform: uppercase; }
-  .insight-value { font-size: 10px; color: var(--text-muted); }
-
-  /* KEYFRAMES */
-  @keyframes slide { from { left: -20%; } to { left: 120%; } }
-  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-</style>
 
 ===================================================================
-COMPONENT ICON GUIDE
+DATA TABLES
+===================================================================
+
+Use real <table> elements for tabular data. Wrap in scrollable
+container for wide tables.
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .data-table th {
+    background: var(--bg2);
+    font-family: var(--font-mono);
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border2);
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .data-table code {
+    font-family: var(--font-mono); font-size: 11px;
+    background: rgba(88,166,255,0.07); color: #58a6ff;
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+===================================================================
+TAGS / BADGES
+===================================================================
+
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  Color variants — create per-palette:
+    .tag--green  { background: rgba(accent, 0.12); color: var(--accent); border: 1px solid rgba(accent, 0.2); }
+    .tag--red    { background: rgba(248,81,73,0.12); color: #f85149; }
+    .tag--amber  { background: rgba(245,166,35,0.12); color: #f5a623; }
+    .tag--blue   { background: rgba(88,166,255,0.12); color: #58a6ff; }
+    .tag--purple { background: rgba(192,132,252,0.12); color: #c084fc; }
+
+===================================================================
+CODE BLOCKS
+===================================================================
+
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 400px;
+  }
+
+  Syntax highlight classes (when useful):
+    .kw  { color: #c792ea; }  /* keywords */
+    .fn  { color: #82aaff; }  /* functions */
+    .str { color: #c3e88d; }  /* strings */
+    .cmt { color: #4a5568; font-style: italic; }  /* comments */
+    .hl  { color: var(--accent); font-weight: 700; }  /* highlighted */
+
+  With file header:
+    .code-file { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .code-file__header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px; background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+    }
+    .code-file__body { /* same as .code-block but no border/radius */ }
+
+===================================================================
+COLLAPSIBLE SECTIONS
+===================================================================
+
+  details.collapsible {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  details.collapsible summary {
+    padding: 14px 20px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; list-style: none;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text);
+    transition: background 0.15s ease;
+  }
+
+  details.collapsible summary:hover { background: var(--surface2); }
+  details.collapsible summary::-webkit-details-marker { display: none; }
+  details.collapsible summary::before {
+    content: '▸'; font-size: 11px; color: var(--text-dim);
+    transition: transform 0.15s ease;
+  }
+  details.collapsible[open] summary::before { transform: rotate(90deg); }
+
+===================================================================
+SECTION LABELS
+===================================================================
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  Optional dot indicator:
+    .section-label::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+===================================================================
+CONNECTORS AND FLOW ARROWS
+===================================================================
+
+  Vertical flow arrow (between stacked sections):
+    .flow-arrow {
+      display: flex; justify-content: center;
+      padding: 6px 0;
+      color: var(--text-dim);
+    }
+    .flow-arrow svg {
+      width: 20px; height: 20px;
+      fill: none; stroke: var(--border2);
+      stroke-width: 2; stroke-linecap: round;
+    }
+
+  Horizontal arrow character:
+    .h-arrow::after {
+      content: '→';
+      color: var(--border2);
+      font-size: 18px; padding: 0 4px;
+    }
+
+  CSS pipeline (linear flow visualization):
+    .pipeline-step {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 14px 0;
+      border-left: 2px solid var(--border);
+      padding-left: 20px;
+      position: relative;
+    }
+    .pipeline-step::before {
+      content: '';
+      position: absolute; left: -5px; top: 18px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border2);
+      border: 2px solid var(--bg);
+    }
+    .pipeline-step:last-child { border-left-color: transparent; }
+
+===================================================================
+BAR VISUALIZATIONS
+===================================================================
+
+  Simple horizontal bar:
+    .bar-track {
+      height: 6px;
+      background: var(--surface);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s cubic-bezier(0.16,1,0.3,1);
+    }
+
+  Segmented distribution bar:
+    .match-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      gap: 2px;
+    }
+    .match-bar-seg { height: 100%; border-radius: 2px; }
+
+===================================================================
+SPLIT / COMPARISON PANELS
+===================================================================
+
+  Before/After comparison:
+    .split-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .panel {
+      padding: clamp(20px, 3vh, 40px) clamp(16px, 3vw, 32px);
+    }
+    .panel--before { background: rgba(248,81,73,0.03); }
+    .panel--after  { background: rgba(34,216,122,0.03); border-left: 1px solid var(--border); }
+
+===================================================================
+ANIMATIONS
+===================================================================
+
+  Staggered fade-in (use --i variable per element):
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeScale {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .card { animation: fadeUp 0.4s ease-out both; animation-delay: calc(var(--i, 0) * 0.05s); }
+
+  Scroll-triggered reveal (preferred for report sections):
+    Instead of animating everything on load, reveal sections
+    as they enter the viewport via IntersectionObserver:
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    Style: sections start with opacity:0, transform:translateY(20px),
+    and transition to visible state when the .visible class is added.
+
+  Reduced motion:
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+  Archflow keyframes (always include for the diagram):
+    @keyframes slide { from { left: -20%; } to { left: 120%; } }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+===================================================================
+RESPONSIVE DESIGN
+===================================================================
+
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    .split-panels { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+===================================================================
+OVERFLOW PROTECTION
+===================================================================
+
+  /* Every grid/flex child must be able to shrink */
+  [style*="display: grid"] > *,
+  [style*="display: flex"] > * {
+    min-width: 0;
+  }
+  body { overflow-wrap: break-word; }
+
+===================================================================
+MERMAID CONTAINERS
+===================================================================
+
+When including Mermaid diagrams (sequence, ER, state), use:
+
+  CDN import (at end of body):
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+          primaryColor: isDark ? '#1a2744' : '#e0f2fe',
+          primaryBorderColor: 'var(--accent)',
+          primaryTextColor: 'var(--text)',
+          lineColor: 'var(--text-dim)',
+          fontSize: '16px',
+          fontFamily: 'var(--font-body)',
+        }
+      });
+    </script>
+
+  Container CSS:
+    .mermaid-wrap {
+      display: flex; justify-content: center; align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 24px;
+      overflow: auto;
+      min-height: 300px;
+    }
+
+  Never use .node as a CSS class — Mermaid uses it internally.
+
+===================================================================
+ANIMATED DIAGRAM — ARCHFLOW PHASE ENGINE
+===================================================================
+
+The animated architecture diagram is archflow's core differentiator.
+Include it as a section within the report. The CSS classes below are
+ONLY for the diagram section — the rest of the report uses the
+patterns above.
+
+  Diagram container:
+    .diagram-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: var(--font-mono);
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+  Phase banner:
+    .phase-banner {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg2);
+      transition: color 0.4s, border-color 0.4s;
+      margin-bottom: 24px;
+    }
+
+  Component card:
+    .component {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      transition: border-color 0.4s, box-shadow 0.4s;
+      min-width: 120px;
+    }
+    .component-icon  { font-size: 20px; margin-bottom: 6px; }
+    .component-label { font-family: var(--font-mono); font-size: 9px;
+                       font-weight: 700; letter-spacing: 2px;
+                       text-transform: uppercase; margin-bottom: 4px; }
+    .component-sub   { font-family: var(--font-mono); font-size: 9px;
+                       color: var(--text-dim); margin-bottom: 6px; }
+    .component-body  { font-size: 11px; color: var(--text-muted);
+                       line-height: 1.4; }
+
+  Agent card (for multi-agent hub layout):
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+      flex: 1;
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+
+  Arrows:
+    .arrow-col  { flex: 1; padding: 0 8px;
+                  display: flex; flex-direction: column; gap: 8px; }
+    .arrow-wrap { display: flex; flex-direction: column; }
+    .arrow-line {
+      height: 2px; background: var(--border);
+      border-radius: 1px; position: relative; overflow: hidden;
+      transition: background 0.4s;
+    }
+    .arrow-line .shimmer {
+      display: none; position: absolute; top: 0; left: -20%;
+      width: 20%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      animation: slide 0.7s linear infinite;
+    }
+    .arrow-line.active .shimmer { display: block; }
+    .arrow-lbl       { text-align: center; font-size: 9px;
+                       color: var(--text-dim); margin-top: 3px; }
+    .arrow-lbl.above { margin-top: 0; margin-bottom: 3px; }
+
+  Vertical connector:
+    .vert-line { width: 2px; background: var(--border);
+                 transition: background 0.4s; margin: 0 auto; }
+
+  Storage / external services row:
+    .storage-pipeline {
+      display: flex; align-items: center; gap: 0;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 12px;
+      position: relative;
+    }
+    .storage-title {
+      position: absolute; top: -10px; left: 16px;
+      background: var(--bg);
+      padding: 0 8px;
+      font-size: 9px; letter-spacing: 3px;
+      color: #e8b84b; text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+    .storage-item {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px; text-align: center;
+      min-width: 80px;
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+    .storage-sep { width: 16px; text-align: center;
+                   font-size: 10px; color: var(--border);
+                   flex-shrink: 0; }
+
+  Diagram insights row:
+    .diagram-insights { margin-top: 12px; display: flex; gap: 10px;
+                        flex-wrap: wrap; justify-content: center; }
+    .insight-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-align: center; min-width: 150px;
+    }
+
+===================================================================
+SEMANTIC ACCENT COLORS FOR DIAGRAMS
+===================================================================
+
+These are the semantic color assignments for the animated diagram
+section ONLY. The rest of the report uses the chosen palette.
+
+  Cyan    #00d4ff   user / input / client layer
+  Orange  #ff6b35   orchestrator / coordinator / router
+  Purple  #a78bfa   agents / workers / sub-processes
+  Yellow  #e8b84b   storage / external services / RAG
+  Green   #3fb950   output / persistence / success state
+  Amber   #f0883e   LLM / AI inference / model core
+  Blue    #58a6ff   app layer / API responses / user-facing
+  Red     #f85149   errors / warnings (use sparingly)
+
+===================================================================
+COMPONENT ICON GUIDE (DIAGRAMS ONLY)
 ===================================================================
 
   👤  User / client / human
@@ -268,587 +767,3 @@ COMPONENT ICON GUIDE
   🔀  Router / dispatcher / load balancer
   📥  Ingest / intake / collector
   🪄  Transform / enrich / process
-
-===================================================================
-REPORT-MODE EXTENSIONS
-===================================================================
-
-The sections below apply ONLY to report and slide outputs.
-Diagram-only mode uses only the base CSS above.
-Report-mode adds a body font, richer card components, data tables,
-and entrance animations alongside the existing phase engine.
-
-===================================================================
-GOOGLE FONTS — REPORT / SLIDE MODE ONLY
-===================================================================
-
-Reports and slides load a body font via Google Fonts CDN.
-Diagram-only mode stays self-contained (no external fonts).
-
-  HTML — place in <head>:
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-  CSS — add to :root:
-
-    --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-  Font pairing options (rotate across projects for variety):
-
-    Pairing               Body Font               Google import slug
-    Technical (default)   IBM Plex Sans            IBM+Plex+Sans:wght@400;500;600;700
-    Developer-friendly    DM Sans                  DM+Sans:wght@400;500;600;700
-    Modern geometric      Outfit                   Outfit:wght@400;500;600;700
-    Bold characterful     Bricolage Grotesque      Bricolage+Grotesque:wght@400;500;600;700
-
-  JetBrains Mono is ALWAYS the mono font. Never substitute it.
-
-===================================================================
-REPORT BODY OVERRIDE
-===================================================================
-
-In report mode, the body needs different layout than the centered
-diagram mode. Add this CSS AFTER the base body rule:
-
-  body.report-mode {
-    display: block;
-    align-items: initial;
-    justify-content: initial;
-    padding: 0;
-    font-family: var(--font-body);
-    line-height: 1.6;
-    overflow-wrap: break-word;
-  }
-
-  body.report-mode .report-wrap {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 48px 24px;
-  }
-
-Background atmosphere — add subtle radial glow on report pages:
-
-  body.report-mode {
-    background-image: radial-gradient(
-      ellipse at 50% 0%,
-      rgba(0, 212, 255, 0.06) 0%,
-      transparent 60%
-    );
-  }
-
-===================================================================
-REPORT SECTION LABELS
-===================================================================
-
-  .af-section {
-    margin-bottom: 48px;
-    animation: fadeUp 0.4s ease-out both;
-    animation-delay: calc(var(--i, 0) * 0.08s);
-  }
-
-  .af-section-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .af-section-label::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-===================================================================
-REPORT CARD SYSTEM — .af-card
-===================================================================
-
-Cards for report sections. NOT used in the animated diagram area
-(which keeps .component / .agent-card / .storage-item).
-
-Base card:
-
-  .af-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 24px;
-    position: relative;
-  }
-
-Depth tiers — vary card prominence to signal importance:
-
-  /* Elevated: KPIs, key metrics, important findings */
-  .af-card--elevated {
-    background: var(--bg-card);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  }
-
-  /* Recessed: secondary content, code blocks, detail panels */
-  .af-card--recessed {
-    background: color-mix(in srgb, var(--bg-body) 70%, var(--bg-card) 30%);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
-  }
-
-  /* Hero: executive summary, focal element — demands attention */
-  .af-card--hero {
-    background: color-mix(in srgb, var(--bg-card) 92%, #00d4ff 8%);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
-    border-color: color-mix(in srgb, var(--border) 50%, #00d4ff 50%);
-  }
-
-  /* Glass: special-occasion overlay (use sparingly) */
-  .af-card--glass {
-    background: color-mix(in srgb, var(--bg-card) 60%, transparent 40%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-color: rgba(255,255,255,0.1);
-  }
-
-  /* Left accent stripe by semantic color */
-  .af-card--accent-cyan   { border-left: 3px solid #00d4ff; }
-  .af-card--accent-orange { border-left: 3px solid #ff6b35; }
-  .af-card--accent-purple { border-left: 3px solid #a78bfa; }
-  .af-card--accent-yellow { border-left: 3px solid #e8b84b; }
-  .af-card--accent-green  { border-left: 3px solid #3fb950; }
-
-===================================================================
-KPI / METRIC CARDS — .af-kpi
-===================================================================
-
-  .af-kpi-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .af-kpi {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    animation: fadeScale 0.35s ease-out both;
-    animation-delay: calc(var(--i, 0) * 0.06s);
-  }
-
-  .af-kpi__value {
-    font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-primary);
-  }
-
-  .af-kpi__label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    margin-top: 6px;
-  }
-
-  .af-kpi__detail {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
-===================================================================
-DATA TABLE — .af-data-table
-===================================================================
-
-  .af-table-wrap {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 32px;
-  }
-
-  .af-table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .af-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .af-data-table th {
-    background: var(--bg-storage);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-    text-align: left;
-    padding: 12px 16px;
-    border-bottom: 2px solid var(--border);
-    white-space: nowrap;
-  }
-
-  .af-data-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-    color: var(--text-secondary);
-  }
-
-  .af-data-table tbody tr:nth-child(even) {
-    background: rgba(0, 212, 255, 0.03);
-  }
-
-  .af-data-table tbody tr:hover {
-    background: rgba(0, 212, 255, 0.06);
-    transition: background 0.15s ease;
-  }
-
-  .af-data-table tbody tr:last-child td { border-bottom: none; }
-
-  .af-data-table code {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    background: rgba(0, 212, 255, 0.08);
-    color: #00d4ff;
-    padding: 1px 5px;
-    border-radius: 3px;
-  }
-
-===================================================================
-CALLOUT BOXES — .af-callout
-===================================================================
-
-  .af-callout {
-    padding: 16px 20px;
-    border-radius: 8px;
-    border-left: 4px solid var(--callout-color);
-    background: color-mix(in srgb, var(--callout-color) 8%, var(--bg-card) 92%);
-    margin-bottom: 24px;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  .af-callout--info    { --callout-color: #00d4ff; }
-  .af-callout--warning { --callout-color: #f0883e; }
-  .af-callout--success { --callout-color: #3fb950; }
-  .af-callout--error   { --callout-color: #f85149; }
-
-  .af-callout__title {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--callout-color);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-===================================================================
-CODE BLOCKS — .af-code-block
-===================================================================
-
-  .af-code-file {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  .af-code-file__header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: var(--bg-storage);
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  .af-code-file__body {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.5;
-    padding: 16px;
-    background: var(--bg-card);
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 400px;
-    overflow: auto;
-    color: var(--text-secondary);
-  }
-
-===================================================================
-DIRECTORY TREE — .af-dir-tree
-===================================================================
-
-  .af-dir-tree {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.7;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    overflow-x: auto;
-    white-space: pre;
-    color: var(--text-secondary);
-  }
-
-  .af-dir-tree .hl { color: #00d4ff; font-weight: 600; }
-  .af-dir-tree .ann { color: var(--text-dim); font-size: 11px; font-style: italic; }
-
-===================================================================
-TAGS / BADGES — .af-tag
-===================================================================
-
-  .af-tag {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 500;
-    padding: 2px 7px;
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .af-tag--cyan    { background: rgba(0,212,255,0.12);  color: #00d4ff; }
-  .af-tag--orange  { background: rgba(255,107,53,0.12); color: #ff6b35; }
-  .af-tag--purple  { background: rgba(167,139,250,0.12);color: #a78bfa; }
-  .af-tag--yellow  { background: rgba(232,184,75,0.12); color: #e8b84b; }
-  .af-tag--green   { background: rgba(63,185,80,0.12);  color: #3fb950; }
-
-===================================================================
-STATUS INDICATORS — .af-status
-===================================================================
-
-  .af-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
-  }
-
-  .af-status--match   { background: rgba(63,185,80,0.1);  color: #3fb950; }
-  .af-status--gap     { background: rgba(248,81,73,0.1);  color: #f85149; }
-  .af-status--warn    { background: rgba(240,136,62,0.1); color: #f0883e; }
-  .af-status--info    { background: rgba(0,212,255,0.1);  color: #00d4ff; }
-
-===================================================================
-COLLAPSIBLE SECTIONS — .af-collapsible
-===================================================================
-
-  details.af-collapsible {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 16px;
-  }
-
-  details.af-collapsible summary {
-    padding: 14px 20px;
-    background: var(--bg-card);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-primary);
-    transition: background 0.15s ease;
-  }
-
-  details.af-collapsible summary:hover {
-    background: var(--bg-storage);
-  }
-
-  details.af-collapsible summary::-webkit-details-marker { display: none; }
-
-  details.af-collapsible summary::before {
-    content: '▸';
-    font-size: 11px;
-    color: var(--text-dim);
-    transition: transform 0.15s ease;
-  }
-
-  details.af-collapsible[open] summary::before {
-    transform: rotate(90deg);
-  }
-
-  details.af-collapsible .af-collapsible__body {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-  }
-
-===================================================================
-ENTRANCE ANIMATIONS — REPORT SECTIONS
-===================================================================
-
-These fire once on page load (staggered via --i).
-They coexist with the phase engine, which runs in the
-animated diagram section only.
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeScale {
-    from { opacity: 0; transform: scale(0.92); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-
-===================================================================
-RESPONSIVE BREAKPOINT
-===================================================================
-
-  @media (max-width: 768px) {
-    body.report-mode .report-wrap { padding: 24px 16px; }
-    .af-kpi-row { grid-template-columns: 1fr 1fr; }
-    .af-data-table { font-size: 12px; }
-    .af-data-table th,
-    .af-data-table td { padding: 10px 12px; }
-  }
-
-===================================================================
-CSS PIPELINE — DATA FLOW VISUALIZATION
-===================================================================
-
-When a simple CSS pipeline is preferred over Mermaid (e.g., for
-linear flows with ≤6 steps), use this pattern:
-
-  .af-pipeline {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    margin-bottom: 32px;
-  }
-
-  .af-pipeline__step {
-    flex: 1;
-    min-width: 120px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 12px;
-    text-align: center;
-  }
-
-  .af-pipeline__step-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-
-  .af-pipeline__step-detail {
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.4;
-  }
-
-  .af-pipeline__arrow {
-    display: flex;
-    align-items: center;
-    padding: 0 6px;
-    color: var(--border);
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  @media (max-width: 768px) {
-    .af-pipeline { flex-direction: column; gap: 8px; }
-    .af-pipeline__arrow { display: none; }
-  }
-
-===================================================================
-MERMAID CONTAINER — OPTIONAL CDN
-===================================================================
-
-When the report includes a Mermaid diagram (sequence, ER, state),
-add these classes. Only include Mermaid CDN when this section
-is present in the report.
-
-  CDN import (place at end of <body>, before closing </body>):
-
-    <script type="module">
-      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-      const isDark = !document.body.classList.contains('light');
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: 'base',
-        themeVariables: {
-          primaryColor: isDark ? '#0d2847' : '#e0f2fe',
-          primaryBorderColor: isDark ? '#00d4ff' : '#0891b2',
-          primaryTextColor: isDark ? '#e6edf3' : '#1a1a2e',
-          lineColor: isDark ? '#4a5568' : '#94a3b8',
-          fontSize: '16px',
-          fontFamily: 'var(--font-body)',
-        }
-      });
-    </script>
-
-  CSS container:
-
-    .af-mermaid-wrap {
-      position: relative;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 32px 24px;
-      overflow: auto;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 300px;
-      margin-bottom: 32px;
-    }
-
-    .af-mermaid-wrap .mermaid {
-      font-family: var(--font-body);
-    }
-
-  Never use .node as a CSS class — Mermaid uses it internally.
