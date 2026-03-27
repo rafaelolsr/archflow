@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>[System Name] — Architecture Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;400;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ── RESET ── */
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  /* ── THEME VARIABLES ── */
+  :root {
+    --font-sans:'IBM Plex Sans',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono','Fira Code',monospace;
+    --bg-body:#080c10; --bg-card:#0d1117; --bg-storage:#0a0f14;
+    --border:#21262d; --border-subtle:#30363d; --border-banner:#333;
+    --text-primary:#e6edf3; --text-secondary:#c9d1d9;
+    --text-muted:#8b949e; --text-dim:#4a5568;
+    --shimmer:white; --shadow-alpha:44;
+  }
+  body.light {
+    --bg-body:#f4f5f7; --bg-card:#ffffff; --bg-storage:#f0f1f3;
+    --border:#d0d5dd; --border-subtle:#e2e5ea; --border-banner:#c0c5cc;
+    --text-primary:#1a1a2e; --text-secondary:#333344;
+    --text-muted:#666677; --text-dim:#8b8b9e;
+    --shimmer:#333; --shadow-alpha:22;
+  }
+  html { height:100%; }
+  body {
+    height:100%; background:var(--bg-body); color:var(--text-secondary);
+    font-family:var(--font-sans); line-height:1.5;
+  }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position:fixed; top:16px; left:16px; z-index:200;
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:20px; padding:6px 12px; cursor:pointer;
+    font-size:14px; color:var(--text-muted);
+    transition:border-color 0.3s,background 0.3s;
+  }
+  .theme-toggle:hover { border-color:var(--text-muted); }
+
+  /* ── SLIDE ENGINE ── */
+  .deck {
+    height:100dvh; overflow-y:auto;
+    scroll-snap-type:y mandatory; scroll-behavior:smooth;
+  }
+  .slide {
+    height:100dvh; scroll-snap-align:start; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:clamp(32px,5vh,80px) clamp(24px,5vw,120px);
+    position:relative;
+    /* visibility transition */
+    opacity:0; transform:translateY(30px) scale(0.98);
+    transition:opacity 0.5s ease,transform 0.5s ease;
+  }
+  .slide.visible { opacity:1; transform:translateY(0) scale(1); }
+  @media (prefers-reduced-motion:reduce) {
+    .slide { opacity:1; transform:none; transition:none; }
+  }
+
+  /* ── NAVIGATION CHROME ── */
+  .slide-progress {
+    position:fixed; top:0; left:0; z-index:100;
+    height:3px; background:#00d4ff; width:0;
+    transition:width 0.3s ease;
+  }
+  .slide-nav {
+    position:fixed; right:16px; top:50%; transform:translateY(-50%); z-index:100;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .slide-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--border); cursor:pointer;
+    transition:background 0.2s,transform 0.2s;
+    border:none; padding:0;
+  }
+  .slide-dot.active { background:#00d4ff; transform:scale(1.5); }
+  .slide-counter {
+    position:fixed; bottom:16px; right:16px; z-index:100;
+    font-family:var(--font-mono); font-size:12px; color:var(--text-dim);
+  }
+
+  /* ── af-card COMPONENT ── */
+  .af-card {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:10px; padding:20px 24px; position:relative;
+  }
+  .af-card--hero {
+    background:color-mix(in srgb,var(--bg-card) 92%,#00d4ff 8%);
+    box-shadow:0 4px 20px rgba(0,0,0,0.08),0 1px 3px rgba(0,0,0,0.04);
+    border-color:color-mix(in srgb,var(--border) 50%,#00d4ff 50%);
+  }
+  .af-card--elevated {
+    background:var(--bg-card);
+    box-shadow:0 2px 8px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  }
+  .af-card--accent-cyan   { border-left:3px solid #00d4ff; }
+  .af-card--accent-orange { border-left:3px solid #ff6b35; }
+  .af-card--accent-purple { border-left:3px solid #a78bfa; }
+  .af-card--accent-yellow { border-left:3px solid #e8b84b; }
+  .af-card--accent-green  { border-left:3px solid #3fb950; }
+
+  /* ── af-kpi COMPONENT ── */
+  .af-kpi {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:10px; padding:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .af-kpi__value {
+    font-size:36px; font-weight:700; letter-spacing:-1px;
+    line-height:1.1; font-variant-numeric:tabular-nums;
+    color:var(--text-primary);
+  }
+  .af-kpi__label {
+    font-family:var(--font-mono); font-size:10px; font-weight:600;
+    text-transform:uppercase; letter-spacing:1.5px; color:var(--text-dim);
+    margin-top:6px;
+  }
+
+  /* ── af-tag COMPONENT ── */
+  .af-tag {
+    font-family:var(--font-mono); font-size:10px; font-weight:500;
+    padding:2px 7px; border-radius:4px; display:inline-flex;
+    align-items:center; gap:4px;
+  }
+  .af-tag--cyan   { background:rgba(0,212,255,0.12);  color:#00d4ff; }
+  .af-tag--orange { background:rgba(255,107,53,0.12); color:#ff6b35; }
+  .af-tag--purple { background:rgba(167,139,250,0.12);color:#a78bfa; }
+  .af-tag--yellow { background:rgba(232,184,75,0.12); color:#e8b84b; }
+  .af-tag--green  { background:rgba(63,185,80,0.12);  color:#3fb950; }
+
+  /* ── DIAGRAM CSS (horizontal-pipeline default) ── */
+  .diagram-section { font-family:var(--font-mono); }
+  .phase-banner {
+    background:var(--bg-card); border:1px solid var(--border-banner); border-radius:6px;
+    padding:10px 24px; margin-bottom:32px; font-size:11px;
+    min-width:400px; max-width:700px; text-align:center;
+    transition:color 0.4s,border-color 0.4s;
+  }
+  .component {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+    padding:14px; text-align:center;
+    transition:border-color 0.4s,box-shadow 0.4s; min-width:130px;
+  }
+  .component-icon  { font-size:22px; margin-bottom:6px; }
+  .component-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
+  .component-sub   { font-size:8px; color:var(--text-dim); margin-bottom:6px; line-height:1.4; }
+  .component-body  { font-size:8px; color:var(--text-muted); line-height:1.7; }
+  .arrow-col  { flex:1; padding:0 8px; display:flex; flex-direction:column; gap:8px; }
+  .arrow-wrap { display:flex; flex-direction:column; }
+  .arrow-line {
+    height:2px; background:var(--border); border-radius:1px;
+    position:relative; overflow:hidden; transition:background 0.4s;
+  }
+  .arrow-line .shimmer {
+    display:none; position:absolute; top:0; left:-20%;
+    width:20%; height:100%; background:var(--shimmer); opacity:0.85;
+    animation:slide 0.7s linear infinite;
+  }
+  .arrow-line.active .shimmer { display:block; }
+  .arrow-lbl       { text-align:center; font-size:9px; color:var(--text-dim); margin-top:3px; }
+  .arrow-lbl.above { margin-top:0; margin-bottom:3px; }
+  .vert-line { width:2px; background:var(--border); transition:background 0.4s; margin:0 auto; }
+  .storage-pipeline {
+    display:flex; align-items:center; gap:0;
+    background:var(--bg-storage); border:1px solid var(--border);
+    border-radius:12px; padding:14px 12px; position:relative;
+  }
+  .storage-title {
+    position:absolute; top:-10px; left:16px;
+    background:var(--bg-body); padding:0 8px;
+    font-size:9px; letter-spacing:3px; color:#e8b84b; text-transform:uppercase;
+  }
+  .storage-item {
+    flex:1; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:8px; padding:10px; text-align:center; min-width:80px;
+    transition:border-color 0.4s,box-shadow 0.4s;
+  }
+  .storage-sep { width:16px; text-align:center; font-size:10px; color:var(--border); flex-shrink:0; }
+  @keyframes slide { from { left:-20%; } to { left:120%; } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-height:640px) {
+    .slide { padding:16px clamp(16px,4vw,60px); }
+    .phase-banner { min-width:auto; padding:8px 16px; margin-bottom:16px; }
+    .component { padding:10px; min-width:100px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">&#9684;</button>
+
+<div class="deck">
+
+<!-- ================================================================
+     SLIDE 1 — TITLE
+     ================================================================ -->
+<section class="slide slide--title">
+  <div style="text-align:center;max-width:800px;">
+    <div style="font-family:var(--font-mono);font-size:11px;
+         letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;
+         margin-bottom:16px;">ARCHITECTURE OVERVIEW</div>
+    <h1 style="font-size:clamp(48px,10vw,96px);font-weight:700;
+        color:var(--text-primary);letter-spacing:-2px;line-height:1.05;
+        margin-bottom:16px;">[System Name]</h1>
+    <p style="font-size:clamp(16px,2.2vw,22px);color:var(--text-muted);
+       line-height:1.5;max-width:600px;margin:0 auto 24px;">
+      [One-line system description]
+    </p>
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-dim);">
+      Generated [DATE]
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SLIDE 2 — ANIMATED ARCHITECTURE DIAGRAM (HERO)
+     ================================================================ -->
+<section class="slide slide--diagram" id="diagram-slide">
+  <div class="diagram-section" style="width:100%;max-width:1100px;">
+    <div class="phase-banner" id="phase-banner">&#9654; Waiting...</div>
+
+    <!-- MAIN ROW -->
+    <div style="display:flex;align-items:center;width:100%;max-width:1000px;margin:0 auto;">
+
+      <div class="component" id="c-input">
+        <div class="component-icon">[ICON]</div>
+        <div class="component-label" style="color:#00d4ff">[INPUT]</div>
+        <div class="component-sub">[entry_point.py]</div>
+        <div class="component-body">[method()]<br>[what it does]</div>
+      </div>
+
+      <div class="arrow-col">
+        <div class="arrow-wrap">
+          <div class="arrow-line" id="arr-1"><div class="shimmer"></div></div>
+          <div class="arrow-lbl">[data label] &rarr;</div>
+        </div>
+        <div class="arrow-wrap">
+          <div class="arrow-lbl above">&larr; [response label]</div>
+          <div class="arrow-line" id="arr-1b"></div>
+        </div>
+      </div>
+
+      <div class="component" id="c-orch">
+        <div class="component-icon">[ICON]</div>
+        <div class="component-label" style="color:#ff6b35">[ORCHESTRATOR]</div>
+        <div class="component-sub">[orchestrator.py]</div>
+        <div class="component-body">[run()]<br>[what it does]</div>
+      </div>
+
+      <div class="arrow-col">
+        <div class="arrow-wrap">
+          <div class="arrow-line" id="arr-2"><div class="shimmer"></div></div>
+          <div class="arrow-lbl">[data label] &rarr;</div>
+        </div>
+      </div>
+
+      <div class="component" id="c-proc">
+        <div class="component-icon">[ICON]</div>
+        <div class="component-label" style="color:#a78bfa">[PROCESSOR]</div>
+        <div class="component-sub">[processor.py]</div>
+        <div class="component-body">[process()]<br>[what it does]</div>
+      </div>
+
+      <div class="arrow-col">
+        <div class="arrow-wrap">
+          <div class="arrow-line" id="arr-3"><div class="shimmer"></div></div>
+          <div class="arrow-lbl">result &rarr;</div>
+        </div>
+      </div>
+
+      <div class="component" id="c-output">
+        <div class="component-icon">[ICON]</div>
+        <div class="component-label" style="color:#3fb950">[OUTPUT]</div>
+        <div class="component-sub">[output.py]</div>
+        <div class="component-body">[serialize()]<br>[what it returns]</div>
+      </div>
+
+    </div>
+
+    <!-- VERTICAL CONNECTORS -->
+    <div style="display:flex;width:100%;max-width:1000px;margin:0 auto;">
+      <div style="min-width:130px;"></div>
+      <div style="flex:1;"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
+        <div class="vert-line" id="vl-orch" style="height:24px;"></div>
+      </div>
+      <div style="flex:1;"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
+        <div class="vert-line" id="vl-proc" style="height:24px;"></div>
+      </div>
+      <div style="flex:1;"></div>
+      <div style="min-width:130px;"></div>
+    </div>
+
+    <!-- STORAGE ROW -->
+    <div style="display:flex;align-items:flex-start;width:100%;max-width:1000px;margin:0 auto;">
+      <div style="min-width:130px;"></div>
+      <div class="storage-pipeline" style="flex:1;margin:0 8px;">
+        <div class="storage-title">EXTERNAL SERVICES</div>
+        <div class="storage-item" id="s-1">
+          <div style="font-size:16px;margin-bottom:4px;">[ICON]</div>
+          <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 1]</div>
+          <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+        </div>
+        <div class="storage-sep">&middot;</div>
+        <div class="storage-item" id="s-2">
+          <div style="font-size:16px;margin-bottom:4px;">[ICON]</div>
+          <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 2]</div>
+          <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+        </div>
+        <div class="storage-sep">&middot;</div>
+        <div class="storage-item" id="s-3">
+          <div style="font-size:16px;margin-bottom:4px;">[ICON]</div>
+          <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 3]</div>
+          <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+        </div>
+      </div>
+      <div style="min-width:130px;"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================================================================
+     SLIDE 3 — COMPONENTS
+     ================================================================ -->
+<section class="slide slide--content">
+  <div style="width:100%;max-width:900px;">
+    <div style="font-family:var(--font-mono);font-size:11px;
+         letter-spacing:2px;color:#a78bfa;text-transform:uppercase;
+         margin-bottom:24px;">COMPONENTS</div>
+
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+         gap:16px;margin-bottom:32px;">
+      <div class="af-kpi">
+        <div class="af-kpi__value">[N]</div>
+        <div class="af-kpi__label">Components</div>
+      </div>
+      <div class="af-kpi">
+        <div class="af-kpi__value">[N]</div>
+        <div class="af-kpi__label">Services</div>
+      </div>
+      <div class="af-kpi">
+        <div class="af-kpi__value">[N]</div>
+        <div class="af-kpi__label">Data Flows</div>
+      </div>
+      <div class="af-kpi">
+        <div class="af-kpi__value">[LANG]</div>
+        <div class="af-kpi__label">Language</div>
+      </div>
+    </div>
+
+    <!-- Component grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="af-card">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Component Name]</div>
+        <div style="font-size:14px;color:var(--text-muted);">[Role]</div>
+      </div>
+      <div class="af-card">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Component Name]</div>
+        <div style="font-size:14px;color:var(--text-muted);">[Role]</div>
+      </div>
+      <div class="af-card">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Component Name]</div>
+        <div style="font-size:14px;color:var(--text-muted);">[Role]</div>
+      </div>
+      <div class="af-card">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Component Name]</div>
+        <div style="font-size:14px;color:var(--text-muted);">[Role]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SLIDE 4 — DATA FLOW
+     ================================================================ -->
+<section class="slide slide--content">
+  <div style="width:100%;max-width:900px;">
+    <div style="font-family:var(--font-mono);font-size:11px;
+         letter-spacing:2px;color:#00d4ff;text-transform:uppercase;
+         margin-bottom:24px;">DATA FLOW</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="font-family:var(--font-mono);font-size:28px;
+             font-weight:200;color:#00d4ff;min-width:40px;">01</div>
+        <div>
+          <div style="font-weight:600;font-size:18px;color:var(--text-primary);
+               margin-bottom:4px;">[Phase Title]</div>
+          <div style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+            [Phase description with real code references]
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="font-family:var(--font-mono);font-size:28px;
+             font-weight:200;color:#00d4ff;min-width:40px;">02</div>
+        <div>
+          <div style="font-weight:600;font-size:18px;color:var(--text-primary);
+               margin-bottom:4px;">[Phase Title]</div>
+          <div style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+            [Phase description with real code references]
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="font-family:var(--font-mono);font-size:28px;
+             font-weight:200;color:#00d4ff;min-width:40px;">03</div>
+        <div>
+          <div style="font-weight:600;font-size:18px;color:var(--text-primary);
+               margin-bottom:4px;">[Phase Title]</div>
+          <div style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+            [Phase description with real code references]
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="font-family:var(--font-mono);font-size:28px;
+             font-weight:200;color:#00d4ff;min-width:40px;">04</div>
+        <div>
+          <div style="font-weight:600;font-size:18px;color:var(--text-primary);
+               margin-bottom:4px;">[Phase Title]</div>
+          <div style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+            [Phase description with real code references]
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="font-family:var(--font-mono);font-size:28px;
+             font-weight:200;color:#00d4ff;min-width:40px;">05</div>
+        <div>
+          <div style="font-weight:600;font-size:18px;color:var(--text-primary);
+               margin-bottom:4px;">[Phase Title]</div>
+          <div style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+            [Phase description with real code references]
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SLIDE 5 — EXTERNAL SERVICES
+     ================================================================ -->
+<section class="slide slide--content">
+  <div style="width:100%;max-width:900px;">
+    <div style="font-family:var(--font-mono);font-size:11px;
+         letter-spacing:2px;color:#e8b84b;text-transform:uppercase;
+         margin-bottom:24px;">EXTERNAL SERVICES</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+      <div class="af-card af-card--accent-yellow">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Service Name]</div>
+        <span class="af-tag af-tag--yellow">[Type]</span>
+        <p style="font-size:14px;color:var(--text-muted);margin-top:8px;">
+          [Purpose]
+        </p>
+      </div>
+      <div class="af-card af-card--accent-yellow">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Service Name]</div>
+        <span class="af-tag af-tag--yellow">[Type]</span>
+        <p style="font-size:14px;color:var(--text-muted);margin-top:8px;">
+          [Purpose]
+        </p>
+      </div>
+      <div class="af-card af-card--accent-yellow">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:4px;">[Service Name]</div>
+        <span class="af-tag af-tag--yellow">[Type]</span>
+        <p style="font-size:14px;color:var(--text-muted);margin-top:8px;">
+          [Purpose]
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SLIDE 6 — INSIGHTS
+     ================================================================ -->
+<section class="slide slide--content">
+  <div style="width:100%;max-width:900px;">
+    <div style="font-family:var(--font-mono);font-size:11px;
+         letter-spacing:2px;color:#3fb950;text-transform:uppercase;
+         margin-bottom:24px;">INSIGHTS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="af-card af-card--elevated">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:6px;">[Insight Title]</div>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+          [Non-obvious observation]
+        </p>
+      </div>
+      <div class="af-card af-card--elevated">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:6px;">[Insight Title]</div>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+          [Non-obvious observation]
+        </p>
+      </div>
+      <div class="af-card af-card--elevated">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:6px;">[Insight Title]</div>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+          [Non-obvious observation]
+        </p>
+      </div>
+      <div class="af-card af-card--elevated">
+        <div style="font-weight:600;font-size:16px;color:var(--text-primary);
+             margin-bottom:6px;">[Insight Title]</div>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.5;">
+          [Non-obvious observation]
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SLIDE 7 — SUMMARY
+     ================================================================ -->
+<section class="slide slide--title">
+  <div style="text-align:center;max-width:700px;">
+    <div style="font-family:var(--font-mono);font-size:11px;
+         letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;
+         margin-bottom:16px;">SUMMARY</div>
+    <h2 style="font-size:clamp(28px,5vw,48px);font-weight:700;
+        color:var(--text-primary);letter-spacing:-1px;line-height:1.15;
+        margin-bottom:24px;">[Key Takeaway]</h2>
+    <p style="font-size:clamp(14px,2vw,18px);color:var(--text-muted);
+       line-height:1.6;">
+      [2-3 sentence architecture summary — what makes this system
+      interesting, what its core strength or pattern is.]
+    </p>
+    <div style="margin-top:32px;font-family:var(--font-mono);
+         font-size:11px;color:var(--text-dim);">
+      Generated by archflow
+    </div>
+  </div>
+</section>
+
+</div><!-- .deck -->
+
+<script>
+  /* ── Theme persistence ── */
+  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
+
+  /* ── SlideEngine ── */
+  class SlideEngine {
+    constructor() {
+      this.deck = document.querySelector('.deck');
+      this.slides = [...document.querySelectorAll('.slide')];
+      this.current = 0;
+      this.buildChrome();
+      this.observe();
+      this.bindKeys();
+      this.bindTouch();
+    }
+
+    buildChrome() {
+      const bar = document.createElement('div');
+      bar.className = 'slide-progress';
+      bar.id = 'slide-progress';
+      document.body.appendChild(bar);
+
+      const nav = document.createElement('div');
+      nav.className = 'slide-nav';
+      this.slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'slide-dot';
+        dot.addEventListener('click', () => this.goTo(i));
+        nav.appendChild(dot);
+      });
+      document.body.appendChild(nav);
+      this.dots = [...nav.querySelectorAll('.slide-dot')];
+
+      const counter = document.createElement('div');
+      counter.className = 'slide-counter';
+      counter.id = 'slide-counter';
+      document.body.appendChild(counter);
+
+      this.update(0);
+    }
+
+    observe() {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = this.slides.indexOf(entry.target);
+            if (idx >= 0) this.update(idx);
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.5 });
+      this.slides.forEach(s => observer.observe(s));
+    }
+
+    update(idx) {
+      this.current = idx;
+      const pct = ((idx + 1) / this.slides.length) * 100;
+      document.getElementById('slide-progress').style.width = pct + '%';
+      document.getElementById('slide-counter').textContent =
+        `${idx + 1} / ${this.slides.length}`;
+      this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    goTo(idx) {
+      this.slides[idx]?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    bindKeys() {
+      document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault();
+          this.goTo(Math.min(this.current + 1, this.slides.length - 1));
+        }
+        if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault();
+          this.goTo(Math.max(this.current - 1, 0));
+        }
+        if (e.key === 'Home') { e.preventDefault(); this.goTo(0); }
+        if (e.key === 'End') { e.preventDefault(); this.goTo(this.slides.length - 1); }
+      });
+    }
+
+    bindTouch() {
+      let startY = 0;
+      this.deck.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+      this.deck.addEventListener('touchend', e => {
+        const diff = startY - e.changedTouches[0].clientY;
+        if (Math.abs(diff) > 50) {
+          this.goTo(diff > 0
+            ? Math.min(this.current + 1, this.slides.length - 1)
+            : Math.max(this.current - 1, 0));
+        }
+      });
+    }
+  }
+
+  new SlideEngine();
+
+  /* ── Phase Engine (scoped to diagram slide) ── */
+  const diagramSlide = document.getElementById('diagram-slide');
+
+  const phases = [
+    "[Phase 0: what triggers the system]",
+    "[Phase 1: orchestrator receives and routes]",
+    "[Phase 2: external service consulted]",
+    "[Phase 3: processor runs core logic]",
+    "[Phase 4: result returned to caller]",
+  ];
+  const phaseColors = ["#00d4ff","#ff6b35","#e8b84b","#a78bfa","#3fb950"];
+  let phase = 0;
+
+  const borderColor = () => getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const shadowAlpha = () => getComputedStyle(document.documentElement).getPropertyValue('--shadow-alpha').trim();
+
+  function litComponent(id, color) {
+    const el = diagramSlide.querySelector('#' + id);
+    if (!el) return;
+    el.style.borderColor = color;
+    el.style.boxShadow = `0 0 18px ${color}${shadowAlpha()}`;
+  }
+  function litArrow(id, color, shimmer = false) {
+    const el = diagramSlide.querySelector('#' + id);
+    if (!el) return;
+    el.style.background = color;
+    if (shimmer) el.classList.add('active');
+  }
+  function litStorage(id) {
+    const el = diagramSlide.querySelector('#' + id);
+    if (!el) return;
+    el.style.borderColor = '#e8b84b';
+    el.style.boxShadow = '0 0 14px #e8b84b33';
+  }
+  function resetAll() {
+    const bc = borderColor();
+    diagramSlide.querySelectorAll('.component,.storage-item').forEach(el => {
+      el.style.borderColor = bc; el.style.boxShadow = 'none';
+    });
+    diagramSlide.querySelectorAll('.arrow-line,.vert-line').forEach(el => {
+      el.style.background = bc; el.classList.remove('active');
+    });
+  }
+  function applyPhase() {
+    const banner = diagramSlide.querySelector('#phase-banner');
+    banner.textContent = '\u25b6 ' + phases[phase];
+    banner.style.color = phaseColors[phase];
+    banner.style.borderColor = phaseColors[phase] + '55';
+    resetAll();
+    if (phase === 0) { litComponent('c-input', phaseColors[0]); litArrow('arr-1', phaseColors[0], true); }
+    if (phase === 1) { litComponent('c-orch',  phaseColors[1]); litArrow('vl-orch', phaseColors[1]); }
+    if (phase === 2) { litArrow('vl-orch', phaseColors[2]); litStorage('s-1'); litStorage('s-2'); }
+    if (phase === 3) { litComponent('c-proc',  phaseColors[3]); litArrow('arr-2', phaseColors[3], true); }
+    if (phase === 4) { litComponent('c-output', phaseColors[4]); litArrow('arr-3', phaseColors[4], true); litArrow('arr-1b', phaseColors[4]); }
+  }
+  applyPhase();
+  setInterval(() => { phase = (phase + 1) % phases.length; applyPhase(); }, 1500);
+</script>
+</body>
+</html>

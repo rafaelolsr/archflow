@@ -180,3 +180,66 @@ heavy transform), add a blinking indicator while active:
   JS — toggle in applyPhase():
     document.getElementById("proc-llm")
       .classList.toggle("visible", phase === 2);
+
+===================================================================
+ENTRANCE ANIMATIONS — REPORT SECTIONS
+===================================================================
+
+In report mode, two animation systems coexist independently:
+
+  1. PHASE ENGINE (this file, above)
+     → Runs via setInterval in the animated diagram hero section
+     → Controls component glow, arrow shimmer, phase banner
+     → Loops continuously
+
+  2. ENTRANCE ANIMATIONS (CSS only)
+     → Fire once on page load for report sections
+     → Staggered via --i CSS variable per element
+     → Defined in design-system.md (fadeUp, fadeScale keyframes)
+
+These do NOT conflict. The phase engine targets elements by ID
+inside the diagram section (.component, .agent-card, .arrow-line,
+.storage-item). Entrance animations target .af-section and .af-kpi
+elements that live OUTSIDE the diagram section.
+
+  Stagger index assignments (--i values):
+
+    Section          --i    Animation
+    Header            0     fadeUp
+    Executive Summary 1     fadeUp
+    KPI cards       2-6     fadeScale
+    Diagram hero      7     fadeUp
+    Component table   8     fadeUp
+    Data flow         9     fadeUp
+    External services 10    fadeUp
+    Insights          11    fadeUp
+    Code references   12    fadeUp
+
+  How to apply:
+
+    <section class="af-section" style="--i: 8" id="components">
+      ...
+    </section>
+
+  The animated diagram section (--i: 7) gets the fadeUp entrance
+  like other sections, but its internal components are controlled
+  by the phase engine, not CSS animations.
+
+===================================================================
+REDUCED MOTION
+===================================================================
+
+Both animation systems respect prefers-reduced-motion:
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+This disables both entrance animations AND the phase engine's
+CSS transitions (border-color, box-shadow). The setInterval
+still runs but visual changes are instantaneous rather than
+animated — content remains visible and functional.

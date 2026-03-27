@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>[System Name] — Architecture Report</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg-body:#080c10; --bg-card:#0d1117; --bg-storage:#0a0f14;
+    --bg-sidebar:#0a0e14; --bg-section:#0d1117;
+    --border:#21262d; --border-subtle:#30363d; --border-banner:#333;
+    --text-primary:#e6edf3; --text-secondary:#c9d1d9;
+    --text-muted:#8b949e; --text-dim:#4a5568;
+    --shimmer:white; --shadow-alpha:44;
+    --accent-blue:#00d4ff; --accent-orange:#ff6b35;
+    --accent-purple:#a78bfa; --accent-gold:#e8b84b;
+    --accent-green:#3fb950; --accent-red:#f85149;
+  }
+  body.light {
+    --bg-body:#f4f5f7; --bg-card:#ffffff; --bg-storage:#f0f1f3;
+    --bg-sidebar:#ebedf0; --bg-section:#ffffff;
+    --border:#d0d5dd; --border-subtle:#e2e5ea; --border-banner:#c0c5cc;
+    --text-primary:#1a1a2e; --text-secondary:#333344;
+    --text-muted:#666677; --text-dim:#8b8b9e;
+    --shimmer:#333; --shadow-alpha:22;
+  }
+  body {
+    min-height:100vh; background:var(--bg-body);
+    font-family:'JetBrains Mono','Fira Code',monospace;
+    display:flex; color:var(--text-secondary);
+  }
+
+  /* ── TOC Sidebar ── */
+  .toc-sidebar {
+    position:fixed; top:0; left:0; width:220px; height:100vh;
+    background:var(--bg-sidebar); border-right:1px solid var(--border);
+    padding:24px 16px; overflow-y:auto; z-index:50;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .toc-title {
+    font-size:10px; letter-spacing:3px; color:var(--text-dim);
+    text-transform:uppercase; margin-bottom:12px; padding-bottom:8px;
+    border-bottom:1px solid var(--border);
+  }
+  .toc-link {
+    display:block; padding:6px 10px; border-radius:6px;
+    font-size:10px; color:var(--text-muted); text-decoration:none;
+    transition:background 0.2s,color 0.2s; line-height:1.5;
+  }
+  .toc-link:hover { background:var(--bg-card); color:var(--text-primary); }
+  .toc-link.active { background:var(--bg-card); color:var(--accent-blue); }
+  .toc-num { color:var(--text-dim); margin-right:6px; }
+
+  /* ── Theme Toggle ── */
+  .theme-toggle {
+    position:fixed; top:16px; right:16px; z-index:100;
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:20px; padding:6px 12px; cursor:pointer;
+    font-size:14px; color:var(--text-muted);
+    transition:border-color 0.3s,background 0.3s;
+  }
+  .theme-toggle:hover { border-color:var(--text-muted); }
+
+  /* ── Main Content ── */
+  .main-content {
+    margin-left:220px; flex:1; padding:32px 40px 64px;
+    max-width:1100px; width:100%;
+  }
+
+  /* ── Report Sections ── */
+  .report-section {
+    background:var(--bg-section); border:1px solid var(--border);
+    border-radius:12px; padding:28px 32px; margin-bottom:24px;
+  }
+  .section-number {
+    font-size:9px; letter-spacing:3px; color:var(--text-dim);
+    text-transform:uppercase; margin-bottom:4px;
+  }
+  .section-title {
+    font-size:18px; font-weight:700; color:var(--text-primary);
+    letter-spacing:-0.3px; margin-bottom:16px; padding-bottom:12px;
+    border-bottom:1px solid var(--border);
+  }
+  .section-body {
+    font-size:11px; color:var(--text-muted); line-height:1.8;
+  }
+  .section-body p { margin-bottom:12px; }
+
+  /* ── Header Section ── */
+  .report-header {
+    text-align:center; padding:40px 32px;
+  }
+  .report-header .title-sub {
+    font-size:10px; letter-spacing:4px; color:var(--text-dim);
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .report-header .title-main {
+    font-size:24px; font-weight:700; color:var(--text-primary);
+    letter-spacing:-0.5px; margin-bottom:8px;
+  }
+  .report-header .title-meta {
+    font-size:10px; color:var(--text-dim); letter-spacing:1px;
+  }
+
+  /* ── KPI Row ── */
+  .kpi-row { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  .kpi-card {
+    flex:1; min-width:120px; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:8px; padding:14px; text-align:center;
+  }
+  .kpi-value { font-size:20px; font-weight:700; margin-bottom:4px; }
+  .kpi-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+
+  /* ── Component Directory Table ── */
+  .dir-table { width:100%; border-collapse:collapse; margin-top:8px; }
+  .dir-table th {
+    text-align:left; font-size:9px; letter-spacing:2px; color:var(--text-dim);
+    text-transform:uppercase; padding:8px 12px; border-bottom:1px solid var(--border);
+  }
+  .dir-table td {
+    font-size:10px; color:var(--text-muted); padding:8px 12px;
+    border-bottom:1px solid var(--border-subtle);
+  }
+  .dir-table tr:last-child td { border-bottom:none; }
+  .dir-badge {
+    display:inline-block; padding:2px 8px; border-radius:4px;
+    font-size:8px; font-weight:700; letter-spacing:1px;
+    border:1px solid;
+  }
+
+  /* ── Diagram Section ── */
+  .diagram-wrapper {
+    display:flex; flex-direction:column; align-items:center;
+    padding:16px 0;
+  }
+  .phase-banner {
+    background:var(--bg-card); border:1px solid var(--border-banner); border-radius:6px;
+    padding:10px 24px; margin-bottom:32px; font-size:11px;
+    min-width:400px; max-width:700px; text-align:center;
+    transition:color 0.4s,border-color 0.4s;
+  }
+  .component {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
+    padding:14px; text-align:center;
+    transition:border-color 0.4s,box-shadow 0.4s; min-width:130px;
+  }
+  .component-icon  { font-size:22px; margin-bottom:6px; }
+  .component-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
+  .component-sub   { font-size:8px; color:var(--text-dim); margin-bottom:6px; line-height:1.4; }
+  .component-body  { font-size:8px; color:var(--text-muted); line-height:1.7; }
+  .agent-card {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:8px; padding:10px 12px; text-align:center;
+    flex:1; transition:border-color 0.4s,box-shadow 0.4s;
+  }
+  .arrow-col  { flex:1; padding:0 8px; display:flex; flex-direction:column; gap:8px; }
+  .arrow-wrap { display:flex; flex-direction:column; }
+  .arrow-line {
+    height:2px; background:var(--border); border-radius:1px;
+    position:relative; overflow:hidden; transition:background 0.4s;
+  }
+  .arrow-line .shimmer {
+    display:none; position:absolute; top:0; left:-20%;
+    width:20%; height:100%; background:var(--shimmer); opacity:0.85;
+    animation:slide 0.7s linear infinite;
+  }
+  .arrow-line.active .shimmer { display:block; }
+  .arrow-lbl       { text-align:center; font-size:9px; color:var(--text-dim); margin-top:3px; }
+  .arrow-lbl.above { margin-top:0; margin-bottom:3px; }
+  .vert-line { width:2px; background:var(--border); transition:background 0.4s; margin:0 auto; }
+  .storage-pipeline {
+    display:flex; align-items:center; gap:0;
+    background:var(--bg-storage); border:1px solid var(--border);
+    border-radius:12px; padding:14px 12px; position:relative;
+  }
+  .storage-title {
+    position:absolute; top:-10px; left:16px;
+    background:var(--bg-body); padding:0 8px;
+    font-size:9px; letter-spacing:3px; color:var(--accent-gold); text-transform:uppercase;
+  }
+  .storage-item {
+    flex:1; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:8px; padding:10px; text-align:center; min-width:80px;
+    transition:border-color 0.4s,box-shadow 0.4s;
+  }
+  .storage-sep { width:16px; text-align:center; font-size:10px; color:var(--border); flex-shrink:0; }
+  .proc-indicator { display:none; font-size:9px; color:#f0883e; margin-top:8px; }
+  .proc-indicator.visible { display:block; animation:blink 0.5s linear infinite; }
+
+  /* ── Data Flow List ── */
+  .flow-list { list-style:none; padding:0; }
+  .flow-list li {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--border-subtle);
+    font-size:10px; color:var(--text-muted);
+  }
+  .flow-list li:last-child { border-bottom:none; }
+  .flow-step {
+    flex-shrink:0; width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; font-weight:700; border:1px solid;
+  }
+
+  /* ── Insights Row ── */
+  .insights { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+  .insight-card {
+    flex:1; min-width:140px; background:var(--bg-card); border:1px solid var(--border);
+    border-radius:8px; padding:10px 16px; text-align:center;
+  }
+  .insight-label { font-size:9px; letter-spacing:2px; margin-bottom:3px; text-transform:uppercase; }
+  .insight-value { font-size:10px; color:var(--text-muted); }
+
+  /* ── Code Reference ── */
+  .code-ref {
+    display:block; padding:8px 12px; margin-bottom:6px;
+    background:var(--bg-storage); border:1px solid var(--border-subtle);
+    border-radius:6px; font-size:10px; color:var(--text-muted);
+    text-decoration:none; transition:border-color 0.2s;
+  }
+  .code-ref:hover { border-color:var(--accent-blue); }
+  .code-ref-path { color:var(--accent-blue); }
+  .code-ref-desc { color:var(--text-dim); margin-left:8px; }
+
+  /* ── Footer ── */
+  .report-footer {
+    text-align:center; padding:20px 32px;
+    font-size:9px; color:var(--text-dim); letter-spacing:1px;
+  }
+
+  @keyframes slide { from { left:-20%; } to { left:120%; } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">&#9684;</button>
+
+<!-- ════════════════════════════════════════════
+     TOC SIDEBAR
+     ════════════════════════════════════════════ -->
+<nav class="toc-sidebar">
+  <div class="toc-title">Table of Contents</div>
+  <a class="toc-link" href="#header"><span class="toc-num">0.</span>Header</a>
+  <a class="toc-link" href="#overview"><span class="toc-num">1.</span>Overview</a>
+  <a class="toc-link" href="#kpis"><span class="toc-num">2.</span>Key Metrics</a>
+  <a class="toc-link" href="#directory"><span class="toc-num">3.</span>Component Directory</a>
+  <a class="toc-link" href="#diagram"><span class="toc-num">4.</span>Architecture Diagram</a>
+  <a class="toc-link" href="#dataflow"><span class="toc-num">5.</span>Data Flow</a>
+  <a class="toc-link" href="#services"><span class="toc-num">6.</span>External Services</a>
+  <a class="toc-link" href="#insights"><span class="toc-num">7.</span>Insights</a>
+  <a class="toc-link" href="#code"><span class="toc-num">8.</span>Code References</a>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     MAIN CONTENT
+     ════════════════════════════════════════════ -->
+<div class="main-content">
+
+<!-- ── 0. Header ── -->
+<div class="report-section report-header" id="header">
+  <div class="title-sub">[SYSTEM CATEGORY]</div>
+  <div class="title-main">[System Name] &middot; Architecture Report</div>
+  <div class="title-meta">Generated [date] &middot; Multi-Agent Hub topology &middot; [N] components</div>
+</div>
+
+<!-- ── 1. Overview ── -->
+<div class="report-section" id="overview">
+  <div class="section-number">Section 1</div>
+  <div class="section-title">Overview</div>
+  <div class="section-body">
+    <p>[High-level description of what the system does, its purpose, and the problem it solves.]</p>
+    <p>[Architecture style rationale: why a multi-agent hub-and-spoke topology was chosen, how the orchestrator dispatches work to specialized agents, and how shared services are consumed.]</p>
+  </div>
+</div>
+
+<!-- ── 2. Key Metrics ── -->
+<div class="report-section" id="kpis">
+  <div class="section-number">Section 2</div>
+  <div class="section-title">Key Metrics</div>
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-blue)">[N]</div>
+      <div class="kpi-label">Components</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-purple)">[N]</div>
+      <div class="kpi-label">Agents</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-gold)">[N]</div>
+      <div class="kpi-label">Shared Services</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-green)">[N]</div>
+      <div class="kpi-label">Source Files</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. Component Directory ── -->
+<div class="report-section" id="directory">
+  <div class="section-number">Section 3</div>
+  <div class="section-title">Component Directory</div>
+  <table class="dir-table">
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Role</th>
+        <th>Source</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>[User / Entry Point]</td>
+        <td>[Triggers the system]</td>
+        <td>[entry_point.py]</td>
+        <td><span class="dir-badge" style="color:var(--accent-blue);border-color:var(--accent-blue)">ENTRY</span></td>
+      </tr>
+      <tr>
+        <td>[Orchestrator]</td>
+        <td>[Dispatches to agents]</td>
+        <td>[orchestrator.py]</td>
+        <td><span class="dir-badge" style="color:var(--accent-orange);border-color:var(--accent-orange)">ORCH</span></td>
+      </tr>
+      <tr>
+        <td>[Agent 1]</td>
+        <td>[What it does]</td>
+        <td>[agent1.py]</td>
+        <td><span class="dir-badge" style="color:var(--accent-purple);border-color:var(--accent-purple)">AGENT</span></td>
+      </tr>
+      <tr>
+        <td>[Agent 2]</td>
+        <td>[What it does]</td>
+        <td>[agent2.py]</td>
+        <td><span class="dir-badge" style="color:var(--accent-purple);border-color:var(--accent-purple)">AGENT</span></td>
+      </tr>
+      <tr>
+        <td>[Agent 3]</td>
+        <td>[What it does]</td>
+        <td>[agent3.py]</td>
+        <td><span class="dir-badge" style="color:var(--accent-purple);border-color:var(--accent-purple)">AGENT</span></td>
+      </tr>
+      <tr>
+        <td>[Shared Service 1]</td>
+        <td>[What it provides]</td>
+        <td>[service.py]</td>
+        <td><span class="dir-badge" style="color:var(--accent-gold);border-color:var(--accent-gold)">SERVICE</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── 4. Architecture Diagram (Multi-Agent Hub) ── -->
+<div class="report-section" id="diagram">
+  <div class="section-number">Section 4</div>
+  <div class="section-title">Architecture Diagram</div>
+  <div class="diagram-wrapper">
+
+    <div class="phase-banner" id="phase-banner">&#9654; Waiting...</div>
+
+    <!-- TOP ROW: User → Orchestrator -->
+    <div style="display:flex;align-items:center;width:100%;max-width:900px;">
+
+      <div class="component" id="c-user">
+        <div class="component-icon">&#128100;</div>
+        <div class="component-label" style="color:var(--accent-blue)">USER</div>
+        <div class="component-sub">[entry_point.py]</div>
+        <div class="component-body">[trigger method]<br>[input type]</div>
+      </div>
+
+      <div class="arrow-col">
+        <div class="arrow-wrap">
+          <div class="arrow-line" id="arr-user"><div class="shimmer"></div></div>
+          <div class="arrow-lbl">request &#8594;</div>
+        </div>
+        <div class="arrow-wrap">
+          <div class="arrow-lbl above">&#8592; result</div>
+          <div class="arrow-line" id="arr-user-back"></div>
+        </div>
+      </div>
+
+      <div class="component" id="c-orch">
+        <div class="component-icon">&#9881;&#65039;</div>
+        <div class="component-label" style="color:var(--accent-orange)">ORCHESTRATOR</div>
+        <div class="component-sub">[orchestrator.py]</div>
+        <div class="component-body">[run()]<br>[dispatch strategy]</div>
+        <div class="proc-indicator" id="proc-orch">&#9679; DISPATCHING</div>
+      </div>
+
+    </div>
+
+    <!-- VERT DROPS: Orchestrator → Agents (mirrors agents row flex structure) -->
+    <div style="display:flex;gap:12px;width:100%;max-width:900px;">
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" id="vl-a1" style="height:20px;width:2px;"></div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" id="vl-a2" style="height:20px;width:2px;"></div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" id="vl-a3" style="height:20px;width:2px;"></div>
+      </div>
+    </div>
+
+    <!-- AGENTS ROW -->
+    <div style="display:flex;gap:12px;width:100%;max-width:900px;">
+
+      <div class="agent-card" id="a1">
+        <div style="font-size:18px;margin-bottom:5px;">&#129302;</div>
+        <div style="font-size:9px;font-weight:700;color:var(--accent-purple);letter-spacing:1px;margin-bottom:3px;">[AGENT 1]</div>
+        <div style="font-size:8px;color:var(--text-dim);margin-bottom:4px;">[agent1.py]</div>
+        <div style="font-size:8px;color:var(--text-muted);line-height:1.6;">[what it does]</div>
+      </div>
+
+      <div class="agent-card" id="a2">
+        <div style="font-size:18px;margin-bottom:5px;">&#129302;</div>
+        <div style="font-size:9px;font-weight:700;color:var(--accent-purple);letter-spacing:1px;margin-bottom:3px;">[AGENT 2]</div>
+        <div style="font-size:8px;color:var(--text-dim);margin-bottom:4px;">[agent2.py]</div>
+        <div style="font-size:8px;color:var(--text-muted);line-height:1.6;">[what it does]</div>
+      </div>
+
+      <div class="agent-card" id="a3">
+        <div style="font-size:18px;margin-bottom:5px;">&#129302;</div>
+        <div style="font-size:9px;font-weight:700;color:var(--accent-purple);letter-spacing:1px;margin-bottom:3px;">[AGENT 3]</div>
+        <div style="font-size:8px;color:var(--text-dim);margin-bottom:4px;">[agent3.py]</div>
+        <div style="font-size:8px;color:var(--text-muted);line-height:1.6;">[what it does]</div>
+      </div>
+
+    </div>
+
+    <!-- VERT DROPS: Agents → Shared Services (mirrors agents row flex structure) -->
+    <div style="display:flex;gap:12px;width:100%;max-width:900px;">
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" id="vl-s1" style="height:20px;width:2px;"></div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" id="vl-s2" style="height:20px;width:2px;"></div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;">
+        <div class="vert-line" id="vl-s3" style="height:20px;width:2px;"></div>
+      </div>
+    </div>
+
+    <!-- SHARED SERVICES -->
+    <div style="display:flex;width:100%;max-width:900px;">
+      <div class="storage-pipeline" style="flex:1;">
+        <div class="storage-title">SHARED SERVICES</div>
+        <div class="storage-item" id="s-llm">
+          <div style="font-size:16px;margin-bottom:4px;">&#129504;</div>
+          <div style="font-size:9px;color:var(--accent-gold);letter-spacing:1px;">[LLM]</div>
+          <div style="font-size:8px;color:var(--text-dim);">[model name]</div>
+        </div>
+        <div class="storage-sep">&middot;</div>
+        <div class="storage-item" id="s-vdb">
+          <div style="font-size:16px;margin-bottom:4px;">&#128269;</div>
+          <div style="font-size:9px;color:var(--accent-gold);letter-spacing:1px;">[VECTOR DB]</div>
+          <div style="font-size:8px;color:var(--text-dim);">[service name]</div>
+        </div>
+        <div class="storage-sep">&middot;</div>
+        <div class="storage-item" id="s-tools">
+          <div style="font-size:16px;margin-bottom:4px;">&#129513;</div>
+          <div style="font-size:9px;color:var(--accent-gold);letter-spacing:1px;">[TOOLS]</div>
+          <div style="font-size:8px;color:var(--text-dim);">[tool names]</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 5. Data Flow ── -->
+<div class="report-section" id="dataflow">
+  <div class="section-number">Section 5</div>
+  <div class="section-title">Data Flow</div>
+  <ul class="flow-list">
+    <li>
+      <span class="flow-step" style="color:var(--accent-blue);border-color:var(--accent-blue)">1</span>
+      <span>[User sends request to the orchestrator via entry point]</span>
+    </li>
+    <li>
+      <span class="flow-step" style="color:var(--accent-orange);border-color:var(--accent-orange)">2</span>
+      <span>[Orchestrator parses intent and plans agent dispatch strategy]</span>
+    </li>
+    <li>
+      <span class="flow-step" style="color:var(--accent-purple);border-color:var(--accent-purple)">3</span>
+      <span>[Agents run in parallel, each handling its specialized domain]</span>
+    </li>
+    <li>
+      <span class="flow-step" style="color:var(--accent-gold);border-color:var(--accent-gold)">4</span>
+      <span>[Agents call shared services (LLM, vector DB, tools) as needed]</span>
+    </li>
+    <li>
+      <span class="flow-step" style="color:var(--accent-orange);border-color:var(--accent-orange)">5</span>
+      <span>[Orchestrator collects and synthesizes agent results]</span>
+    </li>
+    <li>
+      <span class="flow-step" style="color:var(--accent-green);border-color:var(--accent-green)">6</span>
+      <span>[Final response returned to user]</span>
+    </li>
+  </ul>
+</div>
+
+<!-- ── 6. External Services ── -->
+<div class="report-section" id="services">
+  <div class="section-number">Section 6</div>
+  <div class="section-title">External Services</div>
+  <table class="dir-table">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Purpose</th>
+        <th>Provider</th>
+        <th>Protocol</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>[LLM API]</td>
+        <td>[Natural language generation]</td>
+        <td>[provider name]</td>
+        <td><span class="dir-badge" style="color:var(--accent-gold);border-color:var(--accent-gold)">REST</span></td>
+      </tr>
+      <tr>
+        <td>[Vector DB]</td>
+        <td>[Semantic search / retrieval]</td>
+        <td>[provider name]</td>
+        <td><span class="dir-badge" style="color:var(--accent-gold);border-color:var(--accent-gold)">gRPC</span></td>
+      </tr>
+      <tr>
+        <td>[Tools / Plugins]</td>
+        <td>[Extended capabilities]</td>
+        <td>[provider name]</td>
+        <td><span class="dir-badge" style="color:var(--accent-gold);border-color:var(--accent-gold)">SDK</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── 7. Insights ── -->
+<div class="report-section" id="insights">
+  <div class="section-number">Section 7</div>
+  <div class="section-title">Insights</div>
+  <div class="insights">
+    <div class="insight-card">
+      <div class="insight-label" style="color:var(--accent-orange)">ORCHESTRATOR</div>
+      <div class="insight-value">[Key architectural fact]</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label" style="color:var(--accent-purple)">AGENTS</div>
+      <div class="insight-value">[Key architectural fact]</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label" style="color:var(--accent-gold)">SERVICES</div>
+      <div class="insight-value">[Key architectural fact]</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label" style="color:var(--accent-green)">OUTPUT</div>
+      <div class="insight-value">[Key architectural fact]</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 8. Code References ── -->
+<div class="report-section" id="code">
+  <div class="section-number">Section 8</div>
+  <div class="section-title">Code References</div>
+  <div class="section-body">
+    <a class="code-ref" href="#">
+      <span class="code-ref-path">[src/entry_point.py]</span>
+      <span class="code-ref-desc">— [Entry point, user-facing interface]</span>
+    </a>
+    <a class="code-ref" href="#">
+      <span class="code-ref-path">[src/orchestrator.py]</span>
+      <span class="code-ref-desc">— [Central dispatcher, agent lifecycle management]</span>
+    </a>
+    <a class="code-ref" href="#">
+      <span class="code-ref-path">[src/agents/agent1.py]</span>
+      <span class="code-ref-desc">— [Specialized agent for domain 1]</span>
+    </a>
+    <a class="code-ref" href="#">
+      <span class="code-ref-path">[src/agents/agent2.py]</span>
+      <span class="code-ref-desc">— [Specialized agent for domain 2]</span>
+    </a>
+    <a class="code-ref" href="#">
+      <span class="code-ref-path">[src/agents/agent3.py]</span>
+      <span class="code-ref-desc">— [Specialized agent for domain 3]</span>
+    </a>
+    <a class="code-ref" href="#">
+      <span class="code-ref-path">[src/services/]</span>
+      <span class="code-ref-desc">— [Shared service integrations (LLM, vector DB, tools)]</span>
+    </a>
+  </div>
+</div>
+
+<!-- ── Footer ── -->
+<div class="report-footer" id="footer">
+  Generated by archflow &middot; [System Name] &middot; Multi-Agent Hub topology
+</div>
+
+</div><!-- /main-content -->
+
+<script>
+  /* ── Theme persistence ── */
+  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
+
+  /* ── TOC active-link highlight on scroll ── */
+  (function() {
+    const sections = document.querySelectorAll('.report-section');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(l => l.classList.remove('active'));
+          const id = entry.target.getAttribute('id');
+          const active = document.querySelector(`.toc-link[href="#${id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -60% 0px' });
+    sections.forEach(s => observer.observe(s));
+  })();
+
+  /* ── Phase animation engine (multi-agent hub) ── */
+  const phases = [
+    "[Phase 0: user triggers the system]",
+    "[Phase 1: orchestrator receives and plans dispatch]",
+    "[Phase 2: agents run in parallel]",
+    "[Phase 3: agents call shared services]",
+    "[Phase 4: orchestrator collects and synthesizes results]",
+    "[Phase 5: response returned to user]",
+  ];
+  const phaseColors = ["#00d4ff","#ff6b35","#a78bfa","#e8b84b","#ff6b35","#3fb950"];
+  let phase = 0;
+  const borderColor = () => getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const shadowAlpha = () => getComputedStyle(document.documentElement).getPropertyValue('--shadow-alpha').trim();
+
+  function litComponent(id, color) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = color;
+    el.style.boxShadow = `0 0 18px ${color}${shadowAlpha()}`;
+  }
+  function litArrow(id, color, shimmer) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background = color;
+    if (shimmer) el.classList.add("active");
+  }
+  function litStorage(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = "#e8b84b";
+    el.style.boxShadow = "0 0 14px #e8b84b33";
+  }
+  function resetAll() {
+    const bc = borderColor();
+    document.querySelectorAll(".component,.agent-card,.storage-item").forEach(el => {
+      el.style.borderColor = bc; el.style.boxShadow = "none";
+    });
+    document.querySelectorAll(".arrow-line,.vert-line").forEach(el => {
+      el.style.background = bc; el.classList.remove("active");
+    });
+    document.getElementById("proc-orch").classList.remove("visible");
+  }
+  function applyPhase() {
+    const banner = document.getElementById("phase-banner");
+    banner.textContent = "\u25b6 " + phases[phase];
+    banner.style.color = phaseColors[phase];
+    banner.style.borderColor = phaseColors[phase] + "55";
+    resetAll();
+    if (phase === 0) { litComponent("c-user", phaseColors[0]); litArrow("arr-user", phaseColors[0], true); }
+    if (phase === 1) {
+      litComponent("c-orch", phaseColors[1]);
+      document.getElementById("proc-orch").classList.add("visible");
+    }
+    if (phase === 2) {
+      ["vl-a1","vl-a2","vl-a3"].forEach(id => litArrow(id, phaseColors[2]));
+      ["a1","a2","a3"].forEach(id => litComponent(id, phaseColors[2]));
+    }
+    if (phase === 3) {
+      ["vl-s1","vl-s2","vl-s3"].forEach(id => litArrow(id, phaseColors[3]));
+      ["s-llm","s-vdb","s-tools"].forEach(id => litStorage(id));
+    }
+    if (phase === 4) { litComponent("c-orch", phaseColors[4]); }
+    if (phase === 5) { litComponent("c-user", phaseColors[5]); litArrow("arr-user-back", phaseColors[5]); }
+  }
+  applyPhase();
+  setInterval(() => { phase = (phase + 1) % phases.length; applyPhase(); }, 1500);
+</script>
+</body>
+</html>

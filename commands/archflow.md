@@ -1,8 +1,10 @@
 # /archflow
 
-Analyze the current codebase and generate an animated HTML architecture diagram.
+Analyze the current codebase and generate a full architecture report.
 
-Reads the codebase, identifies the main components and data flows, picks the
-best layout, and outputs a self-contained architecture-diagram.html file.
+Produces a rich HTML page with an animated architecture diagram as the hero
+section, plus supporting sections: executive summary, KPI metrics, component
+directory, data flow detail, external services, architecture insights, and
+code references. Includes a sticky table-of-contents sidebar.
 
 Uses the archflow skill.
