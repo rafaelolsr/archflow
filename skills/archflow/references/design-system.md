@@ -898,117 +898,160 @@ ANIMATED DIAGRAM — ARCHFLOW PHASE ENGINE
 ===================================================================
 
 The animated architecture diagram is archflow's core differentiator.
-Include it as a section within the report. The CSS classes below are
-ONLY for the diagram section — the rest of the report uses the
-patterns above.
+It should be BIG, RICH, and READABLE — not tiny monospace boxes.
+
+CRITICAL: The diagram components must be full-width horizontal cards
+with SVG icons, descriptions, and technology tags. NOT small centered
+boxes with emoji. Think of each component as a rich card that tells
+a story, not a label on a flowchart.
 
   Diagram container:
-    .diagram-section {
+    .arch-flow {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      font-family: var(--font-mono);
-      padding: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      gap: 0;
+      max-width: 860px;
+      margin: 0 auto;
     }
 
   Phase banner:
     .phase-banner {
       font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 8px 20px;
+      font-size: 13px;
+      padding: 10px 24px;
       border: 1px solid var(--border);
       border-radius: 20px;
       background: var(--bg2);
       transition: color 0.4s, border-color 0.4s;
       margin-bottom: 24px;
+      max-width: 860px;
     }
 
-  Component card:
-    .component {
+  Architecture layer card (the PRIMARY component pattern):
+    .arch-layer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: border-color 0.4s, box-shadow 0.4s, background 0.3s;
+    }
+    .arch-layer:hover {
+      border-color: var(--accent);
+    }
+    .arch-layer.lit {
+      border-color: var(--glow-color, var(--accent));
+      background: linear-gradient(135deg, var(--surface) 0%,
+        color-mix(in srgb, var(--glow-color, var(--accent)) 5%, var(--surface)) 100%);
+      box-shadow: 0 0 40px color-mix(in srgb, var(--glow-color, var(--accent)) 15%, transparent);
+    }
+
+  Layer icon (SVG in colored rounded background, NOT emoji):
+    .arch-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    Use inline SVG icons (24x24, stroke-width 1.5) with colored
+    backgrounds like: background: rgba(accent, 0.15); color: accent;
+
+  Layer name + description:
+    .arch-name {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .arch-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+  Layer tags (technology badges, aligned right):
+    .arch-tags {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .arch-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--accent-dim, rgba(var(--accent), 0.1));
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+  Vertical connector between layers:
+    .arch-connector {
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      margin: 0 auto;
+      opacity: 0.4;
+      transition: opacity 0.4s, background 0.4s;
+    }
+    .arch-connector.lit {
+      opacity: 1;
+      background: var(--glow-color, var(--accent));
+      box-shadow: 0 0 8px color-mix(in srgb, var(--glow-color, var(--accent)) 40%, transparent);
+    }
+
+  PHASE ENGINE with rich cards — JS helpers:
+
+    The litComponent function targets .arch-layer elements by ID:
+
+      function litLayer(id, color) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.setProperty('--glow-color', color);
+        el.classList.add('lit');
+      }
+
+      function litConnector(id, color) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.setProperty('--glow-color', color);
+        el.classList.add('lit');
+      }
+
+      function resetAll() {
+        document.querySelectorAll('.arch-layer, .arch-connector').forEach(el => {
+          el.classList.remove('lit');
+          el.style.removeProperty('--glow-color');
+        });
+      }
+
+  External services (below the flow):
+    Use a horizontal row of cards below the arch-flow:
+    .services-row {
+      display: flex; gap: 12px;
+      margin-top: 20px;
+      max-width: 860px;
+    }
+    .service-card {
+      flex: 1;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px;
       text-align: center;
       transition: border-color 0.4s, box-shadow 0.4s;
-      min-width: 120px;
     }
-    .component-icon  { font-size: 20px; margin-bottom: 6px; }
-    .component-label { font-family: var(--font-mono); font-size: 9px;
-                       font-weight: 700; letter-spacing: 2px;
-                       text-transform: uppercase; margin-bottom: 4px; }
-    .component-sub   { font-family: var(--font-mono); font-size: 9px;
-                       color: var(--text-dim); margin-bottom: 6px; }
-    .component-body  { font-size: 11px; color: var(--text-muted);
-                       line-height: 1.4; }
-
-  Agent card (for multi-agent hub layout):
-    .agent-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      text-align: center;
-      flex: 1;
-      transition: border-color 0.4s, box-shadow 0.4s;
+    .service-card.lit {
+      border-color: #e8b84b;
+      box-shadow: 0 0 14px rgba(232,184,75,0.2);
     }
-
-  Arrows:
-    .arrow-col  { flex: 1; padding: 0 8px;
-                  display: flex; flex-direction: column; gap: 8px; }
-    .arrow-wrap { display: flex; flex-direction: column; }
-    .arrow-line {
-      height: 2px; background: var(--border);
-      border-radius: 1px; position: relative; overflow: hidden;
-      transition: background 0.4s;
-    }
-    .arrow-line .shimmer {
-      display: none; position: absolute; top: 0; left: -20%;
-      width: 20%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-      animation: slide 0.7s linear infinite;
-    }
-    .arrow-line.active .shimmer { display: block; }
-    .arrow-lbl       { text-align: center; font-size: 9px;
-                       color: var(--text-dim); margin-top: 3px; }
-    .arrow-lbl.above { margin-top: 0; margin-bottom: 3px; }
-
-  Vertical connector:
-    .vert-line { width: 2px; background: var(--border);
-                 transition: background 0.4s; margin: 0 auto; }
-
-  Storage / external services row:
-    .storage-pipeline {
-      display: flex; align-items: center; gap: 0;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 12px;
-      position: relative;
-    }
-    .storage-title {
-      position: absolute; top: -10px; left: 16px;
-      background: var(--bg);
-      padding: 0 8px;
-      font-size: 9px; letter-spacing: 3px;
-      color: #e8b84b; text-transform: uppercase;
-      font-family: var(--font-mono);
-    }
-    .storage-item {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px; text-align: center;
-      min-width: 80px;
-      transition: border-color 0.4s, box-shadow 0.4s;
-    }
-    .storage-sep { width: 16px; text-align: center;
-                   font-size: 10px; color: var(--border);
-                   flex-shrink: 0; }
 
   Diagram insights row:
     .diagram-insights { margin-top: 12px; display: flex; gap: 10px;
