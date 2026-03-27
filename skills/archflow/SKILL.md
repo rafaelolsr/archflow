@@ -84,16 +84,38 @@ WORKFLOW — FULL REPORT (default: /archflow)
 WORKFLOW — DIAGRAM ONLY (/archflow-diagram)
 ===================================================================
 
-  1. Read references/analysis.md       → analyze the codebase
-  2. Read references/layouts.md        → decide the layout
-  3. Read references/design-system.md  → internalize diagram CSS
-  4. Read references/animation.md      → understand the JS pattern
-  5. Pick the closest template from templates/
-  6. Generate architecture-diagram.html
-  7. Present the file
-  8. Print a short summary
+  1. ANALYZE
+     Read references/analysis.md → scan the codebase
+     Read references/layouts.md  → decide the diagram layout pattern
 
-  Templates (diagram-only mode):
+  2. THINK
+     Read references/design-system.md → CSS patterns + diagram classes
+     Read references/animation.md     → phase engine
+
+     Pick:
+       → A color palette aesthetic for the diagram
+       → A background atmosphere
+       → The layout pattern (pipeline, hub, or medallion)
+
+     Use templates/ as REFERENCE EXAMPLES only — don't copy them
+     rigidly. Compose the diagram HTML freely with custom CSS.
+
+  3. COMPOSE
+     Write custom CSS + HTML for this specific diagram.
+     Use the diagram component classes from design-system.md
+     (.component, .arrow-line, .vert-line, .storage-pipeline, etc.)
+     and the phase engine from animation.md.
+     Adapt the layout to fit the actual codebase — don't force
+     it into a template if the system has a different shape.
+
+  4. DELIVER
+     → Output to ./architecture-diagram.html
+     → Single self-contained HTML file
+     → ZERO external dependencies (no CDN fonts, no Mermaid)
+     → Self-contained fonts: 'JetBrains Mono', 'Fira Code', monospace
+     → Present the file + short summary
+
+  Reference examples (for layout patterns, not rigid templates):
     templates/horizontal-pipeline.html   → API / RAG / request-response
     templates/multi-agent-hub.html       → orchestrator + parallel agents
     templates/medallion-pipeline.html    → ETL / Delta Live Tables
