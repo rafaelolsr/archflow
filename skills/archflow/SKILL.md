@@ -149,6 +149,12 @@ Think MAGAZINE, not JIRA. Think PRODUCT PAGE, not ADMIN PANEL.
     Mix: full-bleed, split panels, stat bars, entity lists, timelines.
   → Prefer FULL-WIDTH flowing layouts over sidebar+content grids.
   → The ANIMATED DIAGRAM is the hero section — maximum visual weight.
+  → SINGLE-PAGE DIAGRAMS: prefer compact vertical stacks where the
+    full architecture is visible in 1-2 viewport scrolls. Layers
+    with sub-components expand INLINE (nested grids inside the layer
+    card). Never spread 4 tiny boxes across a wide row.
+  → ALL diagrams on the page highlight in SYNC during phase animation.
+    Flow-row boxes, arch-layer cards, SVG elements — all glow together.
   → Create BESPOKE components for the data (bar viz, comparison panels,
     distribution charts, particle animations).
   → Write CUSTOM CSS per report. Every output should look unique.

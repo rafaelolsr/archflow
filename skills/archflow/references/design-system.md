@@ -43,6 +43,62 @@ cyan-magenta-pink neon combos, rows of identical cards.
 If your design looks like a Bootstrap dashboard, redesign it.
 
 ===================================================================
+DIAGRAM LAYOUT PREFERENCE — SINGLE-PAGE DENSITY
+===================================================================
+
+The animated architecture diagram should prefer COMPACT, DENSE
+layouts that fit within a single viewport scroll — NOT spread
+across the full page width with tiny boxes that need zooming.
+
+Preferred pattern: VERTICAL LAYERED DIAGRAM
+  → Stack layers top-to-bottom in a single scrollable column
+  → Each layer is a full-width card with icon, title, description, tags
+  → Layers that contain sub-components EXPAND INLINE:
+    a parent layer card can contain a nested grid of child components
+    (e.g., Layer 3 — Tool Suite with a 5×2 grid of tool cards inside)
+  → Connectors between layers are short vertical lines (8-14px)
+  → The whole diagram fits in ~1-2 viewport heights, not 4-5
+
+Why single-page density matters:
+  → The reader sees the FULL architecture at once without scrolling far
+  → Animated phase highlighting is more impactful when all layers
+    are visible simultaneously — the glow sweeps through the stack
+  → Nested detail (tool grids, entity lists) stays in context
+    with its parent layer instead of being a separate section
+
+Nested expansion pattern:
+  A layer card that has sub-components should show them INSIDE
+  the card, not as separate sections below:
+
+    <div class="arch-layer" id="layer-tools">
+      <div class="arch-icon">...</div>
+      <div>
+        <div class="arch-name">Tool Suite (11 Tools)</div>
+        <div class="arch-desc">LLM selects autonomously...</div>
+        <div class="arch-tags">...</div>
+      </div>
+    </div>
+    <!-- Nested tool grid INSIDE the layer context -->
+    <div style="display:grid; grid-template-columns:repeat(5,1fr);
+                gap:8px; padding:12px 28px; margin-top:-1px;
+                background:var(--surface); border:1px solid var(--border);
+                border-top:none; border-radius:0 0 12px 12px;">
+      <div class="tool-card">...</div>
+      <div class="tool-card">...</div>
+      <!-- ... -->
+    </div>
+
+  This keeps the tool detail visually grouped with its parent
+  layer, not floating as a disconnected section.
+
+Avoid:
+  → Spreading 4-6 components across a wide horizontal row where
+    each box is tiny and labels are 8px
+  → Putting the diagram components and the diagram detail (tables,
+    grids, entity lists) in separate report sections
+  → Using separate pages/sections for what is one logical diagram
+
+===================================================================
 TEXTURE OVERLAYS
 ===================================================================
 
