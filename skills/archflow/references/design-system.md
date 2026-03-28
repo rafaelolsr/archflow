@@ -1065,6 +1065,146 @@ a story, not a label on a flowchart.
     }
 
 ===================================================================
+RICH DIAGRAM COMPONENTS — BEYOND BOXES AND ARROWS
+===================================================================
+
+The arch-flow + arch-layer pattern above is the BASE for the
+animated phase engine. But a good architecture visualization
+needs MORE than a vertical stack of cards. Combine multiple
+techniques to tell the full story:
+
+  LAYER CARDS (for tier breakdowns like Bronze/Silver/Gold):
+    .layer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .layer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .layer-card:hover { transform: translateY(-2px); }
+    .layer-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent);
+    }
+    .layer-card .count {
+      font-size: 2.2rem; font-weight: 800;
+      line-height: 1; margin-bottom: 0.5rem;
+    }
+
+    Use for: medallion tiers, service categories, module groups.
+    Each card shows a big number + title + list of items.
+
+  ENTITY CARDS (for component relationships, ER-like):
+    .er-grid {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; justify-content: center;
+    }
+    .er-entity {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      min-width: 160px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .er-entity:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .er-entity.central {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--surface) 0%,
+        color-mix(in srgb, var(--accent) 5%, var(--surface)) 100%);
+      box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 6%, transparent);
+    }
+
+    Use for: microservices, agent networks, database entities.
+
+  QUALITY / FEATURE GRID (for listing capabilities):
+    .quality-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
+    }
+    .quality-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .quality-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+      background: var(--accent);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+  HORIZONTAL BAR CHART (for performance/size comparisons):
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      margin-bottom: 0.5rem;
+    }
+    .bar-label {
+      width: 7rem;
+      color: var(--text-dim);
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .bar-track {
+      flex: 1;
+      height: 28px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+  MERMAID DIAGRAM (for complex flows, ER, sequences):
+    Use Mermaid for flows that are too complex for CSS.
+    Especially good for: multi-path branching, sequence diagrams,
+    entity relationships with cardinality, state machines.
+    See the MERMAID CONTAINERS section below for setup.
+
+COMBINING TECHNIQUES IN ONE REPORT:
+  A great architecture visualization uses MULTIPLE techniques:
+    1. arch-flow with phase engine for the OVERVIEW (animated)
+    2. layer-cards for TIER DETAIL (Bronze/Silver/Gold, etc.)
+    3. Mermaid for COMPLEX FLOWS (sequence diagrams, ER)
+    4. bar-charts for PERFORMANCE DATA
+    5. quality-grid for CAPABILITY LISTS
+    6. entity-cards for RELATIONSHIP MAPS
+
+  Don't just stack 4 boxes with arrows and call it done.
+  The diagram should be as rich as the architecture it describes.
+
+===================================================================
 SEMANTIC ACCENT COLORS FOR DIAGRAMS
 ===================================================================
 
