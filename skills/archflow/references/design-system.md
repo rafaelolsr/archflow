@@ -1192,17 +1192,126 @@ techniques to tell the full story:
     entity relationships with cardinality, state machines.
     See the MERMAID CONTAINERS section below for setup.
 
+  HORIZONTAL FLOW ROW (pipeline of colored boxes with arrows):
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+    .flow-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 10px;
+      padding: 12px 18px;
+      text-align: center;
+      min-width: 110px;
+    }
+    /* Each box gets a DIFFERENT border color */
+    .flow-box--green  { border-color: var(--accent); background: linear-gradient(135deg, var(--surface) 0%, rgba(accent, 0.06) 100%); }
+    .flow-box--orange { border-color: #ef9000; background: linear-gradient(135deg, var(--surface) 0%, rgba(239,144,0,0.06) 100%); }
+    .flow-box--blue   { border-color: #60a5fa; background: linear-gradient(135deg, var(--surface) 0%, rgba(96,165,250,0.06) 100%); }
+    .flow-box--purple { border-color: #a78bfa; background: linear-gradient(135deg, var(--surface) 0%, rgba(167,139,250,0.06) 100%); }
+    .flow-box--gold   { border-color: #fbbf24; background: linear-gradient(135deg, var(--surface) 0%, rgba(251,191,36,0.06) 100%); }
+    .flow-box__title {
+      font-family: var(--font-mono); font-size: 11px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .flow-box__sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+    .flow-arrow { color: var(--accent); font-size: 20px; padding: 0 6px; opacity: 0.5; flex-shrink: 0; }
+
+    Use for: linear pipelines, command sequences, phase progressions.
+    Boxes with vertical drop-downs below for detail:
+      <div class="flow-box">Title<div class="flow-box__sub">Subtitle</div></div>
+      Add vertical connectors below specific boxes for detail items.
+
+  INLINE SVG ARCHITECTURE DIAGRAM (for complex mixed layouts):
+    For diagrams with mixed component sizes, data tables inside flows,
+    and vertical sub-stacks — use inline SVG instead of CSS layout.
+
+    SVG gives pixel-perfect control for:
+      → Boxes of varying sizes in one horizontal flow
+      → Embedded data tables with colored row labels
+      → Vertical tier stacks (Bronze→Silver→Gold) beside horizontal flows
+      → Arrow connectors of any length and direction
+      → Circle badges with initials (B, S, G)
+
+    Pattern:
+      <svg viewBox="0 0 [width] [height]" style="width:100%;max-width:[width]px;">
+        <!-- Boxes -->
+        <rect x="..." y="..." width="..." height="..." rx="12"
+              fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/>
+        <!-- Text labels -->
+        <text x="..." y="..." fill="var(--accent)"
+              font-family="var(--font-mono)" font-size="12" font-weight="700">
+          LABEL
+        </text>
+        <!-- Arrow connectors -->
+        <line x1="..." y1="..." x2="..." y2="..."
+              stroke="var(--accent)" stroke-width="1.5"
+              marker-end="url(#arrow)"/>
+        <!-- Circle badges -->
+        <circle cx="..." cy="..." r="14" fill="none"
+                stroke="var(--accent)" stroke-width="2"/>
+      </svg>
+
+    Arrow markers:
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+    SVG diagrams are the BEST option when the architecture has:
+      → Multiple component types of different sizes
+      → Embedded data tables within the flow
+      → Vertical sub-flows branching from horizontal main flow
+      → Custom shapes (circles, badges, icons)
+
+  SIDE-BY-SIDE CONCEPT CARDS (for methodology / comparison):
+    Two large cards with different colored borders, editorial content.
+    Display font heading above. Optional quote below in italic serif.
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .concept-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .concept-card--blue  { border-color: rgba(96,165,250,0.3); }
+    .concept-card--green { border-color: rgba(accent,0.3); }
+    .concept-label {
+      font-family: var(--font-mono);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    Use for: comparing approaches, before/after methodologies,
+    showing how a concept applies to a specific domain.
+
 COMBINING TECHNIQUES IN ONE REPORT:
   A great architecture visualization uses MULTIPLE techniques:
-    1. arch-flow with phase engine for the OVERVIEW (animated)
-    2. layer-cards for TIER DETAIL (Bronze/Silver/Gold, etc.)
-    3. Mermaid for COMPLEX FLOWS (sequence diagrams, ER)
-    4. bar-charts for PERFORMANCE DATA
-    5. quality-grid for CAPABILITY LISTS
-    6. entity-cards for RELATIONSHIP MAPS
+    1. flow-row for HORIZONTAL PIPELINES (colored boxes + arrows)
+    2. arch-flow with phase engine for ANIMATED OVERVIEW
+    3. Inline SVG for COMPLEX MIXED LAYOUTS
+    4. layer-cards for TIER DETAIL (Bronze/Silver/Gold, etc.)
+    5. concept-cards for METHODOLOGY COMPARISONS
+    6. quality-grid for CAPABILITY LISTS
+    7. bar-charts for PERFORMANCE DATA
+    8. entity-cards for RELATIONSHIP MAPS
 
   Don't just stack 4 boxes with arrows and call it done.
   The diagram should be as rich as the architecture it describes.
+  Mix techniques: horizontal flow at the top, detail grids below,
+  SVG diagram for the complex data flow, bar charts for metrics.
 
 ===================================================================
 SEMANTIC ACCENT COLORS FOR DIAGRAMS
