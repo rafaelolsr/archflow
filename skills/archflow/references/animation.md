@@ -118,17 +118,100 @@ LAYOUT-AGNOSTIC
 ===================================================================
 
 The phase engine works with ANY layout direction — horizontal,
-vertical, hub, medallion. litComponent, litArrow, litStorage all
+vertical, hub, medallion. litLayer, litConnector, litService all
 target elements by ID, not by position. The same JS works for:
 
   → Horizontal pipeline (flex-direction: row)
   → Vertical pipeline (flex-direction: column)
   → Multi-agent hub (mixed row + column)
   → Medallion pipeline (sequential stages)
+  → Inline SVG diagrams (rect, circle, line elements)
+  → Flow-row horizontal boxes
 
-For vertical layouts, use .vert-line elements as connectors
-between stacked components. litArrow() lights them the same way
-it lights horizontal .arrow-line elements.
+===================================================================
+CROSS-DIAGRAM HIGHLIGHTING
+===================================================================
+
+When a report has MULTIPLE diagrams (arch-flow, SVG data flow,
+flow-row pipeline, layer cards), the phase engine should highlight
+elements ACROSS ALL OF THEM simultaneously.
+
+Each phase lights up the corresponding elements in EVERY diagram
+on the page — telling a coherent story across all visualizations.
+
+  Example: Phase 2 ("Timeseries built") highlights:
+    → The arch-layer card for Timeseries Builder
+    → The SVG rect for Timeseries Builder in the data flow
+    → The flow-row box for TIMESERIES in the pipeline
+    → The connector arrows between them
+
+  Implementation:
+    Give corresponding elements matching IDs across diagrams:
+      arch-layer:   id="layer-timeseries"
+      SVG rect:     id="svg-timeseries"
+      flow-box:     id="flow-timeseries"
+
+    In applyPhase(), light them all:
+      if (phase === 2) {
+        litLayer("layer-timeseries", color);
+        litSvgElement("svg-timeseries", color);
+        litFlowBox("flow-timeseries", color);
+        litConnector("conn-2", color);
+      }
+
+  SVG element highlighting:
+    function litSvgElement(id, color) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('stroke', color);
+      el.setAttribute('stroke-width', '2');
+      // For rect elements, add a glow filter
+      el.style.filter = `drop-shadow(0 0 8px ${color}60)`;
+    }
+
+  Flow-box highlighting:
+    function litFlowBox(id, color) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.borderColor = color;
+      el.style.boxShadow = `0 0 20px ${color}30`;
+      el.style.background = `linear-gradient(135deg, var(--surface) 0%, ${color}08 100%)`;
+    }
+
+  Reset must clear ALL diagrams:
+    function resetAll() {
+      // arch-layers
+      document.querySelectorAll('.arch-layer,.arch-connector').forEach(el => {
+        el.classList.remove('lit');
+        el.style.removeProperty('--glow-color');
+      });
+      // SVG elements
+      document.querySelectorAll('[id^="svg-"]').forEach(el => {
+        el.removeAttribute('style');
+        // restore original stroke from data attribute
+        el.setAttribute('stroke', el.dataset.origStroke || 'var(--border)');
+        el.setAttribute('stroke-width', el.dataset.origWidth || '1.5');
+      });
+      // flow-boxes
+      document.querySelectorAll('.flow-box').forEach(el => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+        el.style.background = '';
+      });
+      // service cards
+      document.querySelectorAll('.service-card').forEach(el => {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+      });
+    }
+
+  IMPORTANT: Every diagram element that participates in the phase
+  animation needs a unique ID. Use prefixes to avoid collisions:
+    layer-*   for arch-layer cards
+    svg-*     for SVG elements
+    flow-*    for flow-row boxes
+    conn-*    for connectors
+    svc-*     for service cards
 
 ===================================================================
 THEME TOGGLE
