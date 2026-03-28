@@ -31,6 +31,12 @@ Rules:
     entity lists, code panels, timeline steps.
   → Add TEXTURE: film grain via SVG noise, dot grids, or subtle
     patterns. Flat solid backgrounds feel dead.
+  → Use GRADIENT BACKGROUNDS on sections and cards. Prefer subtle
+    radial/linear gradients over flat solid fills. Examples:
+      background: linear-gradient(135deg, var(--surface) 0%, rgba(accent, 0.06) 100%);
+      background: radial-gradient(ellipse at 70% 30%, rgba(accent, 0.05) 0%, transparent 45%);
+    Each section can have its own gradient atmosphere — don't make
+    all sections the same flat background.
   → Use generous WHITESPACE. Padding 40-80px on sections.
     Don't cram content. Let it breathe.
   → Prefer FULL-WIDTH flowing layouts over sidebar + content grids.
