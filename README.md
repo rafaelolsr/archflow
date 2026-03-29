@@ -45,21 +45,23 @@ archflow fixes that. It reads the actual code first, builds a mental model of th
 
 ## Install
 
-**Option 1 — Local plugin (development / testing):**
+**Option 1 — Marketplace install (recommended):**
+
+In Claude Code, run:
+
+```
+/plugin marketplace add rafaelolsr/archflow
+/plugin install archflow@archflow
+```
+
+**Option 2 — Local development / testing:**
 
 ```bash
 git clone https://github.com/rafaelolsr/archflow.git
 claude --plugin-dir ./archflow
 ```
 
-**Option 2 — Permanent install:**
-
-```bash
-git clone https://github.com/rafaelolsr/archflow.git
-claude plugin install archflow --plugin-dir ./archflow
-```
-
-No restart needed — run `/reload-plugins` to pick up the plugin.
+Run `/reload-plugins` to pick up the plugin.
 
 ---
 
