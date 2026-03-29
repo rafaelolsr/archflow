@@ -1,7 +1,26 @@
 # Animation Reference
 
 The JS phase engine that drives all diagram animation.
-Follow this pattern exactly in every generated file.
+Use this engine as infrastructure — the phase cycling, element
+targeting by ID, and resetAll logic are required. The visual
+treatment of highlighting is flexible: design it to match
+the project's aesthetic.
+
+===================================================================
+HIGHLIGHTING STYLES (choose what fits the design)
+===================================================================
+
+Default: border glow + box-shadow (shown in core pattern below).
+
+Alternatives the agent may use instead:
+  - Background color shift:  el.style.background = `${color}15`;
+  - Opacity change:          el.style.opacity = '1'; (dim = '0.4')
+  - Scale transform:         el.style.transform = 'scale(1.04)';
+  - Border-left accent:      el.style.borderLeft = `3px solid ${color}`;
+  - Class toggle + CSS:      el.classList.add('phase-active');
+
+Mix and match per element type. The lit* helpers below show the
+default glow approach — adapt or replace them to suit the design.
 
 ===================================================================
 CORE PATTERN

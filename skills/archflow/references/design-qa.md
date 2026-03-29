@@ -145,17 +145,18 @@ TYPOGRAPHY ANTI-PATTERNS
 
   These signal "AI-generated default" and lack character.
 
-  ALWAYS pair a distinctive body font with JetBrains Mono:
-    → IBM Plex Sans + JetBrains Mono (technical, reliable)
-    → DM Sans + JetBrains Mono (friendly, developer)
-    → Outfit + JetBrains Mono (clean, geometric)
-    → Bricolage Grotesque + JetBrains Mono (bold, characterful)
-    → Plus Jakarta Sans + JetBrains Mono (rounded, approachable)
-    → Sora + JetBrains Mono (technical, precise)
-    → Red Hat Display + JetBrains Mono (cohesive, enterprise)
-    → Geist + JetBrains Mono (sharp, modern)
+  ALWAYS use at least 2 DISTINCT font families (not from the same family):
+    → Instrument Serif (display) + DM Sans (body) + Fira Code (mono)
+    → Playfair Display (display) + Inter (body) + JetBrains Mono (mono)
+    → Fraunces (display) + IBM Plex Sans (body) + IBM Plex Mono (mono)
+    → Bebas Neue (display) + Outfit (body) + Space Mono (mono)
+    → Bricolage Grotesque (display) + Plus Jakarta Sans (body) + Azeret Mono (mono)
 
-  Rotate pairings across projects. Don't always pick IBM Plex Sans.
+  NEVER use one font family for everything (e.g., Red Hat Display + Red Hat Mono).
+  Mix serif display with sans-serif body for editorial contrast.
+  Add a third voice: editorial serif (Newsreader, Crimson Pro) for quotes/callouts.
+
+  Rotate pairings across projects. Don't always pick the same set.
 
 ===================================================================
 COLOR ANTI-PATTERNS
@@ -178,15 +179,19 @@ COLOR ANTI-PATTERNS
 FINAL CHECKLIST — RUN BEFORE PRESENTING
 ===================================================================
 
-  □ Squint test passes (sections visually distinct)
-  □ At least 3 card depth tiers used
+  □ Squint test passes (sections visually distinct when blurred)
+  □ Swap test passes (hierarchy works without color alone)
+  □ Typography uses 2+ distinct font families (serif + sans or display + body)
+  □ No single font family for display + body + labels
+  □ Each section has a UNIQUE background treatment (gradient, texture, or atmosphere)
+  □ No uniform flat background across all sections
+  □ No 3+ adjacent sections with the same card/component shape
+  □ At least 3 different component types used (not all bordered rectangles)
   □ Accent colors varied (not monochrome grid)
-  □ Font pairing is intentional (not default IBM Plex Sans every time)
   □ Background atmosphere matches project character
   □ Diagram phase engine runs correctly
   □ Both dark and light themes work
-  □ KPI values use counter animation
-  □ Cards have hover lift effect
   □ Sections reveal on scroll (not all at once)
   □ No overflow on mobile viewport
   □ Phase banner is readable in both themes
+  □ If you swapped CSS between this report and another, someone WOULD notice

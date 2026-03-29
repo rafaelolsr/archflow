@@ -1,370 +1,169 @@
 # Layout Reference
 
-Three layout recipes. Pick one based on the system shape,
-then use the HTML skeleton as your starting point.
+Conceptual layout guide for animated architecture diagrams.
+Choose a layout based on the system's shape, then compose the HTML
+to match. See `templates/` for working examples — treat them as
+inspiration, not rigid skeletons.
 
-===================================================================
-LAYOUT A — HORIZONTAL PIPELINE
-===================================================================
+---
 
-Use when:
-  → API services, RAG systems, request/response flows
-  → Data has a clear left-to-right path: receive → process → return
-  → External services feed into one processing layer
-
-Visual shape:
-
-  [Input] → arrows → [Orchestrator] → arrows → [Processor] → arrows → [Output]
-                             ↕ vertical connectors
-                     [Storage Row: DB | VectorDB | LLM | Cache]
-
-HTML skeleton:
-
-  <!-- MAIN ROW -->
-  <div style="display:flex;align-items:center;width:100%;max-width:1000px;">
-    <div class="component" id="c-input">...</div>
-    <div class="arrow-col">
-      <div class="arrow-wrap">
-        <div class="arrow-line" id="arr-1"><div class="shimmer"></div></div>
-        <div class="arrow-lbl">tokens →</div>
-      </div>
-      <div class="arrow-wrap">
-        <div class="arrow-lbl above">← response</div>
-        <div class="arrow-line" id="arr-1b"></div>
-      </div>
-    </div>
-    <div class="component" id="c-orch">...</div>
-    <div class="arrow-col">...</div>
-    <div class="component" id="c-proc">...</div>
-    <div class="arrow-col">...</div>
-    <div class="component" id="c-output">...</div>
-  </div>
-
-  <!-- VERTICAL CONNECTORS -->
-  <div style="display:flex;width:100%;max-width:1000px;margin-top:0;">
-    <div style="min-width:[match input card width];"></div>
-    <div style="flex:1;"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;min-width:[match orch card width];">
-      <div class="vert-line" id="vl-orch" style="height:24px;"></div>
-    </div>
-    <div style="flex:1;"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;min-width:[match proc card width];">
-      <div class="vert-line" id="vl-proc" style="height:24px;"></div>
-    </div>
-    <div style="flex:1;"></div>
-    <div style="min-width:[match output card width];"></div>
-  </div>
-
-  <!-- STORAGE ROW -->
-  <div style="display:flex;align-items:flex-start;width:100%;max-width:1000px;">
-    <div style="min-width:[match input card width];"></div>
-    <div class="storage-pipeline" style="margin:0 8px;">
-      <div class="storage-title">EXTERNAL SERVICES</div>
-      <div class="storage-item" id="s-db">...</div>
-      <div class="storage-sep">·</div>
-      <div class="storage-item" id="s-llm">...</div>
-      <div class="storage-sep">·</div>
-      <div class="storage-item" id="s-cache">...</div>
-    </div>
-    <div style="min-width:[match output card width];"></div>
-  </div>
-
-===================================================================
-LAYOUT B — MULTI-AGENT HUB
-===================================================================
+## Layout A — Horizontal Pipeline
 
 Use when:
-  → Orchestrator spawns parallel workers / sub-agents
-  → ReAct loops, multi-agent systems, fan-out/fan-in patterns
-  → Agents share a common service layer (LLM, tools, DB)
+  - API services, RAG systems, request/response flows
+  - Data has a clear left-to-right path: receive -> process -> return
+  - External services feed into one processing layer
 
-Visual shape:
+Shape:
 
-  [User] → [Orchestrator]
-               ↓  ↓  ↓
-           [A1] [A2] [A3]   ← agents row
-               ↓  ↓  ↓
-           [LLM | VectorDB | Tools]
+```
+  [Input] ──> [Orchestrator] ──> [Processor] ──> [Output]
+                    |                  |
+              ┌─────┴──────────────────┴─────┐
+              │  DB  ·  VectorDB  ·  Cache   │
+              └──────────────────────────────┘
+```
 
-HTML skeleton:
+Composition principles:
+  - Top row: flex container with component cards separated by arrow columns
+  - Vertical connectors drop from top-row cards to a shared service strip
+  - Storage strip spans the width beneath the connected components
+  - Bidirectional arrows (request/response) stack two arrow-wraps
+    inside a single arrow-col
 
-  <!-- TOP: user + orchestrator -->
-  <div style="display:flex;align-items:center;width:100%;max-width:900px;">
-    <div class="component" id="c-user">...</div>
-    <div class="arrow-col">...</div>
-    <div class="component" id="c-orch">...</div>
-  </div>
+Density guidance:
+  - 4-7 components fit comfortably in a single horizontal row
+  - If the pipeline exceeds 7 nodes, split into two stacked rows
+    or switch to a vertical pipeline variant (column layout, centered,
+    max-width ~480px — simpler alignment, no flex-mirroring needed)
 
-  <!-- VERT DROPS to agents (mirrors agents row flex structure) -->
-  <div style="display:flex;gap:12px;width:100%;max-width:700px;">
-    <div style="flex:1;display:flex;justify-content:center;">
-      <div class="vert-line" id="vl-a1" style="height:20px;width:2px;"></div>
-    </div>
-    <div style="flex:1;display:flex;justify-content:center;">
-      <div class="vert-line" id="vl-a2" style="height:20px;width:2px;"></div>
-    </div>
-    <div style="flex:1;display:flex;justify-content:center;">
-      <div class="vert-line" id="vl-a3" style="height:20px;width:2px;"></div>
-    </div>
-  </div>
+---
 
-  <!-- AGENTS ROW -->
-  <div style="display:flex;gap:12px;width:100%;max-width:700px;">
-    <div class="agent-card" id="a1">...</div>
-    <div class="agent-card" id="a2">...</div>
-    <div class="agent-card" id="a3">...</div>
-  </div>
-
-  <!-- VERT DROPS to services (mirrors agents row flex structure) -->
-  <div style="display:flex;gap:12px;width:100%;max-width:700px;">
-    <div style="flex:1;display:flex;justify-content:center;">
-      <div class="vert-line" id="vl-s1" style="height:20px;width:2px;"></div>
-    </div>
-    <div style="flex:1;display:flex;justify-content:center;">
-      <div class="vert-line" id="vl-s2" style="height:20px;width:2px;"></div>
-    </div>
-    <div style="flex:1;display:flex;justify-content:center;">
-      <div class="vert-line" id="vl-s3" style="height:20px;width:2px;"></div>
-    </div>
-  </div>
-
-  <!-- SHARED SERVICES -->
-  <div class="storage-pipeline" style="width:100%;max-width:700px;margin-top:0;">
-    <div class="storage-title">SHARED SERVICES</div>
-    <div class="storage-item" id="s-llm">...</div>
-    <div class="storage-sep">·</div>
-    <div class="storage-item" id="s-vdb">...</div>
-    <div class="storage-sep">·</div>
-    <div class="storage-item" id="s-tools">...</div>
-  </div>
-
-===================================================================
-LAYOUT C — MEDALLION PIPELINE
-===================================================================
+## Layout B — Multi-Agent Hub
 
 Use when:
-  → ETL / ELT systems, Databricks, Delta Live Tables
-  → Staged data transformations (Bronze → Silver → Gold)
-  → Clear sequential processing with a storage layer per stage
+  - Orchestrator spawns parallel workers or sub-agents
+  - ReAct loops, multi-agent systems, fan-out / fan-in patterns
+  - Agents share a common service layer (LLM, tools, DB)
 
-Visual shape:
+Shape:
 
-  [Source] → [Bronze/Ingest] → [Silver/Transform] → [Gold/Serve]
-                  ↕                    ↕                   ↕
-            [Raw Storage]       [Delta Tables]      [Semantic Layer / BI]
+```
+       [User] ──> [Orchestrator]
+                   |   |   |
+                 [A1] [A2] [A3]
+                   |   |   |
+              ┌────┴───┴───┴────┐
+              │ LLM · VecDB · Tools │
+              └─────────────────┘
+```
 
-HTML skeleton:
+Composition principles:
+  - Entry pair (user + orchestrator) sits in its own top row
+  - Agent cards form an equal-width flex row (flex:1, shared gap)
+  - Vertical connector rows MUST mirror the exact flex structure
+    of the row they connect — same gap, same flex:1 children
+  - Shared services strip spans the full agent-row width
 
-  <!-- PIPELINE ROW -->
-  <div style="display:flex;align-items:center;width:100%;max-width:1100px;">
-    <div class="component" id="c-source">...</div>
-    <div class="arrow-col">
-      <div class="arrow-wrap">
-        <div class="arrow-line" id="arr-ingest"><div class="shimmer"></div></div>
-        <div class="arrow-lbl">raw events →</div>
-      </div>
-    </div>
-    <div class="component" id="c-bronze">...</div>
-    <div class="arrow-col">
-      <div class="arrow-wrap">
-        <div class="arrow-line" id="arr-silver"><div class="shimmer"></div></div>
-        <div class="arrow-lbl">cleaned →</div>
-      </div>
-    </div>
-    <div class="component" id="c-silver">...</div>
-    <div class="arrow-col">
-      <div class="arrow-wrap">
-        <div class="arrow-line" id="arr-gold"><div class="shimmer"></div></div>
-        <div class="arrow-lbl">aggregated →</div>
-      </div>
-    </div>
-    <div class="component" id="c-gold">...</div>
-  </div>
+Density guidance:
+  - 2-4 agents: single flex row works well
+  - 5-8 agents: use a multi-column grid (2 rows of cards)
+  - 8+ agents or complex hierarchies: radial/orbit layout or
+    nested groups where each group is its own mini-hub
 
-  <!-- VERT CONNECTORS per stage -->
-  <div style="display:flex;width:100%;max-width:1100px;">
-    <div style="min-width:[source width];"></div>
-    <div style="flex:1;"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;min-width:[bronze width];">
-      <div class="vert-line" id="vl-bronze" style="height:24px;"></div>
-    </div>
-    <!-- repeat for silver, gold -->
-  </div>
+---
 
-  <!-- STORAGE TIER per stage -->
-  <div style="display:flex;width:100%;max-width:1100px;">
-    <div style="min-width:[source width];flex:1;"></div>
-    <div class="storage-pipeline" style="flex:3;margin:0 8px;">
-      <div class="storage-title">DELTA LAKE LAYERS</div>
-      <div class="storage-item" id="s-raw">...</div>
-      <div class="storage-sep">·</div>
-      <div class="storage-item" id="s-silver">...</div>
-      <div class="storage-sep">·</div>
-      <div class="storage-item" id="s-gold">...</div>
-    </div>
-    <div style="min-width:[serve width];flex:1;"></div>
-  </div>
-
-===================================================================
-VERTICAL CONNECTOR ALIGNMENT — CRITICAL RULE
-===================================================================
-
-Vertical connector rows (vert-line divs between tiers) MUST mirror the
-exact flex layout of the row they connect to. Misaligned connectors are
-the #1 visual bug in generated diagrams.
-
-THE RULE:
-  The connector row's child div structure MUST replicate the sizing
-  of the adjacent component row it connects to.
-
-PATTERN A — Connecting to a row of equal-width flex items:
-  If the row above uses: display:flex; gap:Xpx; with flex:1 children,
-  the connector row MUST also use: display:flex; gap:Xpx; with flex:1
-  children (each centering a vert-line).
-
-  GOOD:
-    <!-- Agent row: flex:1 cards, gap:10px -->
-    <div style="display:flex;gap:10px;width:100%;max-width:1100px;">
-      <div class="agent-card" style="flex:1;">...</div>
-      <div class="agent-card" style="flex:1;">...</div>
-    </div>
-    <!-- Connector mirrors same layout -->
-    <div style="display:flex;gap:10px;width:100%;max-width:1100px;">
-      <div style="flex:1;display:flex;justify-content:center;">
-        <div class="vert-line" style="height:16px;width:2px;"></div>
-      </div>
-      <div style="flex:1;display:flex;justify-content:center;">
-        <div class="vert-line" style="height:16px;width:2px;"></div>
-      </div>
-    </div>
-
-  BAD (fixed gap doesn't match flex cards):
-    <div style="display:flex;justify-content:flex-end;padding-right:30px;">
-      <div style="display:flex;gap:38px;">
-        <div class="vert-line">...</div>
-        <div class="vert-line">...</div>
-      </div>
-    </div>
-
-PATTERN B — Connecting to a row of component + arrow-col alternating:
-  If the row uses: component(min-width:Xpx) + arrow-col(flex:1) + ...
-  the connector row MUST replicate each slot with matching min-width
-  and flex spacers.
-
-  GOOD:
-    <!-- Shared path: component 110px, arrow flex:1, component 120px, ... -->
-    <div style="display:flex;align-items:center;width:100%;max-width:1100px;">
-      <div style="display:flex;justify-content:center;min-width:110px;">
-        <div class="vert-line" style="height:20px;"></div>
-      </div>
-      <div style="flex:1;max-width:60px;"></div>
-      <div style="display:flex;justify-content:center;min-width:120px;">
-        <div class="vert-line" style="height:20px;"></div>
-      </div>
-      <!-- ... mirrors every slot in the row above -->
-    </div>
-
-  BAD (uniform flex:1 doesn't match alternating layout):
-    <div style="display:flex;">
-      <div style="flex:1;"><div class="vert-line">...</div></div>
-      <div style="flex:1;"></div>
-      <div style="flex:1;"><div class="vert-line">...</div></div>
-    </div>
-
-NEVER:
-  → Use fixed px gaps (gap:38px) to align with flex:1 cards
-  → Use justify-content:flex-end with padding to "eyeball" alignment
-  → Use uniform flex:1 grids to connect to rows with mixed widths
-  → Omit gap from connector rows when the adjacent row has gap
-
-ALWAYS:
-  → Copy the exact flex structure from the row you're connecting to
-  → Match gap values between connector and component rows
-  → Match min-width values for fixed-width components
-  → Match flex:1 + max-width for arrow-col spacers
-
-===================================================================
-LAYOUT D — VERTICAL PIPELINE
-===================================================================
+## Layout C — Medallion Pipeline
 
 Use when:
-  → Linear flows that read naturally top-to-bottom
-  → Reports where the diagram is embedded in a page (not full-width)
-  → Systems with 3-6 sequential steps
-  → The flow is more intuitive as a waterfall than left-to-right
+  - ETL / ELT systems, Databricks, Delta Live Tables
+  - Staged data transformations (Bronze -> Silver -> Gold)
+  - Each stage has its own storage tier
 
-Visual shape:
+Shape:
 
-        [Input]
-           ↓
-      [Orchestrator]
-           ↓
-       [Processor]
-           ↓
-        [Output]
-           ↓
-  [Storage Row: DB | API | Cache]
+```
+  [Source] ──> [Bronze] ──> [Silver] ──> [Gold]
+                  |             |            |
+              [Raw Store]  [Delta Tbl]  [Semantic / BI]
+```
 
-HTML skeleton:
+Composition principles:
+  - Identical structure to Horizontal Pipeline, but each component
+    has a dedicated storage node directly beneath it (1:1 mapping)
+  - Vertical connectors align per-stage, not to a shared strip
+  - Arrow labels describe the data transformation at each hop
+    (e.g., "raw events ->", "cleaned ->", "aggregated ->")
 
-  <!-- VERTICAL FLOW -->
-  <div style="display:flex;flex-direction:column;align-items:center;
-              width:100%;max-width:480px;margin:0 auto;gap:0;">
+Density guidance:
+  - 3-5 stages fit one horizontal row
+  - 6+ stages or stages with sub-steps: use vertical stacking
+    with inline expansion cards for each stage's internals
 
-    <div class="component" id="c-input" style="width:100%;">...</div>
+---
 
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <div class="vert-line" id="vl-1" style="height:28px;"></div>
-      <div style="font-size:9px;color:var(--text-dim);
-                  font-family:var(--font-mono);margin:4px 0;">
-        data label ↓
-      </div>
-    </div>
+## Vertical Connector Alignment
 
-    <div class="component" id="c-orch" style="width:100%;">...</div>
+The single most common visual bug in generated diagrams is
+misaligned vertical connectors. One rule prevents it:
 
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <div class="vert-line" id="vl-2" style="height:28px;"></div>
-    </div>
+**The connector row must replicate the flex structure of the row
+it connects to.**
 
-    <div class="component" id="c-proc" style="width:100%;">...</div>
+Equal-width rows (e.g., agent cards with flex:1 and gap:12px):
+  - Connector row uses the same flex:1 children and gap:12px
+  - Each child centers a vert-line element
 
-    <div style="display:flex;flex-direction:column;align-items:center;">
-      <div class="vert-line" id="vl-3" style="height:28px;"></div>
-    </div>
+Mixed-width rows (e.g., component + arrow-col alternating):
+  - Connector row replicates each slot's min-width or flex value
+  - Arrow-col slots become empty spacers with matching flex/max-width
 
-    <div class="component" id="c-output" style="width:100%;">...</div>
-  </div>
+Vertical (column) layouts are simpler — vert-lines center
+automatically via the parent's align-items:center. No mirroring
+needed unless the flow branches into a horizontal sub-row.
 
-  <!-- CONNECTOR TO STORAGE -->
-  <div style="display:flex;flex-direction:column;align-items:center;">
-    <div class="vert-line" id="vl-storage" style="height:28px;"></div>
-  </div>
+Never:
+  - Use fixed px gaps to align with flex:1 cards
+  - Use justify-content:flex-end with padding to eyeball alignment
+  - Omit gap from connector rows when the adjacent row has gap
 
-  <!-- STORAGE ROW (horizontal, below vertical flow) -->
-  <div class="storage-pipeline" style="width:100%;max-width:600px;margin:0 auto;">
-    <div class="storage-title">EXTERNAL SERVICES</div>
-    <div class="storage-item" id="s-1">...</div>
-    <div class="storage-sep">·</div>
-    <div class="storage-item" id="s-2">...</div>
-    <div class="storage-sep">·</div>
-    <div class="storage-item" id="s-3">...</div>
-  </div>
+---
 
-Vertical connector alignment:
+## Composition Rules
 
-  Vertical layout is simpler than horizontal — all components are
-  stacked in a single column so no flex-mirroring is needed.
-  The vert-line elements center automatically via margin: 0 auto.
+Vary visual density across the report so no two adjacent sections
+feel the same:
 
-  For branching (e.g., orchestrator dispatching to 2-3 parallel steps),
-  use a horizontal row within the vertical flow:
+  - **Full-width**: hero diagram, key metrics banner
+  - **Split-panel**: two-column compare (e.g., before/after, pros/cons)
+  - **Grid**: 3-4 concept cards or entity summaries
+  - **Single-column**: narrative text, detailed explanations
 
-  <div style="display:flex;gap:16px;width:100%;">
-    <div class="component" id="a-1" style="flex:1;">Agent 1</div>
-    <div class="component" id="a-2" style="flex:1;">Agent 2</div>
-    <div class="component" id="a-3" style="flex:1;">Agent 3</div>
-  </div>
+The architecture diagram is the HERO section. Give it maximum
+visual weight — full width, generous padding, animated arrows,
+gradient backgrounds. Surrounding sections should be lighter
+so the diagram commands attention.
 
-Phase engine works identically — litComponent/litArrow/litStorage
-target elements by ID regardless of layout direction.
+### Diagram density quick-reference
+
+| System shape                        | Recommended layout                        |
+|-------------------------------------|-------------------------------------------|
+| 4-7 linear layers                   | Horizontal flow-row (compact, one viewport) |
+| 8+ layers or nested sub-components  | Vertical stack with inline expansion cards  |
+| Hub-spoke with 2-4 agents           | Single agent flex row beneath orchestrator  |
+| Hub-spoke with 5+ agents            | Multi-column grid or radial/orbit layout    |
+| Staged transforms (ETL/medallion)   | Horizontal pipeline with per-stage storage  |
+
+---
+
+## Templates Reference
+
+The `templates/` directory contains working HTML examples for each
+layout. Use them to understand the CSS class vocabulary (component,
+arrow-col, arrow-line, shimmer, vert-line, storage-pipeline, etc.)
+and the phase-engine ID conventions (litComponent, litArrow,
+litStorage target elements by ID regardless of layout direction).
+
+Templates are EXAMPLES of how to implement these concepts — not
+rigid structures to copy verbatim. Adapt the shape, density, and
+component count to fit the specific system being diagrammed.

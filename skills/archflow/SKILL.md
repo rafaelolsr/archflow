@@ -140,25 +140,33 @@ DESIGN PRINCIPLES
 
 Think MAGAZINE, not JIRA. Think PRODUCT PAGE, not ADMIN PANEL.
 
-  → Use a DISPLAY FONT (Bebas Neue, Bricolage Grotesque) at 72-148px
-    for the hero heading. Not 28px. MASSIVE.
+  → Each report should feel INTENTIONALLY DESIGNED for this specific
+    project. If you swapped the CSS between two reports and nobody
+    would notice, you haven't designed anything.
+  → TYPOGRAPHY IS THE DESIGN. Use at least 2 distinct font families.
+    Mix serif display (Instrument Serif, Playfair Display) with
+    sans-serif body. Add a third voice for quotes/callouts.
+    Never use one font family for everything.
+  → The design-system.md provides BUILDING BLOCKS, not templates.
+    Compose unique CSS per project. Don't copy class definitions —
+    design each component fresh, guided by the principles.
+  → BACKGROUNDS CREATE ATMOSPHERE. Each section is a different room.
+    Every section MUST have its own unique background treatment
+    (radial gradient, linear sweep, texture). No uniform flat
+    backgrounds across all sections.
   → Keep the palette TIGHT — 2 accent colors + neutrals. Don't use 6+.
-  → Add TEXTURE — film grain, dot grid, or SVG grid. Never flat.
   → Use GENEROUS whitespace — 40-80px section padding. Let it breathe.
-  → Every section has a UNIQUE layout. Don't repeat card grids.
-    Mix: full-bleed, split panels, stat bars, entity lists, timelines.
-  → Prefer FULL-WIDTH flowing layouts over sidebar+content grids.
+  → Every section has a UNIQUE layout AND component shape. Don't repeat
+    card grids. Mix: full-bleed, split panels, stat bars, entity lists,
+    editorial quotes, terminal mockups, SVG charts.
   → The ANIMATED DIAGRAM is the hero section — maximum visual weight.
-  → SINGLE-PAGE DIAGRAMS: prefer compact vertical stacks where the
-    full architecture is visible in 1-2 viewport scrolls. Layers
-    with sub-components expand INLINE (nested grids inside the layer
-    card). Never spread 4 tiny boxes across a wide row.
+  → SINGLE-PAGE DIAGRAMS: prefer compact layouts where the full
+    architecture is visible in 1-2 viewport scrolls. Use horizontal
+    flow-rows for linear 4-7 layer systems; vertical stacks only
+    when layers have nested sub-components.
   → ALL diagrams on the page highlight in SYNC during phase animation.
-    Flow-row boxes, arch-layer cards, SVG elements — all glow together.
-  → Create BESPOKE components for the data (bar viz, comparison panels,
-    distribution charts, particle animations).
-  → Write CUSTOM CSS per report. Every output should look unique.
   → Apply the SQUINT TEST: sections must be distinct when blurred.
+  → Apply the SWAP TEST: hierarchy must work without color alone.
   → If it looks like a Bootstrap dashboard, redesign it.
 
 ===================================================================

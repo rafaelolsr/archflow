@@ -1,1417 +1,614 @@
 # Design System
 
-CSS patterns, typography, and visual principles for archflow outputs.
-This is a patterns library — adapt and compose freely per project.
-Do NOT copy-paste rigidly. Design each report uniquely.
+Design principles and building blocks for archflow outputs.
+This is a design brief, not a CSS reference. You make the design
+decisions fresh per project. Do not copy-paste patterns between reports.
 
 ===================================================================
-DESIGN PHILOSOPHY
+1. DESIGN PHILOSOPHY
 ===================================================================
 
-Every archflow output should feel like a bespoke editorial page —
+Every archflow output should feel like a bespoke editorial page --
 NOT a generic developer dashboard with rows of identical cards.
 
 Think MAGAZINE, not JIRA. Think PRODUCT PAGE, not ADMIN PANEL.
 
-Before writing CSS:
+Before writing any CSS, make five conscious decisions:
 
-  1. THINK about the project's character (5 seconds)
-  2. Pick a DISPLAY FONT for the hero heading (bold, dramatic)
-  3. Pick a body + mono font pairing
-  4. Pick a color palette — MINIMAL (2-3 accent colors max)
-  5. Pick a background texture (grain, grid, gradient, or clean)
+  1. CHARACTER -- What personality fits this project?
+     A CLI tool feels different from an ML pipeline feels different
+     from an enterprise data platform. Let the subject matter drive
+     the aesthetic.
+
+  2. TYPOGRAPHY -- Pick a 3-voice font set (see section 2).
+
+  3. COLOR -- Pick a named palette direction (see section 3).
+     Limit yourself to 2 accent colors + neutrals. Constraint
+     creates elegance; 6+ colors creates noise.
+
+  4. TEXTURE -- Every section needs a background treatment.
+     Flat solid backgrounds feel dead (see section 4).
+
+  5. VARIETY -- Every section must have a unique layout shape.
+     Do not repeat the same card grid. Mix: full-bleed panels,
+     stat displays, editorial quotes, terminal mockups, split
+     comparisons, timeline steps, code panels, entity clusters.
 
 Rules:
-  → Use display fonts (Bebas Neue, Bricolage Grotesque, Red Hat Display)
-    at LARGE sizes (80-148px) for hero headings. Not just 28-48px.
-  → Keep the color palette TIGHT — 2 accent colors + neutrals.
-    Don't use 6+ colors. Constraint creates elegance.
-  → Every section should have UNIQUE layout. Don't repeat the same
-    card grid pattern. Mix: full-bleed, split panels, stat bars,
-    entity lists, code panels, timeline steps.
-  → Add TEXTURE: film grain via SVG noise, dot grids, or subtle
-    patterns. Flat solid backgrounds feel dead.
-  → Use GRADIENT BACKGROUNDS on sections and cards. Prefer subtle
-    radial/linear gradients over flat solid fills. Examples:
-      background: linear-gradient(135deg, var(--surface) 0%, rgba(accent, 0.06) 100%);
-      background: radial-gradient(ellipse at 70% 30%, rgba(accent, 0.05) 0%, transparent 45%);
-    Each section can have its own gradient atmosphere — don't make
-    all sections the same flat background.
-  → Use generous WHITESPACE. Padding 40-80px on sections.
-    Don't cram content. Let it breathe.
-  → Prefer FULL-WIDTH flowing layouts over sidebar + content grids.
-    TOC sidebar is optional, not default.
-
-Forbidden: generic Inter + purple gradients, uniform card grids,
-emoji icons in headers, gradient text, animated glowing shadows,
-cyan-magenta-pink neon combos, rows of identical cards.
+  -> Display fonts belong at LARGE sizes (60-148px) for hero
+     headings. A display font at 28px is wasted.
+  -> Use generous WHITESPACE. Padding 40-80px on sections.
+     Do not cram content. Let it breathe.
+  -> Prefer FULL-WIDTH flowing layouts over sidebar + content.
+     TOC sidebar is optional, not the default.
+  -> Use em + color to highlight a key word in the hero title:
+     h1 em { font-style: normal; color: var(--accent); }
 
 If your design looks like a Bootstrap dashboard, redesign it.
 
 ===================================================================
-DIAGRAM LAYOUT PREFERENCE — SINGLE-PAGE DENSITY
+2. TYPOGRAPHY -- THREE-VOICE FONT SETS
 ===================================================================
 
-The animated architecture diagram should prefer COMPACT, DENSE
-layouts that fit within a single viewport scroll — NOT spread
-across the full page width with tiny boxes that need zooming.
+Every report REQUIRES three distinct font voices:
 
-Preferred pattern: VERTICAL LAYERED DIAGRAM
-  → Stack layers top-to-bottom in a single scrollable column
-  → Each layer is a full-width card with icon, title, description, tags
-  → Layers that contain sub-components EXPAND INLINE:
-    a parent layer card can contain a nested grid of child components
-    (e.g., Layer 3 — Tool Suite with a 5×2 grid of tool cards inside)
-  → Connectors between layers are short vertical lines (8-14px)
-  → The whole diagram fits in ~1-2 viewport heights, not 4-5
+  DISPLAY -- The hero heading font. Bold, dramatic, large.
+  BODY    -- Running text. Readable, neutral, professional.
+  MONO    -- Code, labels, data. Technical, compact.
 
-Why single-page density matters:
-  → The reader sees the FULL architecture at once without scrolling far
-  → Animated phase highlighting is more impactful when all layers
-    are visible simultaneously — the glow sweeps through the stack
-  → Nested detail (tool grids, entity lists) stays in context
-    with its parent layer instead of being a separate section
+The display and body fonts MUST come from different families.
+Using the same family (e.g., Red Hat Display + Red Hat Text)
+produces bland uniformity.
 
-Nested expansion pattern:
-  A layer card that has sub-components should show them INSIDE
-  the card, not as separate sections below:
-
-    <div class="arch-layer" id="layer-tools">
-      <div class="arch-icon">...</div>
-      <div>
-        <div class="arch-name">Tool Suite (11 Tools)</div>
-        <div class="arch-desc">LLM selects autonomously...</div>
-        <div class="arch-tags">...</div>
-      </div>
-    </div>
-    <!-- Nested tool grid INSIDE the layer context -->
-    <div style="display:grid; grid-template-columns:repeat(5,1fr);
-                gap:8px; padding:12px 28px; margin-top:-1px;
-                background:var(--surface); border:1px solid var(--border);
-                border-top:none; border-radius:0 0 12px 12px;">
-      <div class="tool-card">...</div>
-      <div class="tool-card">...</div>
-      <!-- ... -->
-    </div>
-
-  This keeps the tool detail visually grouped with its parent
-  layer, not floating as a disconnected section.
-
-Avoid:
-  → Spreading 4-6 components across a wide horizontal row where
-    each box is tiny and labels are 8px
-  → Putting the diagram components and the diagram detail (tables,
-    grids, entity lists) in separate report sections
-  → Using separate pages/sections for what is one logical diagram
-
-===================================================================
-TEXTURE OVERLAYS
-===================================================================
-
-Add subtle texture to avoid flat, dead backgrounds:
-
-  Film grain (subtle, editorial feel):
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 9999;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      opacity: 0.6;
-    }
-
-  SVG grid (technical, developer feel):
-    <div style="position:fixed;inset:0;z-index:-1;opacity:0.25;pointer-events:none;">
-      <svg width="100%" height="100%">
-        <defs>
-          <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
-            <path d="M 48 0 L 0 0 0 48" fill="none" stroke="var(--accent)" stroke-width="0.4"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)"/>
-      </svg>
-    </div>
-
-  Dot grid (minimal, enterprise):
-    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-    background-size: 24px 24px;
-
-===================================================================
-DISPLAY TYPOGRAPHY
-===================================================================
-
-Reports need a HERO heading that commands attention.
-Use a display font at massive scale for the page title.
-
-  Recommended display fonts (load via Google Fonts):
-    Bebas Neue          → 72-148px, uppercase, industrial
-    Bricolage Grotesque → 48-96px, bold, characterful
-    Red Hat Display      → 48-80px, clean, enterprise
-    Outfit               → 48-80px, weight 800, geometric
-
-  Pattern:
-    h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(72px, 11vw, 148px);
-      line-height: 0.9;
-      letter-spacing: 0.01em;
-    }
-
-  Use em + color to highlight a key word in the title:
-    h1 em { font-style: normal; color: var(--accent); }
-
-===================================================================
-STAT BARS / LARGE NUMBERS
-===================================================================
-
-For impressive metrics, use full-width stat bars with large numbers:
-
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-  }
-  .stat-cell {
-    padding: 40px 52px;
-    border-right: 1px solid var(--border);
-  }
-  .stat-cell:last-child { border-right: none; }
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 60px; line-height: 1;
-    color: var(--text); letter-spacing: 0.02em;
-  }
-  .stat-lbl {
-    font-family: var(--font-mono);
-    font-size: 10.5px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--text-dim);
-    margin-top: 10px;
-  }
-
-===================================================================
-SPLIT / COMPARISON PANELS
-===================================================================
-
-Full-width split views for before/after, raw/clean, etc.:
-
-  .split-grid {
-    display: grid;
-    grid-template-columns: 1fr 72px 1fr;
-    border: 1px solid var(--border);
-    min-height: 480px;
-    overflow: hidden;
-  }
-
-  .side-raw {
-    background: linear-gradient(135deg, #0a0500 0%, #060400 100%);
-    border-right: 1px solid rgba(accent-color, 0.15);
-    padding: 32px;
-  }
-
-  .blade {
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .side-clean {
-    background: linear-gradient(135deg, #020806 0%, #030806 100%);
-    border-left: 1px solid rgba(accent-color, 0.15);
-    padding: 32px;
-  }
-
-  Add animated particles between panels for dynamic feel.
-
-===================================================================
-STICKY NAV BAR
-===================================================================
-
-Alternative to TOC sidebar — a top navigation bar:
-
-  nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 52px;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0;
-    background: rgba(5,5,5,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-  }
-
-===================================================================
-THEME SYSTEM — DARK / LIGHT TOGGLE
-===================================================================
-
-Every generated file includes a toggle button. Dark is the default.
-The .light class on <body> flips all CSS variable values.
-Preference persists via localStorage.
-
-  HTML — place immediately after <body>:
-
-    <button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">◐</button>
-
-  JS — place at the top of the <script> block:
-
-    if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
-
-  CSS pattern for theme variables:
-
-    :root {
-      --bg: #0e1014;
-      --bg2: #141720;
-      --surface: #1e2330;
-      --surface2: #252b3a;
-      --border: #2a3045;
-      --border2: #384054;
-      --text: #e2e8f4;
-      --text-dim: #6b7591;
-      --text-muted: #9aa5bd;
-      --accent: [primary accent from chosen palette];
-      --accent2: [secondary accent];
-      --font-body: [chosen body font];
-      --font-mono: [chosen mono font];
-    }
-    body.light {
-      --bg: #f8f9fa;
-      --bg2: #f0f1f5;
-      --surface: #ffffff;
-      --surface2: #f5f6f9;
-      --border: rgba(0,0,0,0.08);
-      --border2: rgba(0,0,0,0.15);
-      --text: #1a1a2e;
-      --text-dim: #6b7280;
-      --text-muted: #9aa5bd;
-    }
-
-  Accent colors stay the same in both themes — they are bright
-  enough to work on both dark and light backgrounds.
-
-===================================================================
-TYPOGRAPHY
-===================================================================
-
-Always load fonts via Google Fonts CDN:
-
+Load all fonts via Google Fonts CDN:
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=[Body]+[Mono]&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=...&display=swap" rel="stylesheet">
 
-Font pairings — pick one per project, rotate across projects:
+DISPLAY FONT OPTIONS (hero headings only):
 
-  Body Font              Mono Font           Feel           Best For
-  DM Sans                Fira Code           Friendly       AI/ML, agents
-  Instrument Serif       JetBrains Mono      Editorial      Plan reviews, docs
-  IBM Plex Sans          IBM Plex Mono       Reliable       Architecture, APIs
-  Bricolage Grotesque    Fragment Mono       Bold           Data tables, dashboards
-  Plus Jakarta Sans      Azeret Mono         Approachable   Status reports
-  Outfit                 Space Mono          Geometric      Flowcharts, pipelines
-  Sora                   IBM Plex Mono       Precise        Schemas, databases
-  Fraunces               Source Code Pro     Warm           Project recaps
-  Geist                  Geist Mono          Sharp          Modern APIs
-  Red Hat Display        Red Hat Mono        Cohesive       System overviews
-  Libre Franklin         Inconsolata         Classic        Data-dense tables
+  Sans-serif display:
+    Bebas Neue             uppercase, industrial, 72-148px
+    Bricolage Grotesque    bold, characterful, 48-96px
+    Outfit                 geometric, weight 800, 48-80px
 
-  ANTI-PATTERNS — never use as body font:
-    Inter, Roboto, Arial, Helvetica, system-ui alone.
-    These signal "AI-generated default."
+  Serif display (editorial, premium feel):
+    Instrument Serif       elegant, high contrast, 48-96px
+    Playfair Display       classic editorial, 48-96px
+    Fraunces               warm, soft serif, 48-80px
 
-Typography scale (use clamp() for responsive sizing):
+BODY FONT OPTIONS:
+    DM Sans                friendly, works with any display font
+    IBM Plex Sans          reliable, enterprise
+    Plus Jakarta Sans      approachable, modern
+    Sora                   precise, geometric
+    Geist                  sharp, contemporary
+    Libre Franklin         classic, data-dense layouts
+
+MONO FONT OPTIONS:
+    Fira Code              ligatures, friendly
+    JetBrains Mono         sharp, developer-oriented
+    IBM Plex Mono          pairs naturally with IBM Plex Sans
+    Space Mono             geometric, distinctive
+    Geist Mono             pairs with Geist body
+    Source Code Pro         warm, readable
+
+EDITORIAL SERIF (for quotes, callouts, pull-quotes):
+    Newsreader             newspaper editorial feel
+    Source Serif 4          pairs with Source Code Pro
+    Crimson Pro            elegant long-form text
+
+EXAMPLE 3-VOICE SETS (rotate across projects):
+    Instrument Serif + DM Sans + Fira Code        (editorial)
+    Bebas Neue + IBM Plex Sans + IBM Plex Mono     (technical)
+    Playfair Display + Sora + JetBrains Mono       (premium)
+    Fraunces + Plus Jakarta Sans + Space Mono      (warm)
+    Bricolage Grotesque + Geist + Geist Mono       (bold modern)
+    Outfit + Libre Franklin + Source Code Pro       (geometric)
+
+TYPOGRAPHY SCALE (use clamp() for responsive sizing):
 
   Element              Size                          Weight
-  Page title           clamp(28px, 5vw, 48px)        700
+  Page title           clamp(48px, 9vw, 148px)       700-900
   Section heading      clamp(18px, 3vw, 28px)        600
   Body text            clamp(14px, 1.5vw, 16px)      400
   Section label        10-11px (mono, uppercase)      600-700
   Card label           9-10px (mono, uppercase)       700
   Code / mono text     12-13px                        400
 
-===================================================================
-COLOR PALETTES — NAMED AESTHETICS
-===================================================================
+ANTI-PATTERNS -- never use as body font:
+  Inter, Roboto, Arial, Helvetica, system-ui alone.
+  These signal "AI-generated default."
 
-Pick a palette aesthetic per project. Don't use raw hex codes
-blindly — choose a named direction and derive colors from it.
-
-  BLUEPRINT (cool, technical — APIs, backend systems):
-    --accent: #0891b2   (teal)
-    --accent2: #22d3ee  (cyan)
-    Warm: #d97706, Cool: #059669
-    Surface: cool grays (#161b22 → #1c2333)
-
-  TERMINAL MONO (code-first, developer tools):
-    --accent: #22d87a   (neon green)
-    --accent2: #00f5d4  (teal)
-    Warn: #f5a623, Danger: #f85149
-    Surface: deep charcoal (#0e1014 → #141720)
-
-  WARM SIGNAL (editorial, data platforms):
-    --accent: #14b8a6   (teal)
-    --accent2: #f59e0b  (amber)
-    Warm: #c2410c, Cool: #65a30d
-    Surface: warm darks (#120f0e → #1a1614)
-
-  NORDIC (calm, enterprise, cloud platforms):
-    --accent: #88c0d0   (ice blue)
-    --accent2: #a3be8c  (frost green)
-    Warm: #ebcb8b, Cool: #81a1c1
-    Surface: slate (#2e3440 → #3b4252)
-
-  MIDNIGHT EDITORIAL (premium, executive summaries):
-    --accent: #d4af37   (warm gold)
-    --accent2: #c0a060  (muted gold)
-    Surface: deep navy (#0a0e1a → #111827)
+FORBIDDEN:
+  -> Single font family for display + body (e.g., Red Hat Display
+     + Red Hat Text, or Inter for everything)
+  -> Display font used at body sizes (under 36px)
+  -> Body font used for the hero heading
 
 ===================================================================
-BACKGROUND ATMOSPHERE
+3. COLOR PALETTES -- NAMED AESTHETICS
 ===================================================================
 
-Flat backgrounds feel dead. Add subtle depth:
+Pick a palette direction per project. Derive your actual colors
+from the aesthetic -- do not use raw hex codes blindly.
 
-  Radial glow (default — works with most palettes):
-    background-image: radial-gradient(
-      ellipse at 50% 0%, rgba(accent, 0.06) 0%, transparent 60%
-    );
+BLUEPRINT (cool, technical -- APIs, backend systems):
+  Accents: teal + cyan range
+  Surface: cool grays
+  Feel: calm engineering precision
 
-  Multi-glow (richer depth, 2-3 positioned radials):
-    background-image:
-      radial-gradient(ellipse 60% 50% at 75% 50%, rgba(accent, 0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(accent2, 0.04) 0%, transparent 50%);
+TERMINAL MONO (code-first, developer tools):
+  Accents: neon green + teal range
+  Surface: deep charcoal
+  Feel: hacker terminal, high contrast data
 
-  Dot grid (minimal, enterprise):
-    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-    background-size: 24px 24px;
+WARM SIGNAL (editorial, data platforms):
+  Accents: teal + amber range
+  Surface: warm darks
+  Feel: magazine data journalism
 
-  SVG grid decoration (Terminal Mono aesthetic):
-    <svg width="100%" height="100%">
-      <defs>
-        <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
-          <path d="M 48 0 L 0 0 0 48" fill="none" stroke="var(--accent)" stroke-width="0.4"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#grid)"/>
-    </svg>
+NORDIC (calm, enterprise, cloud platforms):
+  Accents: ice blue + frost green range
+  Surface: slate grays
+  Feel: Scandinavian restraint
 
-===================================================================
-CARD COMPONENTS
-===================================================================
+MIDNIGHT EDITORIAL (premium, executive summaries):
+  Accents: warm gold range
+  Surface: deep navy
+  Feel: luxury annual report
 
-The fundamental building block. Adapt per report — don't use
-a single rigid .af-card class for everything.
-
-  Base card:
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 20px;
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    }
-    .card:hover {
-      border-color: var(--border2);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      transform: translateY(-2px);
-    }
-
-  Depth tiers (vary within each report):
-
-    /* Elevated — KPIs, key metrics, hero findings */
-    .card--raised {
-      background: var(--surface2);
-      border-color: var(--border2);
-    }
-
-    /* Hero — executive summary, focal element */
-    .card--hero {
-      background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
-      border-left: 3px solid var(--accent);
-      padding: 28px 32px;
-    }
-
-    /* Recessed — secondary content, code blocks */
-    .card--recessed {
-      background: var(--bg2);
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
-    }
-
-  Colored accent borders (use semantic colors):
-
-    .card--green  { border-left: 3px solid var(--accent); }
-    .card--red    { border-left: 3px solid #f85149; }
-    .card--amber  { border-left: 3px solid #f5a623; }
-    .card--blue   { border-left: 3px solid #58a6ff; }
-    .card--purple { border-left: 3px solid #c084fc; }
+Choose accent colors that work on BOTH dark and light backgrounds
+(they need to survive the theme toggle). Pick 2 accents maximum.
+Derive warn/danger/success states from your palette direction,
+not from a fixed table.
 
 ===================================================================
-KPI / METRIC CARDS
+4. BACKGROUND ATMOSPHERE -- PER-SECTION REQUIREMENT
 ===================================================================
 
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-  }
+RULE: No two adjacent sections may share the same background
+treatment. Every section MUST have its own atmosphere.
 
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    transition: transform 0.2s, border-color 0.2s;
-  }
-  .kpi-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+TECHNIQUES (combine and vary per section):
 
-  .kpi-card__val {
-    font-family: var(--font-mono);
-    font-size: clamp(22px, 3vw, 34px);
-    font-weight: 700; letter-spacing: -1px; line-height: 1;
-  }
+  Radial glow -- A soft elliptical gradient from one edge.
+    Position the center differently per section (top-left,
+    bottom-right, center). Vary the accent color and opacity.
 
-  .kpi-card__lbl {
-    font-family: var(--font-mono);
-    font-size: 9px; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--text-dim);
-    margin-top: 6px;
-  }
+  Multi-glow -- Two or three positioned radial gradients layered.
+    Creates depth and dimension. Each glow can use a different
+    accent color at low opacity.
 
-===================================================================
-DATA TABLES
-===================================================================
+  Dot grid -- Repeating radial-gradient dots. Minimal, enterprise.
+    Vary the spacing and dot size per section.
 
-Use real <table> elements for tabular data. Wrap in scrollable
-container for wide tables.
+  SVG grid -- A fixed pattern overlay with thin lines. Technical,
+    terminal aesthetic.
 
-  .table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+  Linear sweep -- A diagonal or horizontal gradient using two
+    surface tones. Subtle tonal shift across the section.
 
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    line-height: 1.5;
-  }
+  Film grain -- SVG noise texture overlay at very low opacity.
+    Adds editorial print texture.
 
-  .data-table th {
-    background: var(--bg2);
-    font-family: var(--font-mono);
-    font-size: 9px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase;
-    color: var(--text-dim);
-    text-align: left;
-    padding: 10px 14px;
-    border-bottom: 2px solid var(--border2);
-  }
-
-  .data-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-muted);
-    vertical-align: top;
-  }
-
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .data-table code {
-    font-family: var(--font-mono); font-size: 11px;
-    background: rgba(88,166,255,0.07); color: #58a6ff;
-    padding: 1px 5px; border-radius: 3px;
-  }
+PRINCIPLES:
+  -> Background gradients should be SUBTLE (3-8% opacity for
+     accent colors). If you can see the gradient without squinting,
+     it is too strong.
+  -> Vary the gradient DIRECTION and POSITION between sections.
+     If section 1 glows from top-left, section 2 should glow from
+     bottom-right or use a different technique entirely.
+  -> Texture overlays (grain, grids) are fixed/absolute-positioned
+     with pointer-events:none and low z-index.
 
 ===================================================================
-TAGS / BADGES
+5. COMPONENT TYPES -- DESIGN PRINCIPLES, NOT CSS
 ===================================================================
 
-  .tag {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    padding: 3px 8px; border-radius: 4px;
-    white-space: nowrap;
-  }
+These are the building blocks available for report sections.
+Design the exact CSS fresh per project -- what follows describes
+WHAT each component is and WHEN to use it, not HOW to style it.
 
-  Color variants — create per-palette:
-    .tag--green  { background: rgba(accent, 0.12); color: var(--accent); border: 1px solid rgba(accent, 0.2); }
-    .tag--red    { background: rgba(248,81,73,0.12); color: #f85149; }
-    .tag--amber  { background: rgba(245,166,35,0.12); color: #f5a623; }
-    .tag--blue   { background: rgba(88,166,255,0.12); color: #58a6ff; }
-    .tag--purple { background: rgba(192,132,252,0.12); color: #c084fc; }
+STAT DISPLAY
+  A large prominent number with a small label beneath it.
+  The number should be the largest element -- bold, mono or display
+  font. The label is tiny, uppercase, tracked-out mono text.
+  Use for: KPIs, counts, percentages, key metrics.
+  Arrange in a grid row or a full-width divided bar.
 
-===================================================================
-CODE BLOCKS
-===================================================================
+STAT PILL
+  A compact inline badge combining a number and a short label.
+  Small, pill-shaped, colored background at low opacity.
+  Use for: inline metrics within prose, status counts in headers.
 
-  .code-block {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 18px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--text-muted);
-    overflow: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 400px;
-  }
+EDITORIAL QUOTE
+  Large serif italic text spanning most of the page width.
+  Use an editorial serif font (Newsreader, Crimson Pro, etc.).
+  Color the text or add a colored left border for attribution.
+  Use for: key findings, executive takeaways, section epigraphs.
+  Position as a section break between dense content areas.
 
-  Syntax highlight classes (when useful):
-    .kw  { color: #c792ea; }  /* keywords */
-    .fn  { color: #82aaff; }  /* functions */
-    .str { color: #c3e88d; }  /* strings */
-    .cmt { color: #4a5568; font-style: italic; }  /* comments */
-    .hl  { color: var(--accent); font-weight: 700; }  /* highlighted */
+TERMINAL MOCKUP
+  A dark recessed panel with three colored dots (red, yellow, green)
+  in the top bar, followed by monospace content.
+  Use for: CLI output, command examples, log excerpts.
+  The dots and the bar are decorative -- the content is code-styled.
 
-  With file header:
-    .code-file { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .code-file__header {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 16px; background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
-    }
-    .code-file__body { /* same as .code-block but no border/radius */ }
+CARD (general purpose)
+  A bordered container with surface background and padding.
+  Vary the depth treatment per report: some cards are raised
+  (brighter surface, stronger border), some are recessed (darker,
+  inset shadow), some are hero-level (accent left border, gradient).
+  Do not use the same card variant for every section.
 
-===================================================================
-COLLAPSIBLE SECTIONS
-===================================================================
+DATA TABLE
+  A real <table> element. Headers should be compact mono uppercase
+  with dim color. Row text in muted body color. Wrap in a scrollable
+  container for wide tables. Add subtle hover highlighting on rows.
 
-  details.collapsible {
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+TAG / BADGE
+  Small mono uppercase pills with color-coded backgrounds at low
+  opacity. Border optional. Use for: technology labels, status
+  indicators, category markers.
 
-  details.collapsible summary {
-    padding: 14px 20px;
-    background: var(--surface);
-    font-family: var(--font-mono);
-    font-size: 12px; font-weight: 600;
-    cursor: pointer; list-style: none;
-    display: flex; align-items: center; gap: 8px;
-    color: var(--text);
-    transition: background 0.15s ease;
-  }
+CODE PANEL
+  Dark recessed background, mono font, pre-wrapped text.
+  Optional: file header bar with filename and language label.
+  Optional: syntax highlighting with a few keyword color classes.
 
-  details.collapsible summary:hover { background: var(--surface2); }
-  details.collapsible summary::-webkit-details-marker { display: none; }
-  details.collapsible summary::before {
-    content: '▸'; font-size: 11px; color: var(--text-dim);
-    transition: transform 0.15s ease;
-  }
-  details.collapsible[open] summary::before { transform: rotate(90deg); }
+COLLAPSIBLE SECTION
+  Use <details> / <summary> for content that is useful but not
+  primary. The summary line should be mono, compact, with a
+  rotation indicator (triangle or chevron).
 
-===================================================================
-SECTION LABELS
-===================================================================
+COMPARISON PANEL
+  A two-column split for before/after, raw/clean, old/new.
+  Each side gets a subtly tinted background (warm for "before",
+  cool for "after"). Optional: animated particles flowing between
+  the panels to show transformation.
 
-  .section-label {
-    font-family: var(--font-mono);
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 8px;
-  }
+BAR VISUALIZATION
+  Horizontal bars for quantity comparison. Label on the left,
+  filled track on the right. The fill color should come from the
+  palette. Use for: performance metrics, size comparisons,
+  distribution breakdowns.
 
-  Optional dot indicator:
-    .section-label::before {
-      content: '';
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-    }
+SECTION LABEL
+  A tiny mono uppercase header with wide letter-spacing.
+  Optional: a small colored dot indicator (animated blink for
+  "live" sections). This marks the start of a content block.
 
-===================================================================
-CONNECTORS AND FLOW ARROWS
-===================================================================
+FLOW / PIPELINE
+  A sequence of connected steps. Can be horizontal (boxes with
+  arrows) or vertical (timeline with dot markers on a left border).
+  Each step should have a different border or accent color.
+  Use for: data pipelines, deployment stages, process flows.
 
-  Vertical flow arrow (between stacked sections):
-    .flow-arrow {
-      display: flex; justify-content: center;
-      padding: 6px 0;
-      color: var(--text-dim);
-    }
-    .flow-arrow svg {
-      width: 20px; height: 20px;
-      fill: none; stroke: var(--border2);
-      stroke-width: 2; stroke-linecap: round;
-    }
+SVG ORBIT / RADIAL DIAGRAM
+  Nodes arranged in a circle around a central node. Lines or arcs
+  connecting nodes to the center. Good for showing relationships
+  where one component is central and others surround it.
+  Use inline SVG for pixel-perfect control.
 
-  Vertical connector with label (for animated diagrams):
-    .vert-connector {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 4px; padding: 4px 0;
-    }
-    .vert-connector .vert-line {
-      width: 2px; height: 28px;
-      background: var(--border);
-      transition: background 0.4s;
-      position: relative; overflow: hidden;
-    }
-    .vert-connector .vert-line .shimmer {
-      display: none; position: absolute; top: -20%;
-      width: 100%; height: 20%;
-      background: var(--text); opacity: 0.85;
-      animation: slideV 0.7s linear infinite;
-    }
-    .vert-connector .vert-line.active .shimmer { display: block; }
-    @keyframes slideV { from { top: -20%; } to { top: 120%; } }
-    .vert-connector .conn-label {
-      font-family: var(--font-mono);
-      font-size: 8px; letter-spacing: 0.5px;
-      color: var(--text-dim);
-    }
+INLINE SVG DIAGRAM
+  For complex mixed layouts where CSS grid is insufficient.
+  SVG gives pixel-perfect control over boxes of varying sizes,
+  embedded tables, arrow connectors of any length and direction,
+  and circle badges. Use CSS variables (var(--accent), var(--surface))
+  inside SVG attributes so themes still work.
 
-  Horizontal arrow character:
-    .h-arrow::after {
-      content: '→';
-      color: var(--border2);
-      font-size: 18px; padding: 0 4px;
-    }
+  Arrow markers:
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10" fill="var(--accent)"/>
+      </marker>
+    </defs>
 
-  CSS pipeline (linear flow visualization):
-    .pipeline-step {
-      display: flex; align-items: flex-start; gap: 16px;
-      padding: 14px 0;
-      border-left: 2px solid var(--border);
-      padding-left: 20px;
-      position: relative;
-    }
-    .pipeline-step::before {
-      content: '';
-      position: absolute; left: -5px; top: 18px;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border2);
-      border: 2px solid var(--bg);
-    }
-    .pipeline-step:last-child { border-left-color: transparent; }
+COMBINING TECHNIQUES:
+  A great report uses 4-6 DIFFERENT component types across its
+  sections. Do not build an entire report from cards alone.
+  Mix stat displays, editorial quotes, terminal mockups, tables,
+  flow diagrams, and bar charts. The visual rhythm should vary.
 
 ===================================================================
-BAR VISUALIZATIONS
+6. DIAGRAM PRINCIPLES
 ===================================================================
 
-  Simple horizontal bar:
-    .bar-track {
-      height: 6px;
-      background: var(--surface);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 1s cubic-bezier(0.16,1,0.3,1);
-    }
+DENSITY -- SINGLE-PAGE PREFERENCE
+  The animated architecture diagram should prefer COMPACT, DENSE
+  layouts that fit within 1-2 viewport heights. Stack layers
+  top-to-bottom in a single scrollable column. Each layer is a
+  full-width card with icon, title, description, and tags.
 
-  Segmented distribution bar:
-    .match-bar {
-      display: flex;
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      gap: 2px;
-    }
-    .match-bar-seg { height: 100%; border-radius: 2px; }
+  Layers with sub-components EXPAND INLINE: a parent layer card
+  contains a nested grid of child components inside it. This keeps
+  detail in context with its parent, not as a disconnected section.
 
-===================================================================
-SPLIT / COMPARISON PANELS
-===================================================================
+  Why: The reader sees the full architecture at once. Animated
+  phase highlighting is more impactful when all layers are visible
+  simultaneously.
 
-  Before/After comparison:
-    .split-panels {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .panel {
-      padding: clamp(20px, 3vh, 40px) clamp(16px, 3vw, 32px);
-    }
-    .panel--before { background: rgba(248,81,73,0.03); }
-    .panel--after  { background: rgba(34,216,122,0.03); border-left: 1px solid var(--border); }
+  Avoid:
+    -> Spreading components across wide horizontal rows with tiny
+       8px labels that need zooming
+    -> Putting diagram components and their detail (tables, grids)
+       in separate report sections
+    -> Using separate pages for one logical diagram
 
-===================================================================
-ANIMATIONS
-===================================================================
+ANIMATED PHASE ENGINE -- JS INTERFACE CONTRACT
+  The phase engine animates an architecture diagram by highlighting
+  components sequentially. The design-system.md does NOT prescribe
+  the exact CSS. You design the layer cards, connectors, and
+  service cards fresh per project. But the JS interface requires:
 
-  1. fadeUp — staggered page load reveal
+  REQUIREMENTS:
+    -> Each diagram component needs a unique ID attribute
+    -> The phase engine JS sets visual highlighting via:
+       - Setting a --glow-color CSS custom property on the element
+       - Adding a .lit class (or applying inline styles directly)
+    -> You must design a .lit state for your components (brighter
+       border, glow shadow, tinted background -- your choice)
+    -> A phase banner element shows the current phase description
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
+  JS PATTERN (adapt the selectors to your class names):
+
+    function litLayer(id, color) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.setProperty('--glow-color', color);
+      el.classList.add('lit');
     }
 
-    CRITICAL: always use animation-fill-mode: both — elements stay
-    hidden before the animation starts. No flash of unstyled content.
-
-    Hero elements stagger on page load with increasing delays:
-
-      .hero-label   { animation: fadeUp 0.5s ease both; }
-      h1            { animation: fadeUp 0.5s ease 0.08s both; }
-      .subline      { animation: fadeUp 0.5s ease 0.16s both; }
-      .ctas         { animation: fadeUp 0.5s ease 0.24s both; }
-      .transform    { animation: fadeUp 0.7s ease 0.35s both; }
-
-    The word "both" is the key. Claude Code tends to forget it and
-    the stagger collapses — elements flash visible then animate.
-
-  2. blink — live indicator dots
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.25; }
+    function litConnector(id, color) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.setProperty('--glow-color', color);
+      el.classList.add('lit');
     }
 
-    Use on small colored dots next to section headers or status labels.
-    Signals "active system" without being aggressive. 1.8-2s loop.
-
-      .live-dot {
-        width: 5px; height: 5px;
-        border-radius: 50%;
-        background: var(--accent);
-        animation: blink 1.8s infinite;
-      }
-
-    Can also use as ::before pseudo-element on labels:
-      .label::before {
-        content: '';
-        width: 5px; height: 5px;
-        border-radius: 50%;
-        background: currentColor;
-        animation: blink 2s infinite;
-      }
-
-  3. pulse — highlighted data fields
-
-    @keyframes pulse {
-      0%, 100% { color: var(--accent); }
-      50% { color: color-mix(in srgb, var(--accent) 60%, var(--text-dim)); }
-    }
-
-    Apply to specific data values that need attention — the fields
-    that matter to the narrative. Draws the eye without being garish.
-    Tied directly to the story the report tells.
-
-      .field-highlight { animation: pulse 2.5s ease infinite; }
-
-  4. cascade — animated particles for transform visualizations
-
-    @keyframes cascade {
-      0%   { top: -6px; opacity: 0; }
-      8%   { opacity: 1; }
-      92%  { opacity: 1; }
-      100% { top: calc(100% + 6px); opacity: 0; }
-    }
-
-    Six particles flowing through a blade/divider between panels.
-    Each particle is absolutely positioned with varied duration,
-    delay, and opacity so they NEVER sync up:
-
-      particle 1 → accent-color,  3.4s, delay 0s
-      particle 2 → white,         2.8s, delay 0.6s, opacity 0.5
-      particle 3 → accent2-color, 3.8s, delay 1.2s
-      particle 4 → accent-color,  2.6s, delay 1.9s, opacity 0.7
-      particle 5 → accent2-color, 4.0s, delay 0.4s
-      particle 6 → white,         3.1s, delay 2.4s, opacity 0.4
-
-    Different durations + different delays = never looks mechanical.
-    Color sequence should echo the transformation story
-    (e.g., orange entering → teal exiting).
-
-    HTML:
-      <div class="blade">
-        <div class="particle" style="background:var(--accent);
-             animation:cascade 3.4s linear infinite;"></div>
-        <div class="particle" style="background:#fff;opacity:0.5;
-             animation:cascade 2.8s linear 0.6s infinite;"></div>
-        <div class="particle" style="background:var(--accent2);
-             animation:cascade 3.8s linear 1.2s infinite;"></div>
-        <!-- ... 3 more particles with varied timing -->
-      </div>
-
-    CSS:
-      .particle {
-        position: absolute;
-        left: 50%; width: 4px; height: 4px;
-        border-radius: 50%;
-        transform: translateX(-50%);
-      }
-
-    IMPORTANT: Claude Code will try to simplify or remove cascade
-    particles because they look complex. Never replace CSS keyframe
-    animations with JS. Keep all 6 particles with varied timing.
-
-  5. fadeScale — for KPI cards and badges
-
-    @keyframes fadeScale {
-      from { opacity: 0; transform: scale(0.92); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-  6. Hover transitions (NOT keyframe animations — CSS transitions):
-
-    Primary buttons → background shifts to accent, translateY(-2px)
-    Secondary buttons → border and text brighten
-    Cards → border brightens, subtle box-shadow, translateY(-2px)
-    Nav links → color eases to --text
-
-    All use transition: 0.2s — fast enough to feel responsive,
-    slow enough to be perceptible. Always 0.2s, not 0.3s.
-
-  7. Scroll-triggered reveal (for below-fold sections):
-
-    Instead of animating everything on load, reveal sections
-    as they enter the viewport via IntersectionObserver:
-
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    Style: sections start with opacity:0, transform:translateY(20px),
-    and transition to visible state when the .visible class is added.
-    Use cubic-bezier(0.16, 1, 0.3, 1) for smooth deceleration.
-
-  Reduced motion:
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-  Archflow diagram keyframes (always include for the phase engine):
-    @keyframes slide { from { left: -20%; } to { left: 120%; } }
-
-===================================================================
-RESPONSIVE DESIGN
-===================================================================
-
-  @media (max-width: 768px) {
-    body { padding: 16px; }
-    .split-panels { grid-template-columns: 1fr; }
-    .kpi-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-===================================================================
-OVERFLOW PROTECTION
-===================================================================
-
-  /* Every grid/flex child must be able to shrink */
-  [style*="display: grid"] > *,
-  [style*="display: flex"] > * {
-    min-width: 0;
-  }
-  body { overflow-wrap: break-word; }
-
-===================================================================
-MERMAID CONTAINERS
-===================================================================
-
-When including Mermaid diagrams (sequence, ER, state), use:
-
-  CDN import (at end of body):
-    <script type="module">
-      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: 'base',
-        themeVariables: {
-          primaryColor: isDark ? '#1a2744' : '#e0f2fe',
-          primaryBorderColor: 'var(--accent)',
-          primaryTextColor: 'var(--text)',
-          lineColor: 'var(--text-dim)',
-          fontSize: '16px',
-          fontFamily: 'var(--font-body)',
-        }
-      });
-    </script>
-
-  Container CSS:
-    .mermaid-wrap {
-      display: flex; justify-content: center; align-items: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 32px 24px;
-      overflow: auto;
-      min-height: 300px;
-    }
-
-  Never use .node as a CSS class — Mermaid uses it internally.
-
-===================================================================
-ANIMATED DIAGRAM — ARCHFLOW PHASE ENGINE
-===================================================================
-
-The animated architecture diagram is archflow's core differentiator.
-It should be BIG, RICH, and READABLE — not tiny monospace boxes.
-
-CRITICAL: The diagram components must be full-width horizontal cards
-with SVG icons, descriptions, and technology tags. NOT small centered
-boxes with emoji. Think of each component as a rich card that tells
-a story, not a label on a flowchart.
-
-  Diagram container:
-    .arch-flow {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-  Phase banner:
-    .phase-banner {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      padding: 10px 24px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: var(--bg2);
-      transition: color 0.4s, border-color 0.4s;
-      margin-bottom: 24px;
-      max-width: 860px;
-    }
-
-  Architecture layer card (the PRIMARY component pattern):
-    .arch-layer {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 28px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      transition: border-color 0.4s, box-shadow 0.4s, background 0.3s;
-    }
-    .arch-layer:hover {
-      border-color: var(--accent);
-    }
-    .arch-layer.lit {
-      border-color: var(--glow-color, var(--accent));
-      background: linear-gradient(135deg, var(--surface) 0%,
-        color-mix(in srgb, var(--glow-color, var(--accent)) 5%, var(--surface)) 100%);
-      box-shadow: 0 0 40px color-mix(in srgb, var(--glow-color, var(--accent)) 15%, transparent);
-    }
-
-  Layer icon (SVG in colored rounded background, NOT emoji):
-    .arch-icon {
-      width: 48px; height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-    Use inline SVG icons (24x24, stroke-width 1.5) with colored
-    backgrounds like: background: rgba(accent, 0.15); color: accent;
-
-  Layer name + description:
-    .arch-name {
-      font-family: var(--font-mono);
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-    .arch-desc {
-      font-size: 14px;
-      color: var(--text-dim);
-      margin-top: 2px;
-      line-height: 1.5;
-    }
-
-  Layer tags (technology badges, aligned right):
-    .arch-tags {
-      display: flex;
-      gap: 6px;
-      margin-left: auto;
-      flex-wrap: wrap;
-    }
-    .arch-tag {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: var(--accent-dim, rgba(var(--accent), 0.1));
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-  Vertical connector between layers:
-    .arch-connector {
-      width: 2px;
-      height: 14px;
-      background: linear-gradient(to bottom, var(--accent), transparent);
-      margin: 0 auto;
-      opacity: 0.4;
-      transition: opacity 0.4s, background 0.4s;
-    }
-    .arch-connector.lit {
-      opacity: 1;
-      background: var(--glow-color, var(--accent));
-      box-shadow: 0 0 8px color-mix(in srgb, var(--glow-color, var(--accent)) 40%, transparent);
-    }
-
-  PHASE ENGINE with rich cards — JS helpers:
-
-    The litComponent function targets .arch-layer elements by ID:
-
-      function litLayer(id, color) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.style.setProperty('--glow-color', color);
-        el.classList.add('lit');
-      }
-
-      function litConnector(id, color) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.style.setProperty('--glow-color', color);
-        el.classList.add('lit');
-      }
-
-      function resetAll() {
-        document.querySelectorAll('.arch-layer, .arch-connector').forEach(el => {
+    function resetAll() {
+      document.querySelectorAll('[class*="layer"], [class*="connector"]')
+        .forEach(el => {
           el.classList.remove('lit');
           el.style.removeProperty('--glow-color');
         });
-      }
-
-  External services (below the flow):
-    Use a horizontal row of cards below the arch-flow:
-    .services-row {
-      display: flex; gap: 12px;
-      margin-top: 20px;
-      max-width: 860px;
-    }
-    .service-card {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      text-align: center;
-      transition: border-color 0.4s, box-shadow 0.4s;
-    }
-    .service-card.lit {
-      border-color: #e8b84b;
-      box-shadow: 0 0 14px rgba(232,184,75,0.2);
     }
 
-  Diagram insights row:
-    .diagram-insights { margin-top: 12px; display: flex; gap: 10px;
-                        flex-wrap: wrap; justify-content: center; }
-    .insight-chip {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 16px;
-      text-align: center; min-width: 150px;
-    }
+  The full phase engine logic (phase definitions, auto-play,
+  prev/next navigation) is documented in animation.md.
 
-===================================================================
-RICH DIAGRAM COMPONENTS — BEYOND BOXES AND ARROWS
-===================================================================
+RICH COMPONENTS -- NOT FLOWCHART BOXES
+  Diagram components should be full-width horizontal cards with
+  SVG icons, descriptions, and technology tags. NOT small centered
+  boxes with emoji. Think of each component as a rich card that
+  tells a story, not a label on a flowchart.
 
-The arch-flow + arch-layer pattern above is the BASE for the
-animated phase engine. But a good architecture visualization
-needs MORE than a vertical stack of cards. Combine multiple
-techniques to tell the full story:
+  Use inline SVG icons (24x24, stroke-width 1.5) with colored
+  backgrounds -- not emoji. Emoji icons look unprofessional.
 
-  LAYER CARDS (for tier breakdowns like Bronze/Silver/Gold):
-    .layer-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    .layer-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.3s, transform 0.3s;
-    }
-    .layer-card:hover { transform: translateY(-2px); }
-    .layer-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--card-accent);
-    }
-    .layer-card .count {
-      font-size: 2.2rem; font-weight: 800;
-      line-height: 1; margin-bottom: 0.5rem;
-    }
-
-    Use for: medallion tiers, service categories, module groups.
-    Each card shows a big number + title + list of items.
-
-  ENTITY CARDS (for component relationships, ER-like):
-    .er-grid {
-      display: flex; flex-wrap: wrap;
-      gap: 12px; justify-content: center;
-    }
-    .er-entity {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      min-width: 160px;
-      text-align: center;
-      transition: all 0.3s;
-    }
-    .er-entity:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-    .er-entity.central {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, var(--surface) 0%,
-        color-mix(in srgb, var(--accent) 5%, var(--surface)) 100%);
-      box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 6%, transparent);
-    }
-
-    Use for: microservices, agent networks, database entities.
-
-  QUALITY / FEATURE GRID (for listing capabilities):
-    .quality-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 12px;
-    }
-    .quality-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-    .quality-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      margin-top: 5px;
-      flex-shrink: 0;
-      background: var(--accent);
-      box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
-    }
-
-  HORIZONTAL BAR CHART (for performance/size comparisons):
-    .bar-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      margin-bottom: 0.5rem;
-    }
-    .bar-label {
-      width: 7rem;
-      color: var(--text-dim);
-      text-align: right;
-      flex-shrink: 0;
-    }
-    .bar-track {
-      flex: 1;
-      height: 28px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      padding-left: 0.75rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-
-  MERMAID DIAGRAM (for complex flows, ER, sequences):
-    Use Mermaid for flows that are too complex for CSS.
-    Especially good for: multi-path branching, sequence diagrams,
-    entity relationships with cardinality, state machines.
-    See the MERMAID CONTAINERS section below for setup.
-
-  HORIZONTAL FLOW ROW (pipeline of colored boxes with arrows):
-    .flow-row {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      flex-wrap: nowrap;
-      justify-content: center;
-    }
-    .flow-box {
-      background: var(--surface);
-      border: 1.5px solid var(--border2);
-      border-radius: 10px;
-      padding: 12px 18px;
-      text-align: center;
-      min-width: 110px;
-    }
-    /* Each box gets a DIFFERENT border color */
-    .flow-box--green  { border-color: var(--accent); background: linear-gradient(135deg, var(--surface) 0%, rgba(accent, 0.06) 100%); }
-    .flow-box--orange { border-color: #ef9000; background: linear-gradient(135deg, var(--surface) 0%, rgba(239,144,0,0.06) 100%); }
-    .flow-box--blue   { border-color: #60a5fa; background: linear-gradient(135deg, var(--surface) 0%, rgba(96,165,250,0.06) 100%); }
-    .flow-box--purple { border-color: #a78bfa; background: linear-gradient(135deg, var(--surface) 0%, rgba(167,139,250,0.06) 100%); }
-    .flow-box--gold   { border-color: #fbbf24; background: linear-gradient(135deg, var(--surface) 0%, rgba(251,191,36,0.06) 100%); }
-    .flow-box__title {
-      font-family: var(--font-mono); font-size: 11px;
-      font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    }
-    .flow-box__sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
-    .flow-arrow { color: var(--accent); font-size: 20px; padding: 0 6px; opacity: 0.5; flex-shrink: 0; }
-
-    Use for: linear pipelines, command sequences, phase progressions.
-    Boxes with vertical drop-downs below for detail:
-      <div class="flow-box">Title<div class="flow-box__sub">Subtitle</div></div>
-      Add vertical connectors below specific boxes for detail items.
-
-  INLINE SVG ARCHITECTURE DIAGRAM (for complex mixed layouts):
-    For diagrams with mixed component sizes, data tables inside flows,
-    and vertical sub-stacks — use inline SVG instead of CSS layout.
-
-    SVG gives pixel-perfect control for:
-      → Boxes of varying sizes in one horizontal flow
-      → Embedded data tables with colored row labels
-      → Vertical tier stacks (Bronze→Silver→Gold) beside horizontal flows
-      → Arrow connectors of any length and direction
-      → Circle badges with initials (B, S, G)
-
-    Pattern:
-      <svg viewBox="0 0 [width] [height]" style="width:100%;max-width:[width]px;">
-        <!-- Boxes -->
-        <rect x="..." y="..." width="..." height="..." rx="12"
-              fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/>
-        <!-- Text labels -->
-        <text x="..." y="..." fill="var(--accent)"
-              font-family="var(--font-mono)" font-size="12" font-weight="700">
-          LABEL
-        </text>
-        <!-- Arrow connectors -->
-        <line x1="..." y1="..." x2="..." y2="..."
-              stroke="var(--accent)" stroke-width="1.5"
-              marker-end="url(#arrow)"/>
-        <!-- Circle badges -->
-        <circle cx="..." cy="..." r="14" fill="none"
-                stroke="var(--accent)" stroke-width="2"/>
-      </svg>
-
-    Arrow markers:
-      <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5"
-                markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10" fill="var(--accent)"/>
-        </marker>
-      </defs>
-
-    SVG diagrams are the BEST option when the architecture has:
-      → Multiple component types of different sizes
-      → Embedded data tables within the flow
-      → Vertical sub-flows branching from horizontal main flow
-      → Custom shapes (circles, badges, icons)
-
-  SIDE-BY-SIDE CONCEPT CARDS (for methodology / comparison):
-    Two large cards with different colored borders, editorial content.
-    Display font heading above. Optional quote below in italic serif.
-
-    .concept-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-    .concept-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border2);
-      border-radius: 14px;
-      padding: 28px;
-    }
-    .concept-card--blue  { border-color: rgba(96,165,250,0.3); }
-    .concept-card--green { border-color: rgba(accent,0.3); }
-    .concept-label {
-      font-family: var(--font-mono);
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 2px; text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    Use for: comparing approaches, before/after methodologies,
-    showing how a concept applies to a specific domain.
-
-COMBINING TECHNIQUES IN ONE REPORT:
-  A great architecture visualization uses MULTIPLE techniques:
-    1. flow-row for HORIZONTAL PIPELINES (colored boxes + arrows)
-    2. arch-flow with phase engine for ANIMATED OVERVIEW
-    3. Inline SVG for COMPLEX MIXED LAYOUTS
-    4. layer-cards for TIER DETAIL (Bronze/Silver/Gold, etc.)
-    5. concept-cards for METHODOLOGY COMPARISONS
-    6. quality-grid for CAPABILITY LISTS
-    7. bar-charts for PERFORMANCE DATA
-    8. entity-cards for RELATIONSHIP MAPS
-
-  Don't just stack 4 boxes with arrows and call it done.
+MULTIPLE DIAGRAM TECHNIQUES
+  A great architecture visualization combines techniques:
+    -> Vertical layered stack for the animated overview
+    -> Horizontal flow row for linear pipelines
+    -> Inline SVG for complex mixed layouts
+    -> Side-by-side cards for methodology comparison
+    -> Bar charts for performance data
+    -> Entity clusters for relationship maps
   The diagram should be as rich as the architecture it describes.
-  Mix techniques: horizontal flow at the top, detail grids below,
-  SVG diagram for the complex data flow, bar charts for metrics.
 
 ===================================================================
-SEMANTIC ACCENT COLORS FOR DIAGRAMS
+7. THEME SYSTEM -- DARK / LIGHT TOGGLE
 ===================================================================
 
-These are the semantic color assignments for the animated diagram
-section ONLY. The rest of the report uses the chosen palette.
+Every generated file includes a toggle button. Dark is the default.
+The .light class on <body> flips CSS variable values.
+Preference persists via localStorage.
 
-  Cyan    #00d4ff   user / input / client layer
-  Orange  #ff6b35   orchestrator / coordinator / router
-  Purple  #a78bfa   agents / workers / sub-processes
-  Yellow  #e8b84b   storage / external services / RAG
-  Green   #3fb950   output / persistence / success state
-  Amber   #f0883e   LLM / AI inference / model core
-  Blue    #58a6ff   app layer / API responses / user-facing
-  Red     #f85149   errors / warnings (use sparingly)
+HTML -- place immediately after <body>:
+  <button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">&#9684;</button>
+
+JS -- place at the top of the <script> block:
+  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
+
+CSS PATTERN -- define :root variables and override in body.light:
+  :root should define: --bg, --bg2, --surface, --surface2,
+  --border, --border2, --text, --text-dim, --text-muted,
+  --accent, --accent2, --font-body, --font-mono.
+
+  body.light overrides the neutral tones (bg, surface, border,
+  text) to light equivalents. Accent colors stay the same in
+  both themes -- they should be bright enough to work on both
+  dark and light backgrounds.
 
 ===================================================================
-COMPONENT ICON GUIDE (DIAGRAMS ONLY)
+8. ANIMATIONS -- TOOLKIT
 ===================================================================
 
-  👤  User / client / human
-  🌐  API / HTTP endpoint / gateway
-  ⚙️  Orchestrator / engine / coordinator
-  🤖  Agent / bot / AI worker
-  🔍  Search / query / embed / lookup
-  🗄️  Database / storage / warehouse
-  📄  Document / file / chunk / record
-  🧩  Augmentation / injection / compose
-  📊  Analytics / dashboard / metrics
-  🔄  Pipeline / loop / cycle / stream
-  📡  Event / message / queue / pub-sub
-  🏗️  Builder / generator / factory
-  🔐  Auth / security / compliance
-  📦  Package / artifact / output
-  🧠  LLM / embedding / AI inference
-  💾  Persistence / cache / write
-  📬  Notification / webhook / emit
-  🔀  Router / dispatcher / load balancer
-  📥  Ingest / intake / collector
-  🪄  Transform / enrich / process
+1. fadeUp -- staggered page load reveal
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  CRITICAL: always use animation-fill-mode: both so elements stay
+  hidden before animation starts. No flash of unstyled content.
+  Stagger hero elements with increasing delays (0s, 0.08s, 0.16s...).
+
+2. blink -- live indicator dots
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  Use on small colored dots next to section headers or status labels.
+  Signals "active system" without aggression. 1.8-2s loop.
+
+3. pulse -- highlighted data fields
+
+  @keyframes pulse {
+    0%, 100% { color: var(--accent); }
+    50% { color: color-mix(in srgb, var(--accent) 60%, var(--text-dim)); }
+  }
+
+  Apply to specific data values that need attention. 2.5s loop.
+
+4. cascade -- animated particles for transform visualizations
+
+  @keyframes cascade {
+    0%   { top: -6px; opacity: 0; }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { top: calc(100% + 6px); opacity: 0; }
+  }
+
+  Use 5-6 particles with DIFFERENT durations (2.6-4.0s) and
+  DIFFERENT delays so they never sync up. Color sequence should
+  echo the transformation story. Never replace CSS keyframe
+  animations with JS. Keep all particles with varied timing.
+
+5. fadeScale -- for cards and badges
+
+  @keyframes fadeScale {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+6. slide -- for diagram phase shimmer effects
+
+  @keyframes slide { from { left: -20%; } to { left: 120%; } }
+
+7. Hover transitions (CSS transitions, not keyframes):
+  Cards, buttons, and nav links should use transition: 0.2s for
+  hover states. Always 0.2s -- fast enough to feel responsive,
+  slow enough to be perceptible.
+
+8. Scroll-triggered reveal:
+  Use IntersectionObserver to add a .visible class to sections
+  as they enter the viewport. Sections start with opacity:0 and
+  translateY(20px), then transition to their visible state.
+  Use cubic-bezier(0.16, 1, 0.3, 1) for smooth deceleration.
+
+REDUCED MOTION:
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+===================================================================
+9. QUALITY GATES
+===================================================================
+
+Before considering a report finished, apply these tests:
+
+THE SQUINT TEST
+  Blur your eyes and look at the page. If two adjacent sections
+  have the same SHAPE (both are 3-column card grids, both are
+  full-width text blocks), redesign one of them. Adjacent sections
+  must have visually distinct silhouettes.
+
+THE SWAP TEST
+  If you could swap the CSS between two of your reports and nobody
+  would notice, you have not designed anything. Each report must
+  have a distinct personality driven by its subject matter.
+
+THE VARIETY CHECK
+  Count the distinct component types used across all sections.
+  If fewer than 4 different types appear in a report with 6+
+  sections, add variety. A report should not be built from a
+  single component type.
+
+THE ADJACENT SECTION CHECK
+  Walk through each pair of adjacent sections. Verify:
+    -> Different background treatment
+    -> Different component layout (not both card grids)
+    -> Different dominant visual weight
+
+THE FONT CHECK
+  Verify that:
+    -> At least 2 distinct font families are loaded
+    -> Display and body fonts are from different families
+    -> Mono font is used for labels, code, and data
+
+===================================================================
+10. FORBIDDEN PATTERNS
+===================================================================
+
+Visual:
+  -> Generic Inter or Roboto as the only font
+  -> Uniform flat solid background across all sections
+  -> All sections using the same card grid pattern
+  -> More than 3 adjacent sections with bordered-rectangle cards
+  -> Emoji icons in headers or diagram components
+  -> Gradient text (background-clip: text)
+  -> Animated glowing box-shadows that pulse aggressively
+  -> Cyan + magenta + pink neon color combos
+  -> Purple gradients as the default (the "AI look")
+
+Typography:
+  -> Single font family for display + body + labels
+  -> Display font used below 36px
+  -> Body font used for the hero heading
+  -> system-ui or sans-serif as the sole font-family
+
+Layout:
+  -> Rows of identical cards repeated section after section
+  -> TOC sidebar as the default layout
+  -> Tiny flowchart boxes with 8px labels
+  -> Diagram components and their detail in separate sections
+
+Code:
+  -> Using .node as a CSS class (Mermaid uses it internally)
+  -> Replacing CSS keyframe animations with JS equivalents
+
+===================================================================
+11. RESPONSIVE AND OVERFLOW PROTECTION
+===================================================================
+
+OVERFLOW:
+  Every grid and flex child must be able to shrink:
+    [style*="display: grid"] > *,
+    [style*="display: flex"] > * {
+      min-width: 0;
+    }
+    body { overflow-wrap: break-word; }
+
+RESPONSIVE:
+  At 768px and below:
+    -> Body padding reduces to 16px
+    -> Multi-column grids collapse to 1-2 columns
+    -> Stat displays stack vertically
+    -> Flow rows wrap or switch to vertical layout
+
+===================================================================
+12. MERMAID DIAGRAMS
+===================================================================
+
+When including Mermaid diagrams (sequence, ER, state):
+
+CDN import (at end of body):
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: isDark ? '#1a2744' : '#e0f2fe',
+        primaryBorderColor: 'var(--accent)',
+        primaryTextColor: 'var(--text)',
+        lineColor: 'var(--text-dim)',
+        fontSize: '16px',
+        fontFamily: 'var(--font-body)',
+      }
+    });
+  </script>
+
+Container: center the diagram in a bordered panel with surface
+background, rounded corners, and padding. Allow overflow scrolling
+for wide diagrams. Never use .node as a CSS class.
