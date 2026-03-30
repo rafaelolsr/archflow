@@ -99,26 +99,31 @@ Claude Code will:
 ```
 archflow/
 ├── .claude-plugin/
-│   └── plugin.json               ← plugin manifest
-├── skills/
+│   ├── plugin.json               ← marketplace identity
+│   └── marketplace.json          ← plugin catalog
+├── plugins/
 │   └── archflow/
-│       ├── SKILL.md              ← workflow orchestrator (model-invoked)
-│       ├── references/
-│       │   ├── analysis.md       ← how to read and model a codebase
-│       │   ├── layouts.md        ← layout decision guide + HTML skeletons
-│       │   ├── design-system.md  ← colors, typography, base CSS
-│       │   └── animation.md      ← JS phase engine and animation patterns
-│       └── templates/
-│           ├── horizontal-pipeline.html  ← API / RAG systems
-│           ├── multi-agent-hub.html      ← orchestrator + parallel agents
-│           └── medallion-pipeline.html   ← ETL / Delta Live Tables
-├── commands/
-│   └── archflow.md               ← /archflow:archflow slash command
+│       ├── .claude-plugin/
+│       │   └── plugin.json       ← plugin manifest
+│       ├── skills/
+│       │   └── archflow/
+│       │       ├── SKILL.md              ← workflow orchestrator (model-invoked)
+│       │       ├── references/
+│       │       │   ├── analysis.md       ← how to read and model a codebase
+│       │       │   ├── layouts.md        ← layout decision guide + HTML skeletons
+│       │       │   ├── design-system.md  ← colors, typography, base CSS
+│       │       │   └── animation.md      ← JS phase engine and animation patterns
+│       │       └── templates/
+│       │           ├── horizontal-pipeline.html  ← API / RAG systems
+│       │           ├── multi-agent-hub.html      ← orchestrator + parallel agents
+│       │           └── medallion-pipeline.html   ← ETL / Delta Live Tables
+│       └── commands/
+│           └── archflow.md               ← /archflow:archflow slash command
 ├── README.md
 └── .gitignore
 ```
 
-The skill routes to the right layout automatically. It reads only the files it needs — entry points, orchestration files, config — then fills in the closest template with real names and flows from your code.
+The repo is structured as a marketplace containing the archflow plugin. The skill routes to the right layout automatically. It reads only the files it needs — entry points, orchestration files, config — then generates a bespoke diagram with real names and flows from your code.
 
 ---
 

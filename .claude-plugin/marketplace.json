@@ -1,0 +1,26 @@
+{
+  "name": "archflow",
+  "owner": {
+    "name": "rafaelolsr"
+  },
+  "metadata": {
+    "description": "Plugin distribution for archflow",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "archflow",
+      "source": "./plugins/archflow",
+      "description": "Analyzes a codebase and generates animated HTML architecture reports",
+      "version": "0.4.0",
+      "author": {
+        "name": "Rafael Oliveira"
+      },
+      "repository": "https://github.com/rafaelolsr/archflow",
+      "license": "MIT",
+      "keywords": ["architecture", "diagram", "visualization", "animation", "codebase"],
+      "category": "visualization"
+    }
+  ]
+}
