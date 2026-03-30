@@ -4,53 +4,162 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>[System Name] Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
+
   :root {
-    --bg-body:#080c10; --bg-card:#0d1117; --bg-storage:#0a0f14;
+    --bg:#080c10; --bg2:#0a0f14; --surface:#0d1117; --surface-elevated:#131920;
+    --surface-recessed:#060a0e;
     --border:#21262d; --border-subtle:#30363d; --border-banner:#333;
-    --text-primary:#e6edf3; --text-secondary:#c9d1d9;
+    --text:#e6edf3; --text-secondary:#c9d1d9;
     --text-muted:#8b949e; --text-dim:#4a5568;
+    --accent:#00d4ff; --accent2:#ff6b35;
     --shimmer:white; --shadow-alpha:44;
+    --font-display:'Bebas Neue', sans-serif;
+    --font-body:'DM Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+    --font-editorial:'Newsreader', serif;
   }
   body.light {
-    --bg-body:#f4f5f7; --bg-card:#ffffff; --bg-storage:#f0f1f3;
+    --bg:#f4f5f7; --bg2:#eef0f2; --surface:#ffffff; --surface-elevated:#f8fafc;
+    --surface-recessed:#e8eaed;
     --border:#d0d5dd; --border-subtle:#e2e5ea; --border-banner:#c0c5cc;
-    --text-primary:#1a1a2e; --text-secondary:#333344;
+    --text:#1a1a2e; --text-secondary:#333344;
     --text-muted:#666677; --text-dim:#8b8b9e;
     --shimmer:#333; --shadow-alpha:22;
   }
+
   body {
-    min-height:100vh; background:var(--bg-body);
-    font-family:'JetBrains Mono','Fira Code',monospace;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    padding:32px 16px; color:var(--text-secondary);
+    min-height:100vh; background:var(--bg);
+    font-family:var(--font-body);
+    color:var(--text-secondary);
+    overflow-x:hidden;
   }
+
+  /* ── ATMOSPHERE ───────────────────────────────── */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:-1;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 15%, rgba(0,212,255,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 25% 85%, rgba(255,107,53,0.04) 0%, transparent 50%);
+  }
+
+  /* ── THEME TOGGLE ────────────────────────────── */
   .theme-toggle {
     position:fixed; top:16px; right:16px; z-index:100;
-    background:var(--bg-card); border:1px solid var(--border);
+    background:var(--surface); border:1px solid var(--border);
     border-radius:20px; padding:6px 12px; cursor:pointer;
     font-size:14px; color:var(--text-muted);
-    transition:border-color 0.3s,background 0.3s;
+    transition:border-color 0.3s;
   }
   .theme-toggle:hover { border-color:var(--text-muted); }
-  .title-sub  { font-size:10px; letter-spacing:4px; color:var(--text-dim);
-                margin-bottom:6px; text-align:center; text-transform:uppercase; }
-  .title-main { font-size:22px; font-weight:700; color:var(--text-primary);
-                letter-spacing:-0.5px; text-align:center; margin-bottom:28px; }
+
+  /* ── SCROLL REVEAL ───────────────────────────── */
+  .reveal { opacity:0; transform:translateY(20px);
+    transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeScale {
+    from { opacity:0; transform:scale(0.92); }
+    to   { opacity:1; transform:scale(1); }
+  }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.25; } }
+
+  /* ══════════════════════════════════════════════
+     RECIPE: MAGAZINE OPENER (weight: MAXIMUM)
+     ══════════════════════════════════════════════ */
+  .hero {
+    padding:80px 52px 0;
+    max-width:1320px; margin:0 auto;
+  }
+  .hero-tag {
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:10px;
+    color:var(--accent); border:1px solid rgba(0,212,255,0.3);
+    padding:4px 14px; letter-spacing:0.18em; text-transform:uppercase;
+    animation:fadeUp 0.5s ease 0.2s both;
+  }
+  .hero-tag::before {
+    content:''; width:5px; height:5px; border-radius:50%;
+    background:var(--accent); animation:blink 1.8s infinite;
+  }
+  .hero h1 {
+    font-family:var(--font-display); font-size:clamp(64px,10vw,128px);
+    line-height:0.9; letter-spacing:0.01em; color:var(--text);
+    margin-top:24px; animation:fadeUp 0.5s ease 0.08s both;
+  }
+  .hero h1 em { font-style:normal; color:var(--accent); }
+  .hero-desc {
+    margin-top:24px; font-size:16px; line-height:1.7;
+    color:var(--text-muted); max-width:560px; font-weight:300;
+    animation:fadeUp 0.5s ease 0.16s both;
+  }
+  .accent-bar {
+    width:48px; height:3px; background:var(--accent);
+    margin-top:32px; box-shadow:0 0 14px rgba(0,212,255,0.3);
+    animation:fadeUp 0.5s ease 0s both;
+  }
+
+  /* ══════════════════════════════════════════════
+     RECIPE: METRIC STRIP (weight: HIGH)
+     ══════════════════════════════════════════════ */
+  .metric-strip {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    margin-top:64px; background:var(--bg2);
+  }
+  .metric-cell {
+    padding:36px 52px; border-right:1px solid var(--border);
+    position:relative;
+    animation:fadeUp 0.5s ease calc(0.3s + var(--i,0) * 0.08s) both;
+  }
+  .metric-cell:last-child { border-right:none; }
+  .metric-num {
+    font-family:var(--font-display); font-size:56px; line-height:1;
+    color:var(--text); letter-spacing:0.02em;
+  }
+  .metric-label {
+    font-family:var(--font-mono); font-size:10px; letter-spacing:0.16em;
+    text-transform:uppercase; color:var(--text-dim); margin-top:8px;
+  }
+
+  /* ══════════════════════════════════════════════
+     RECIPE: ANIMATED DIAGRAM (weight: MAXIMUM)
+     ══════════════════════════════════════════════ */
+  .diagram-section {
+    padding:64px 52px; max-width:1320px; margin:0 auto;
+  }
+  .section-label {
+    font-family:var(--font-mono); font-size:10px; letter-spacing:0.2em;
+    text-transform:uppercase; color:var(--text-dim);
+    display:inline-flex; align-items:center; gap:8px; margin-bottom:24px;
+  }
+  .section-label::before {
+    content:''; width:5px; height:5px; border-radius:50%;
+    background:var(--accent); animation:blink 1.8s infinite;
+  }
   .phase-banner {
-    background:var(--bg-card); border:1px solid var(--border-banner); border-radius:6px;
-    padding:10px 24px; margin-bottom:32px; font-size:11px;
-    min-width:400px; max-width:700px; text-align:center;
+    background:var(--surface); border:1px solid var(--border-banner); border-radius:6px;
+    padding:10px 24px; margin-bottom:28px; font-family:var(--font-mono);
+    font-size:11px; max-width:700px; text-align:center;
     transition:color 0.4s,border-color 0.4s;
   }
+  .pipeline-wrap {
+    display:flex; align-items:center; width:100%; max-width:1000px;
+    margin:0 auto;
+  }
   .component {
-    background:var(--bg-card); border:1px solid var(--border); border-radius:10px;
-    padding:14px; text-align:center;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:14px; text-align:center; font-family:var(--font-mono);
     transition:border-color 0.4s,box-shadow 0.4s; min-width:130px;
   }
-  .component-icon  { font-size:22px; margin-bottom:6px; }
   .component-label { font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:3px; }
   .component-sub   { font-size:8px; color:var(--text-dim); margin-bottom:6px; line-height:1.4; }
   .component-body  { font-size:8px; color:var(--text-muted); line-height:1.7; }
@@ -66,166 +175,288 @@
     animation:slide 0.7s linear infinite;
   }
   .arrow-line.active .shimmer { display:block; }
-  .arrow-lbl       { text-align:center; font-size:9px; color:var(--text-dim); margin-top:3px; }
+  .arrow-lbl       { text-align:center; font-size:9px; color:var(--text-dim); margin-top:3px; font-family:var(--font-mono); }
   .arrow-lbl.above { margin-top:0; margin-bottom:3px; }
   .vert-line { width:2px; background:var(--border); transition:background 0.4s; margin:0 auto; }
   .storage-pipeline {
     display:flex; align-items:center; gap:0;
-    background:var(--bg-storage); border:1px solid var(--border);
+    background:var(--surface-recessed); border:1px solid var(--border);
     border-radius:12px; padding:14px 12px; position:relative;
   }
   .storage-title {
     position:absolute; top:-10px; left:16px;
-    background:var(--bg-body); padding:0 8px;
+    background:var(--bg); padding:0 8px;
+    font-family:var(--font-mono);
     font-size:9px; letter-spacing:3px; color:#e8b84b; text-transform:uppercase;
   }
   .storage-item {
-    flex:1; background:var(--bg-card); border:1px solid var(--border);
+    flex:1; background:var(--surface); border:1px solid var(--border);
     border-radius:8px; padding:10px; text-align:center; min-width:80px;
+    font-family:var(--font-mono);
     transition:border-color 0.4s,box-shadow 0.4s;
   }
   .storage-sep { width:16px; text-align:center; font-size:10px; color:var(--border); flex-shrink:0; }
-  .insights { margin-top:32px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-  .insight-card {
-    background:var(--bg-card); border:1px solid var(--border); border-radius:8px;
-    padding:10px 16px; text-align:center; min-width:150px;
-  }
-  .insight-label { font-size:9px; letter-spacing:2px; margin-bottom:3px; text-transform:uppercase; }
-  .insight-value { font-size:10px; color:var(--text-muted); }
+
   @keyframes slide { from { left:-20%; } to { left:120%; } }
-  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  /* ══════════════════════════════════════════════
+     RECIPE: INSIGHT PULL-QUOTE (weight: MEDIUM)
+     ══════════════════════════════════════════════ */
+  .pull-quote {
+    max-width:1320px; margin:0 auto;
+    padding:56px 52px;
+    border-left:3px solid var(--accent);
+  }
+  .pull-quote p {
+    font-family:var(--font-editorial); font-size:22px;
+    font-style:italic; line-height:1.6; color:var(--text-muted);
+    max-width:800px;
+  }
+  .pull-quote .attribution {
+    margin-top:12px; font-family:var(--font-mono);
+    font-size:10px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--text-dim); font-style:normal;
+  }
+
+  /* ══════════════════════════════════════════════
+     RECIPE: RECESSED TABLE (weight: LOW)
+     ══════════════════════════════════════════════ */
+  .table-section {
+    max-width:1320px; margin:0 auto; padding:0 52px 64px;
+  }
+  .table-wrap {
+    background:var(--surface-recessed); border:1px solid var(--border);
+    border-radius:10px; padding:20px 24px;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);
+    overflow-x:auto;
+  }
+  .table-wrap table { width:100%; border-collapse:collapse; }
+  .table-wrap th {
+    font-family:var(--font-mono); font-size:9px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--text-dim); text-align:left;
+    padding:8px 12px; border-bottom:1px solid var(--border);
+  }
+  .table-wrap td {
+    font-size:13px; color:var(--text-muted); padding:10px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  .table-wrap tr:last-child td { border-bottom:none; }
+  .table-wrap tr:hover td { background:rgba(0,212,255,0.03); }
+  .table-wrap code {
+    font-family:var(--font-mono); font-size:11px;
+    background:rgba(0,212,255,0.06); color:var(--accent);
+    padding:1px 6px; border-radius:3px;
+  }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  footer {
+    border-top:1px solid var(--border); padding:24px 52px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .footer-logo {
+    font-family:var(--font-display); font-size:16px;
+    letter-spacing:0.08em; color:rgba(255,255,255,0.15);
+  }
+  .footer-meta {
+    font-family:var(--font-mono); font-size:10px;
+    color:var(--text-dim); letter-spacing:0.06em;
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────── */
+  @media (max-width:900px) {
+    .hero { padding:48px 24px 0; }
+    .metric-strip { grid-template-columns:1fr; }
+    .metric-cell { border-right:none; border-bottom:1px solid var(--border); }
+    .metric-cell:last-child { border-bottom:none; }
+    .diagram-section, .pull-quote, .table-section { padding-left:24px; padding-right:24px; }
+    .pipeline-wrap { flex-wrap:wrap; gap:8px; }
+    .arrow-col { display:none; }
+    footer { padding:24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration:0.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
 
-<button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">◐</button>
+<button class="theme-toggle" onclick="document.body.classList.toggle('light');localStorage.setItem('archflow-theme',document.body.classList.contains('light')?'light':'dark')">&#9684;</button>
 
-<div class="title-sub">[SYSTEM CATEGORY]</div>
-<div class="title-main">[System Name] · [One-line description]</div>
-<div class="phase-banner" id="phase-banner">▶ Waiting...</div>
-
-<!-- MAIN ROW -->
-<div style="display:flex;align-items:center;width:100%;max-width:1000px;">
-
-  <div class="component" id="c-input">
-    <div class="component-icon">👤</div>
-    <div class="component-label" style="color:#00d4ff">INPUT</div>
-    <div class="component-sub">[entry_point.py]</div>
-    <div class="component-body">[method()]<br>[what it does]</div>
-  </div>
-
-  <div class="arrow-col">
-    <div class="arrow-wrap">
-      <div class="arrow-line" id="arr-1"><div class="shimmer"></div></div>
-      <div class="arrow-lbl">[data label] →</div>
-    </div>
-    <div class="arrow-wrap">
-      <div class="arrow-lbl above">← [response label]</div>
-      <div class="arrow-line" id="arr-1b"></div>
-    </div>
-  </div>
-
-  <div class="component" id="c-orch">
-    <div class="component-icon">⚙️</div>
-    <div class="component-label" style="color:#ff6b35">ORCHESTRATOR</div>
-    <div class="component-sub">[orchestrator.py]</div>
-    <div class="component-body">[run()]<br>[what it does]</div>
-  </div>
-
-  <div class="arrow-col">
-    <div class="arrow-wrap">
-      <div class="arrow-line" id="arr-2"><div class="shimmer"></div></div>
-      <div class="arrow-lbl">[data label] →</div>
-    </div>
-  </div>
-
-  <div class="component" id="c-proc">
-    <div class="component-icon">🔄</div>
-    <div class="component-label" style="color:#a78bfa">PROCESSOR</div>
-    <div class="component-sub">[processor.py]</div>
-    <div class="component-body">[process()]<br>[what it does]</div>
-  </div>
-
-  <div class="arrow-col">
-    <div class="arrow-wrap">
-      <div class="arrow-line" id="arr-3"><div class="shimmer"></div></div>
-      <div class="arrow-lbl">result →</div>
-    </div>
-  </div>
-
-  <div class="component" id="c-output">
-    <div class="component-icon">📦</div>
-    <div class="component-label" style="color:#3fb950">OUTPUT</div>
-    <div class="component-sub">[output.py]</div>
-    <div class="component-body">[serialize()]<br>[what it returns]</div>
-  </div>
-
+<!-- ═══════════════════════════════════════════════
+     MAGAZINE OPENER — project identity + tone
+     ═══════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-tag">[SYSTEM CATEGORY]</div>
+  <h1>[System <em>Name</em>]</h1>
+  <p class="hero-desc">[2-3 sentence overview of what this system does, its primary pattern, and key technologies.]</p>
+  <div class="accent-bar"></div>
 </div>
 
-<!-- VERTICAL CONNECTORS -->
-<div style="display:flex;width:100%;max-width:1000px;margin-top:0;">
-  <div style="min-width:130px;"></div>
-  <div style="flex:1;"></div>
-  <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
-    <div class="vert-line" id="vl-orch" style="height:24px;"></div>
+<!-- ═══════════════════════════════════════════════
+     METRIC STRIP — key numbers at a glance
+     ═══════════════════════════════════════════════ -->
+<div class="metric-strip">
+  <div class="metric-cell" style="--i:0">
+    <div class="metric-num">[N]</div>
+    <div class="metric-label">[Metric Label 1]</div>
   </div>
-  <div style="flex:1;"></div>
-  <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
-    <div class="vert-line" id="vl-proc" style="height:24px;"></div>
+  <div class="metric-cell" style="--i:1">
+    <div class="metric-num">[N]</div>
+    <div class="metric-label">[Metric Label 2]</div>
   </div>
-  <div style="flex:1;"></div>
-  <div style="min-width:130px;"></div>
+  <div class="metric-cell" style="--i:2">
+    <div class="metric-num">[N]</div>
+    <div class="metric-label">[Metric Label 3]</div>
+  </div>
 </div>
 
-<!-- STORAGE ROW -->
-<div style="display:flex;align-items:flex-start;width:100%;max-width:1000px;">
-  <div style="min-width:130px;"></div>
-  <div class="storage-pipeline" style="flex:1;margin:0 8px;">
-    <div class="storage-title">EXTERNAL SERVICES</div>
-    <div class="storage-item" id="s-1">
-      <div style="font-size:16px;margin-bottom:4px;">🗄️</div>
-      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 1]</div>
-      <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+<!-- ═══════════════════════════════════════════════
+     ANIMATED DIAGRAM — the hero visualization
+     ═══════════════════════════════════════════════ -->
+<div class="diagram-section">
+  <div class="section-label">Architecture Flow</div>
+  <div class="phase-banner" id="phase-banner">&#9654; Waiting...</div>
+
+  <!-- MAIN ROW -->
+  <div class="pipeline-wrap">
+    <div class="component" id="c-input">
+      <div class="component-label" style="color:#00d4ff">INPUT</div>
+      <div class="component-sub">[entry_point.py]</div>
+      <div class="component-body">[method()]<br>[what it does]</div>
     </div>
-    <div class="storage-sep">·</div>
-    <div class="storage-item" id="s-2">
-      <div style="font-size:16px;margin-bottom:4px;">🧠</div>
-      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 2]</div>
-      <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+
+    <div class="arrow-col">
+      <div class="arrow-wrap">
+        <div class="arrow-line" id="arr-1"><div class="shimmer"></div></div>
+        <div class="arrow-lbl">[data label] &rarr;</div>
+      </div>
+      <div class="arrow-wrap">
+        <div class="arrow-lbl above">&larr; [response label]</div>
+        <div class="arrow-line" id="arr-1b"></div>
+      </div>
     </div>
-    <div class="storage-sep">·</div>
-    <div class="storage-item" id="s-3">
-      <div style="font-size:16px;margin-bottom:4px;">💾</div>
-      <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 3]</div>
-      <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+
+    <div class="component" id="c-orch">
+      <div class="component-label" style="color:#ff6b35">ORCHESTRATOR</div>
+      <div class="component-sub">[orchestrator.py]</div>
+      <div class="component-body">[run()]<br>[what it does]</div>
+    </div>
+
+    <div class="arrow-col">
+      <div class="arrow-wrap">
+        <div class="arrow-line" id="arr-2"><div class="shimmer"></div></div>
+        <div class="arrow-lbl">[data label] &rarr;</div>
+      </div>
+    </div>
+
+    <div class="component" id="c-proc">
+      <div class="component-label" style="color:#a78bfa">PROCESSOR</div>
+      <div class="component-sub">[processor.py]</div>
+      <div class="component-body">[process()]<br>[what it does]</div>
+    </div>
+
+    <div class="arrow-col">
+      <div class="arrow-wrap">
+        <div class="arrow-line" id="arr-3"><div class="shimmer"></div></div>
+        <div class="arrow-lbl">result &rarr;</div>
+      </div>
+    </div>
+
+    <div class="component" id="c-output">
+      <div class="component-label" style="color:#3fb950">OUTPUT</div>
+      <div class="component-sub">[output.py]</div>
+      <div class="component-body">[serialize()]<br>[what it returns]</div>
     </div>
   </div>
-  <div style="min-width:130px;"></div>
+
+  <!-- VERTICAL CONNECTORS -->
+  <div style="display:flex;width:100%;max-width:1000px;margin:0 auto;">
+    <div style="min-width:130px;"></div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
+      <div class="vert-line" id="vl-orch" style="height:24px;"></div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;min-width:130px;">
+      <div class="vert-line" id="vl-proc" style="height:24px;"></div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="min-width:130px;"></div>
+  </div>
+
+  <!-- STORAGE ROW -->
+  <div style="display:flex;align-items:flex-start;width:100%;max-width:1000px;margin:0 auto;">
+    <div style="min-width:130px;"></div>
+    <div class="storage-pipeline" style="flex:1;margin:0 8px;">
+      <div class="storage-title">EXTERNAL SERVICES</div>
+      <div class="storage-item" id="s-1">
+        <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 1]</div>
+        <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+      </div>
+      <div class="storage-sep">&middot;</div>
+      <div class="storage-item" id="s-2">
+        <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 2]</div>
+        <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+      </div>
+      <div class="storage-sep">&middot;</div>
+      <div class="storage-item" id="s-3">
+        <div style="font-size:9px;color:#e8b84b;letter-spacing:1px;">[SERVICE 3]</div>
+        <div style="font-size:8px;color:var(--text-dim);">[description]</div>
+      </div>
+    </div>
+    <div style="min-width:130px;"></div>
+  </div>
 </div>
 
-<!-- INSIGHTS -->
-<div class="insights">
-  <div class="insight-card">
-    <div class="insight-label" style="color:#00d4ff">[LABEL 1]</div>
-    <div class="insight-value">[Key architectural fact]</div>
-  </div>
-  <div class="insight-card">
-    <div class="insight-label" style="color:#ff6b35">[LABEL 2]</div>
-    <div class="insight-value">[Key architectural fact]</div>
-  </div>
-  <div class="insight-card">
-    <div class="insight-label" style="color:#e8b84b">[LABEL 3]</div>
-    <div class="insight-value">[Key architectural fact]</div>
-  </div>
-  <div class="insight-card">
-    <div class="insight-label" style="color:#3fb950">[LABEL 4]</div>
-    <div class="insight-value">[Key architectural fact]</div>
+<!-- ═══════════════════════════════════════════════
+     PULL-QUOTE — key architectural insight
+     ═══════════════════════════════════════════════ -->
+<div class="pull-quote reveal">
+  <p>[Key architectural insight or design philosophy discovered during analysis — one sentence that captures the most important thing about this system.]</p>
+  <div class="attribution">— Derived from [source_file.py]</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     RECESSED TABLE — component reference
+     ═══════════════════════════════════════════════ -->
+<div class="table-section reveal">
+  <div class="section-label">Component Directory</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Component</th><th>Role</th><th>File</th><th>Layer</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>[Component 1]</td><td>[what it does]</td><td><code>[path/file.py]</code></td><td style="color:#00d4ff">[Input]</td></tr>
+        <tr><td>[Component 2]</td><td>[what it does]</td><td><code>[path/file.py]</code></td><td style="color:#ff6b35">[Orchestration]</td></tr>
+        <tr><td>[Component 3]</td><td>[what it does]</td><td><code>[path/file.py]</code></td><td style="color:#a78bfa">[Processing]</td></tr>
+        <tr><td>[Component 4]</td><td>[what it does]</td><td><code>[path/file.py]</code></td><td style="color:#3fb950">[Output]</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">ARCHFLOW</div>
+  <div class="footer-meta">Generated [date] · [branch]</div>
+</footer>
 
 <script>
   if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
 
+  /* ── Scroll reveal ─────────────────────────── */
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  /* ── Phase engine ──────────────────────────── */
   const phases = [
     "[Phase 0: what triggers the system]",
     "[Phase 1: orchestrator receives and routes]",
@@ -267,14 +498,14 @@
   }
   function applyPhase() {
     const banner = document.getElementById("phase-banner");
-    banner.textContent = "▶ " + phases[phase];
+    banner.textContent = "\u25B6 " + phases[phase];
     banner.style.color = phaseColors[phase];
     banner.style.borderColor = phaseColors[phase] + "55";
     resetAll();
     if (phase === 0) { litComponent("c-input", phaseColors[0]); litArrow("arr-1", phaseColors[0], true); }
     if (phase === 1) { litComponent("c-orch",  phaseColors[1]); litArrow("vl-orch", phaseColors[1]); }
     if (phase === 2) { litArrow("vl-orch", phaseColors[2]); litStorage("s-1"); litStorage("s-2"); }
-    if (phase === 3) { litComponent("c-proc",   phaseColors[3]); litArrow("arr-2", phaseColors[3], true); }
+    if (phase === 3) { litComponent("c-proc",  phaseColors[3]); litArrow("arr-2", phaseColors[3], true); }
     if (phase === 4) { litComponent("c-output", phaseColors[4]); litArrow("arr-3", phaseColors[4], true); litArrow("arr-1b", phaseColors[4]); }
   }
   applyPhase();

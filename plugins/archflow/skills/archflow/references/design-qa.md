@@ -118,13 +118,24 @@ Create visual rhythm by alternating:
 ANIMATION CHOREOGRAPHY
 ===================================================================
 
-Don't use the same animation for everything.
+Don't use the same animation for everything. Match animation type
+to element role — each role has a reason for its entrance style:
 
-  Entrance Type         Use For                   Timing
-  fadeUp                Cards, sections, text      0.4s ease-out
-  fadeScale             KPI values, badges, tags   0.35s ease-out
-  countUp (CSS)         KPI hero numbers           1.2s ease-out
-  none                  Diagram section            (phase engine handles it)
+  Element Role          Animation         Why
+  Hero heading          fadeUp            classic entrance, draws the eye down
+  Stat numbers          fadeScale         scale catches the eye on important data
+  Section cards         fadeUp            consistent, expected
+  KPI badges/tags       fadeScale         pops in, feels dynamic
+  Pull-quotes           none (or slow fade) calm, editorial, not bouncy
+  Metric strip cells    fadeUp + stagger  left-to-right reveal reads like data
+  Diagram               none              phase engine handles it
+  Tables                fadeUp (subtle)   minimal distraction for reference content
+  Terminal blocks       fadeUp            single entrance, no internal animation
+
+  Entrance Type         Timing
+  fadeUp                0.4s ease-out
+  fadeScale             0.35s ease-out
+  countUp (CSS)         1.2s ease-out
 
   Stagger: use --i increments of 0.06-0.08s.
   Important elements get lower --i values (appear first).

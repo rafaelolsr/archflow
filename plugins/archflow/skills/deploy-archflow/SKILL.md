@@ -27,11 +27,11 @@ TARGETS
 WORKFLOW
 ===================================================================
 
-  1. SOURCE is always: skills/archflow/ in this repo (the current working directory)
+  1. SOURCE is always: plugins/archflow/skills/archflow/ in this repo (the current working directory)
 
   2. For EACH target above, run:
 
-       rsync -av --delete skills/archflow/ <target-path>
+       rsync -av --delete plugins/archflow/skills/archflow/ <target-path>
 
      The --delete flag removes files in the target that no longer
      exist in the source, keeping targets exactly in sync.

@@ -85,20 +85,71 @@ Don't force data into a generic template. If the project has
 unique data, create a unique visualization for it.
 
 ===================================================================
-LAYOUT COMPOSITION
+COMPOSITION RECIPES — MIX THESE, DON'T REPEAT
 ===================================================================
 
-Don't stack identical cards. Create visual rhythm:
+Each recipe has a visual weight. Sequence them to create rhythm.
 
-  → Full-width hero card for overview
-  → Multi-column grid for KPIs (auto-fit, minmax)
-  → Full-width diagram section with background container
-  → Table with scrollable wrapper
-  → Asymmetric grid for insights (important one full-width)
-  → Split panels for before/after comparisons
-  → Collapsible details for secondary content
+MAGAZINE OPENER                                    weight: MAXIMUM
+  Full-width hero card with oversized display heading, accent bar,
+  and 3-4 stat pills inline. Sets the tone. First thing the reader sees.
+  Use for: Executive summary, project identity.
+  Largest text, most padding, accent gradient background.
 
-  At least one section should break the single-column pattern.
+METRIC STRIP                                       weight: HIGH
+  A full-width divided bar with 3-5 large numbers side by side.
+  Each cell: giant display-font number (48-60px) + tiny mono label.
+  Separated by thin vertical borders. No card wrapper — it IS the section.
+  Use for: KPI overview, project stats, performance summary.
+
+INSIGHT PULL-QUOTE                                 weight: MEDIUM
+  A single editorial serif sentence spanning 80% of the page width.
+  Large (20-24px), italic, with accent-colored left border or top rule.
+  Max 1-2 per report. Positioned between dense sections as a breather.
+  Use for: Key finding, executive takeaway, architectural philosophy.
+
+SPLIT COMPARISON                                   weight: HIGH
+  Two-column panel: left side tinted warm, right side tinted cool.
+  Each side has its own heading and content. Optional animated particles
+  flowing between panels.
+  Use for: Before/after, raw/processed, old/new architecture.
+
+ASYMMETRIC GRID                                    weight: MEDIUM-HIGH
+  First item spans full width (the important one). Remaining items
+  form a 2-3 column grid beneath it. The full-width item gets hero
+  depth; grid items get base depth.
+  Use for: Insights where one is more important, services with a primary.
+
+RECESSED TABLE                                     weight: LOW
+  Dark inset panel (inset shadow, darker surface) containing a data
+  table with mono headers and dim row text. Hover highlights rows.
+  Use for: Component directory, file references, config details.
+
+TERMINAL BLOCK                                     weight: LOW-MEDIUM
+  Dark recessed panel with three colored dots (decorative) and mono
+  content. Looks like a terminal window.
+  Use for: CLI output, command examples, log excerpts, code samples.
+
+TIMELINE FLOW                                      weight: MEDIUM
+  Vertical line on the left with dot markers. Steps branch to the right
+  with title + description. Numbers or phase labels on the far left.
+  Use for: Process steps, deployment stages, historical changes.
+
+===================================================================
+SEQUENCING — CREATE VISUAL RHYTHM
+===================================================================
+
+Never place two sections with the same visual weight adjacent.
+Alternate HIGH and LOW weight sections. Use pull-quotes as breathers.
+
+  GOOD sequence:
+    Magazine Opener (MAX) → Metric Strip (HIGH) → Pull-Quote (MED)
+    → Diagram (MAX) → Recessed Table (LOW) → Asymmetric Grid (MED-HIGH)
+
+  BAD sequence:
+    Hero Card → Card Grid → Card Grid → Card Grid → Table
+
+  At least one section should break the single-column card pattern.
   Use grid-template-columns with varied ratios (5fr 3fr, not 1fr 1fr).
 
 ===================================================================

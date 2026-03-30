@@ -313,6 +313,32 @@ COMBINING TECHNIQUES:
   flow diagrams, and bar charts. The visual rhythm should vary.
 
 ===================================================================
+5b. DEPTH TIERS — VISUAL WEIGHT FOR CARDS
+===================================================================
+
+Every card-like element gets a depth tier. This creates hierarchy
+even when cards share a layout grid.
+
+  HERO      brightest surface, accent-tinted border or left stripe,
+            elevated shadow (0 4px 20px), generous padding (28-40px).
+            Reserve for: executive summary, primary diagram, key finding.
+
+  ELEVATED  brighter-than-base surface, subtle border highlight,
+            light shadow (0 2px 8px). Standard padding (20-24px).
+            Reserve for: insight cards, service cards, important content.
+
+  BASE      standard surface, standard border, no shadow.
+            Reserve for: body content cards, general information.
+
+  RECESSED  darker surface, inset shadow (inset 0 1px 3px),
+            compact padding (14-18px).
+            Reserve for: tables, code references, secondary content.
+
+The depth tier is independent of the component type — a stat display
+can be hero-depth (main KPI) or base-depth (secondary metric).
+A card grid where all items are the same depth looks flat and dead.
+
+===================================================================
 6. DIAGRAM PRINCIPLES
 ===================================================================
 
