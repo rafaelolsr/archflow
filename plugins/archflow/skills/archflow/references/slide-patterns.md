@@ -326,8 +326,9 @@ SLIDE 3 — COMPONENTS
 SLIDE 4 — DATA FLOW
 ===================================================================
 
-Show the phase descriptions as a numbered step list.
-Do NOT use Mermaid in slides — use styled step cards instead.
+Show the phase descriptions as a numbered step list or Mermaid diagram.
+Use CSS step cards for linear flows. Use Mermaid for branching/looping flows
+(see MERMAID IN SLIDES section below).
 
   <section class="slide slide--content">
     <div style="width:100%;max-width:900px;">
@@ -650,34 +651,65 @@ Slides fade in when they enter the viewport.
   }
 
 ===================================================================
-CONTENT DENSITY LIMITS
+CONTENT DENSITY GUIDANCE
 ===================================================================
 
-  Slide Type       Max Content
+These are soft targets for readability, not hard caps. If the
+architecture has more items than listed, show them all — either
+on one slide or split across multiple slides of the same type.
+Never drop content to fit a layout.
+
+  Slide Type       Typical Content
   Title            1 heading + 1 subtitle
   Diagram          1 diagram (use full viewport)
-  Components       6 KPI cards + 8 component cards
-  Data Flow        6 steps max
-  Services         6 service cards
-  Insights         6 insight cards (2-column grid)
+  Components       ~6 KPI cards + ~8 component cards
+  Data Flow        ~6 steps (more is fine — split if needed)
+  Services         ~6 service cards
+  Insights         ~6 insight cards (2-column grid)
   Split            1 heading + 1 paragraph per panel
   Quote            1 blockquote (2-3 sentences max)
   Full-bleed       1 heading + 1 short paragraph
   Section divider  1 number + 1 heading
   Summary          1 heading + 1 paragraph
 
-If content exceeds limits, split into multiple slides of the
-same type. For example, 10 components → 2 component slides.
+If content exceeds these targets, split into multiple slides of
+the same type. For example, 11 tools → 1 tool grid slide showing
+all 11. 10 components → 2 component slides.
 
 ===================================================================
 SLIDE DECK RULES
 ===================================================================
 
-  → Do NOT use Mermaid in slides (too small, zoom controls awkward)
-  → Use CSS step cards for data flow instead
   → The animated diagram (slide 2) IS the hero — give it full viewport
   → All text must be readable at arm's length (min 14px body, 28px headings)
   → One focal point per slide
   → Keyboard navigation: arrows, Page Up/Down, Home, End, Space
   → Touch: swipe up/down
   → Nav dots on the right, progress bar on top
+
+===================================================================
+MERMAID IN SLIDES
+===================================================================
+
+Mermaid diagrams ARE allowed in slides when they add information
+density that CSS step cards cannot:
+
+  USE MERMAID when:
+    → The system has branching/looping flows (e.g., retry loops,
+      conditional paths, fan-out/fan-in)
+    → You need to show graph topology (which components connect
+      to which) rather than just a linear sequence
+    → A flow diagram with decision points would be flattened
+      into a misleading linear list without Mermaid
+
+  USE CSS STEP CARDS when:
+    → The flow is strictly linear (step 1 → 2 → 3 → done)
+    → You need large readable text for each step
+    → The flow has ≤6 steps with no branching
+
+When using Mermaid in slides:
+  → Import mermaid ESM from CDN
+  → Use theme: 'base' with themeVariables matching the deck palette
+  → Wrap in a container with border-radius, padding, and overflow:auto
+  → Keep node labels short (2-4 words)
+  → classDef nodes with fill/stroke matching accent colors

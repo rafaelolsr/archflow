@@ -172,6 +172,32 @@ PAGE LAYOUT
   Mobile: collapse to single column at max-width: 1000px
 
 ===================================================================
+CONTENT COMPLETENESS — THE CARDINAL RULE
+===================================================================
+
+Changing the medium (page → slides) does not mean dropping content.
+A longer report that covers everything beats a shorter one that
+looks polished but is missing 40% of the source.
+
+Before writing any HTML:
+
+  1. INVENTORY — enumerate every architectural concern found during
+     analysis: components, data flows, design decisions, external
+     services, contracts, state management, error handling, etc.
+
+  2. MAP — assign each item to a section. If a concern doesn't fit
+     an existing section, create a bespoke one.
+
+  3. VERIFY — scan the inventory after mapping. If any item has no
+     section, add one. Never silently drop content because it
+     doesn't fit a template.
+
+The density guidelines in this file (e.g. "3-7 metric cards") are
+soft targets, not hard caps. If the system has 11 tools, show 11
+tools. If there are 8 eval criteria, show all 8. Size the report
+to the content — do not truncate content to fit a layout.
+
+===================================================================
 OUTPUT
 ===================================================================
 

@@ -48,22 +48,48 @@ For each file extract:
 STEP 3 — BUILD THE ARCHITECTURE MODEL
 ===================================================================
 
-Organize findings into this structure before writing any HTML:
+Organize findings into GROUPS, not flat layers. Real systems have
+subsystems that contain related components — identify those groups.
 
-  LAYERS
+  GROUPS (the spatial building blocks of the diagram)
   -------------------------------------------------------------------
-    Input layer      → users, API clients, triggers, events, cron
-    Orchestration    → routers, orchestrators, agents, managers
-    Processing       → pipelines, chains, transformers, workers
-    Storage/External → DBs, vector stores, APIs, LLMs, queues, caches
-    Output           → responses, files, events, side effects
+  Identify 3-6 groups by asking: "which components share a runtime
+  boundary, a subsystem name, or a logical concern?"
+
+  Examples of groups:
+    → "ReAct Loop Engine" containing: LLM call, parse, execute,
+       track grounding, validate contracts
+    → "Tool Ecosystem" containing: 11 tools in 5 categories
+    → "Lambda Parsers" containing: ADF, MDI, TDDF, D256
+    → "Grounding Ledger" containing: grounded sets, validation
+    → "Evaluator Gate" containing: 8 criteria, retry logic
+
+  For each group identify:
+    → Group name and what boundary it represents
+    → Internal components (what lives inside the group)
+    → Internal layout: are items sequential (vertical stack),
+       parallel (horizontal wrap), or categorized (grid)?
+    → Which groups does it connect to? (the arrows between groups)
+
+  HIERARCHY — assign each group a depth tier:
+    → HERO: the core subsystem (1 per diagram, accent border + glow)
+    → ELEVATED: important subsystems connected to the hero
+    → DEFAULT: standard subsystems
+    → RECESSED: storage, external services, secondary concerns
+
+  COMPONENT DETAIL — for each component inside a group:
+    → Name + actual function/class name (tag badge)
+    → 1-line description of what it does
+    → Sub-items if it has internal parts worth showing
+    → Quantitative facts: counts, limits, timeouts
 
   FLOWS (4-8 phases for the animation)
   -------------------------------------------------------------------
     → What triggers the system? (the first phase)
     → What are the key steps of a typical request or job?
-    → What data moves between which components at each step?
-    → What external service is touched at each step?
+    → Which GROUP is active at each phase? (not individual components)
+    → What data moves between groups at each step?
+    → Include branching: loops, retries, conditional paths
     → What does the system return? (the last phase)
 
   PHASE LABELS
@@ -74,6 +100,26 @@ Organize findings into this structure before writing any HTML:
     Good: "VectorSearch returns top-3 chunks for context injection..."
     Bad:  "Processing step 2..."
     Bad:  "Component A calls Component B..."
+
+===================================================================
+STEP 3b — VERIFY COMPLETENESS (before generating any output)
+===================================================================
+
+Create an internal inventory of every architectural concern found:
+
+  → Every distinct subsystem or component
+  → Every data flow path (including branches and error paths)
+  → Every external service integration
+  → Every design decision or pattern worth calling out
+  → State management concerns (what persists, what doesn't)
+  → Safety/validation mechanisms (contracts, eval gates, etc.)
+
+Map each item to an output section. If any item has no home,
+create a section for it. Do not drop architectural concerns
+because they don't fit a predefined template.
+
+This step prevents the most common failure mode: producing a
+polished output that covers only 60% of the architecture.
 
 ===================================================================
 STEP 4 — DECIDE THE LAYOUT
