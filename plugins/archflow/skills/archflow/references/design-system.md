@@ -455,13 +455,16 @@ CSS PATTERN -- define :root variables and override in body.light:
 1. fadeUp -- staggered page load reveal
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
+    from { opacity: 0.15; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
   CRITICAL: always use animation-fill-mode: both so elements stay
-  hidden before animation starts. No flash of unstyled content.
+  dim before animation starts. No flash of unstyled content.
   Stagger hero elements with increasing delays (0s, 0.08s, 0.16s...).
+  Cap total stagger window at 0.8s — for diagrams with many elements,
+  reduce per-element increment so all content is readable within 0.8s
+  of page load.
 
 2. blink -- live indicator dots
 
@@ -499,7 +502,7 @@ CSS PATTERN -- define :root variables and override in body.light:
 5. fadeScale -- for cards and badges
 
   @keyframes fadeScale {
-    from { opacity: 0; transform: scale(0.92); }
+    from { opacity: 0.15; transform: scale(0.92); }
     to   { opacity: 1; transform: scale(1); }
   }
 
