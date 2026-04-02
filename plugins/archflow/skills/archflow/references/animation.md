@@ -26,28 +26,100 @@ default glow approach — adapt or replace them to suit the design.
 CORE PATTERN
 ===================================================================
 
-  // ── THEME RESTORE (place at top of script) ─────────────────
-  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
+The phase engine targets elements by ID regardless of whether they
+are HTML or SVG elements. For architecture diagrams (the primary
+use case), targets are SVG elements: <rect>, <path>, <circle>,
+and <text> within an inline <svg>. See svg-exemplar.md for the
+full structural pattern and CSS class contracts.
+
+-------------------------------------------------------------------
+PRIMARY: SVG ELEMENT TARGETING (architecture diagrams)
+-------------------------------------------------------------------
+
+For SVG diagrams, use the DECLARATIVE phase data structure.
+Each phase is an object declaring what to highlight:
 
   const phases = [
-    "Phase 0: plain-language description of what is happening...",
-    "Phase 1: next step in the flow...",
-    // 4-8 phases total — sweet spot for readability
-  ];
-
-  // One accent color per phase, matching the active component's role
-  const phaseColors = [
-    "#00d4ff",  // phase 0 — user/input (cyan)
-    "#ff6b35",  // phase 1 — orchestrator (orange)
-    "#a78bfa",  // phase 2 — agents (purple)
-    "#e8b84b",  // phase 3 — storage (yellow)
-    "#3fb950",  // phase 4 — output (green)
+    {
+      label: "Sources feed the pipeline — description...",
+      groups: [],                          // group-box IDs
+      sources: ["src-api", "src-db"],      // source-box IDs
+      arrows: ["arr-s1", "arr-s2"],        // arrow-path IDs
+      color: "#14b8a6"
+    },
+    {
+      label: "P0-P2: Processing — validate, transform...",
+      groups: ["grp-process"],
+      sources: [],
+      arrows: ["arr-h1"],
+      color: "#f59e0b"
+    },
+    // 4-8 phases total
   ];
 
   let phase = 0;
 
-  // ── THEME-AWARE HELPERS ────────────────────────────────────
-  // Read CSS custom properties so colors adapt to dark/light mode.
+  function resetSvg() {
+    document.querySelectorAll('.group-box, .source-box').forEach(el => {
+      el.classList.remove('lit');
+      el.style.removeProperty('--glow-color');
+    });
+    document.querySelectorAll('.arrow-path').forEach(el => {
+      el.classList.remove('lit');
+      el.style.removeProperty('--glow-color');
+      el.setAttribute('marker-end', 'url(#arrowhead)');
+    });
+  }
+
+  function applyPhase() {
+    const p = phases[phase];
+    const banner = document.getElementById('phase-banner');
+    banner.textContent = '▶ ' + p.label;
+    banner.style.color = p.color;
+    banner.style.borderColor = p.color + '55';
+
+    resetSvg();
+
+    (p.groups || []).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.setProperty('--glow-color', p.color); el.classList.add('lit'); }
+    });
+    (p.sources || []).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.setProperty('--glow-color', p.color); el.classList.add('lit'); }
+    });
+    (p.arrows || []).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.stroke = p.color; el.style.strokeWidth = '2'; el.classList.add('lit'); }
+    });
+  }
+
+  applyPhase();
+  setInterval(() => { phase = (phase + 1) % phases.length; applyPhase(); }, 2200);
+
+This declarative pattern is more maintainable than imperative
+if/else chains. Adding a phase = adding one object to the array.
+
+The CSS for SVG highlight states:
+
+  .group-box.lit, .source-box.lit {
+    stroke: var(--glow-color);
+    filter: drop-shadow(0 0 12px var(--glow-color));
+  }
+  .arrow-path.lit {
+    stroke: var(--glow-color);
+    stroke-width: 2;
+  }
+
+-------------------------------------------------------------------
+SECONDARY: HTML ELEMENT TARGETING (card-based layouts)
+-------------------------------------------------------------------
+
+For non-SVG layouts (card grids, report sections), the imperative
+pattern still applies. Theme-aware helpers read CSS custom properties:
+
+  // ── THEME RESTORE (place at top of script) ─────────────────
+  if (localStorage.getItem('archflow-theme') === 'light') document.body.classList.add('light');
 
   const borderColor = () => getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
   const shadowAlpha = () => getComputedStyle(document.documentElement).getPropertyValue('--shadow-alpha').trim();
@@ -67,7 +139,6 @@ CORE PATTERN
   }
 
   function litStorage(id) {
-    // Storage items always glow yellow
     const el = document.getElementById(id);
     if (!el) return;
     el.style.borderColor = "#e8b84b";
@@ -76,149 +147,74 @@ CORE PATTERN
 
   function resetAll() {
     const bc = borderColor();
-    document.querySelectorAll(
-      ".component, .agent-card, .storage-item"
-    ).forEach(el => {
-      el.style.borderColor = bc;
-      el.style.boxShadow = "none";
+    document.querySelectorAll(".component, .agent-card, .storage-item").forEach(el => {
+      el.style.borderColor = bc; el.style.boxShadow = "none";
     });
     document.querySelectorAll(".arrow-line, .vert-line").forEach(el => {
-      el.style.background = bc;
-      el.classList.remove("active");
+      el.style.background = bc; el.classList.remove("active");
     });
   }
-
-  // ── MAIN APPLY FUNCTION ───────────────────────────────────────
-
-  function applyPhase() {
-    const banner = document.getElementById("phase-banner");
-    banner.textContent = "▶ " + phases[phase];
-    banner.style.color = phaseColors[phase];
-    banner.style.borderColor = phaseColors[phase] + "55";
-
-    resetAll();
-
-    // Light up the relevant elements for THIS phase.
-    // Use === for a moving spotlight (only active node glows).
-    // Use >= to keep earlier nodes lit as animation progresses.
-    // Moving spotlight is recommended for most diagrams.
-
-    if (phase === 0) {
-      litComponent("c-input", phaseColors[0]);
-    }
-    if (phase === 1) {
-      litArrow("arr-1", phaseColors[1], true); // true = shimmer
-      litComponent("c-orch", phaseColors[1]);
-    }
-    if (phase === 2) {
-      litArrow("vl-orch", phaseColors[2]);      // vert connector
-      litStorage("s-llm");
-    }
-    if (phase === 3) {
-      litComponent("c-proc", phaseColors[3]);
-      litArrow("arr-2", phaseColors[3], true);
-    }
-    if (phase === 4) {
-      litComponent("c-output", phaseColors[4]);
-      litArrow("arr-back", phaseColors[4]);
-    }
-  }
-
-  // ── TICK ─────────────────────────────────────────────────────
-
-  applyPhase();
-  setInterval(() => {
-    phase = (phase + 1) % phases.length;
-    applyPhase();
-  }, 1500); // 1500ms per phase — do not go below 1200ms
 
 ===================================================================
 LAYOUT-AGNOSTIC
 ===================================================================
 
 The phase engine works with ANY layout direction — horizontal,
-vertical, hub, medallion. litLayer, litConnector, litService all
-target elements by ID, not by position. The same JS works for:
+vertical, hub, medallion. It targets elements by ID, not by
+position. The same JS pattern works for:
 
+  → Inline SVG diagrams (primary — rect, path, circle elements)
   → Horizontal pipeline (flex-direction: row)
   → Vertical pipeline (flex-direction: column)
   → Multi-agent hub (mixed row + column)
   → Medallion pipeline (sequential stages)
-  → Inline SVG diagrams (rect, circle, line elements)
   → Flow-row horizontal boxes
+
+For slide decks, the phase engine almost always targets SVG
+elements. For single-page reports, it may target a mix of SVG
+and HTML elements.
 
 ===================================================================
 CROSS-DIAGRAM HIGHLIGHTING
 ===================================================================
 
-When a report has MULTIPLE diagrams (arch-flow, SVG data flow,
-flow-row pipeline, layer cards), the phase engine should highlight
-elements ACROSS ALL OF THEM simultaneously.
+When a report has MULTIPLE diagrams (inline SVG, HTML cards,
+flow-row pipeline), the phase engine should highlight elements
+ACROSS ALL OF THEM simultaneously.
 
 Each phase lights up the corresponding elements in EVERY diagram
 on the page — telling a coherent story across all visualizations.
 
-  Example: Phase 2 ("Timeseries built") highlights:
-    → The arch-layer card for Timeseries Builder
-    → The SVG rect for Timeseries Builder in the data flow
-    → The flow-row box for TIMESERIES in the pipeline
-    → The connector arrows between them
+  SVG element highlighting (primary):
+    The declarative phase data structure (see CORE PATTERN above)
+    handles SVG elements via the groups/sources/arrows arrays.
+    Each array entry is an element ID. The applyPhase() function
+    sets --glow-color + .lit on matching elements.
 
-  Implementation:
-    Give corresponding elements matching IDs across diagrams:
-      arch-layer:   id="layer-timeseries"
-      SVG rect:     id="svg-timeseries"
-      flow-box:     id="flow-timeseries"
+  HTML element highlighting (secondary):
+    For HTML card layouts alongside SVG diagrams, include the
+    element IDs in the phase object and add lit* calls:
 
-    In applyPhase(), light them all:
       if (phase === 2) {
-        litLayer("layer-timeseries", color);
-        litSvgElement("svg-timeseries", color);
+        litComponent("card-timeseries", color);
         litFlowBox("flow-timeseries", color);
-        litConnector("conn-2", color);
       }
 
-  SVG element highlighting:
-    function litSvgElement(id, color) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.setAttribute('stroke', color);
-      el.setAttribute('stroke-width', '2');
-      // For rect elements, add a glow filter
-      el.style.filter = `drop-shadow(0 0 8px ${color}60)`;
-    }
-
-  Flow-box highlighting:
     function litFlowBox(id, color) {
       const el = document.getElementById(id);
       if (!el) return;
       el.style.borderColor = color;
       el.style.boxShadow = `0 0 20px ${color}30`;
-      el.style.background = `linear-gradient(135deg, var(--surface) 0%, ${color}08 100%)`;
     }
 
-  Reset must clear ALL diagrams:
+  Reset must clear ALL diagram types:
     function resetAll() {
-      // arch-layers
-      document.querySelectorAll('.arch-layer,.arch-connector').forEach(el => {
+      // SVG elements (primary)
+      resetSvg();  // clears .group-box, .source-box, .arrow-path
+      // HTML cards (secondary)
+      document.querySelectorAll('.arch-layer,.flow-box,.service-card').forEach(el => {
         el.classList.remove('lit');
         el.style.removeProperty('--glow-color');
-      });
-      // SVG elements
-      document.querySelectorAll('[id^="svg-"]').forEach(el => {
-        el.removeAttribute('style');
-        // restore original stroke from data attribute
-        el.setAttribute('stroke', el.dataset.origStroke || 'var(--border)');
-        el.setAttribute('stroke-width', el.dataset.origWidth || '1.5');
-      });
-      // flow-boxes
-      document.querySelectorAll('.flow-box').forEach(el => {
-        el.style.borderColor = '';
-        el.style.boxShadow = '';
-        el.style.background = '';
-      });
-      // service cards
-      document.querySelectorAll('.service-card').forEach(el => {
         el.style.borderColor = '';
         el.style.boxShadow = '';
       });
@@ -226,11 +222,13 @@ on the page — telling a coherent story across all visualizations.
 
   IMPORTANT: Every diagram element that participates in the phase
   animation needs a unique ID. Use prefixes to avoid collisions:
-    layer-*   for arch-layer cards
-    svg-*     for SVG elements
-    flow-*    for flow-row boxes
-    conn-*    for connectors
-    svc-*     for service cards
+    grp-*     for SVG group-box containers
+    src-*     for SVG source-box entities
+    arr-*     for SVG arrow-path connections
+    con-*     for SVG consumer-box entities
+    layer-*   for HTML arch-layer cards
+    flow-*    for HTML flow-row boxes
+    svc-*     for HTML service cards
 
 ===================================================================
 THEME TOGGLE

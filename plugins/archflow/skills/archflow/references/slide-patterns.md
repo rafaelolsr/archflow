@@ -231,12 +231,18 @@ the content requires.
   Type              Class                   When to Use
   Title             slide--title            Opening, closing
   Content           slide--content          Component grids, data flow, services, insights
-  Diagram           slide--diagram          Animated architecture hero
+  SVG Diagram       slide--diagram          Animated SVG architecture hero (phase engine)
+  SVG Detail        slide--diagram          Static SVG (data sources, consumers, zoom)
   Split             slide--split            Text+diagram, before/after, comparison
   Quote             slide--quote            Key takeaway between dense slides
   Full-bleed        slide--bleed            Dramatic moments, visual emphasis
   Section divider   slide--divider          Transitions between major topics
   Summary           slide--title            Closing with key takeaway
+
+Diagram slides (slide--diagram) contain inline SVG, not HTML/CSS
+card layouts. Multiple SVG diagram slides are expected per deck —
+typically: hero architecture (animated), data sources (static),
+and output/consumers (static).
 
 Suggested starting sequence (adapt freely):
 
@@ -275,20 +281,32 @@ SLIDE 1 — TITLE
 SLIDE 2 — ANIMATED ARCHITECTURE (HERO)
 ===================================================================
 
-This slide contains the full animated diagram from archflow.
-The phase engine runs here — setInterval, litComponent, litArrow, etc.
+This slide contains a full inline SVG architecture diagram with
+phase-engine animation. NOT CSS card grids, NOT Mermaid.
+
+The SVG uses a viewBox for responsive scaling, defines arrowhead
+markers in <defs>, and renders group-box containers, source-box
+entities, arrow-path connections, and text labels. The phase engine
+targets SVG elements by ID, adding .lit + --glow-color.
+
+See svg-exemplar.md for the complete structural pattern.
 
   <section class="slide slide--diagram">
-    <div class="diagram-section" style="width:100%;max-width:1100px;">
-      <div class="phase-banner" id="phase-banner">▶ Waiting...</div>
-      <!-- Full diagram HTML from the matching layout template -->
-      <!-- (horizontal-pipeline, multi-agent-hub, or medallion) -->
-    </div>
+    <div class="s-label">END-TO-END ARCHITECTURE</div>
+    <div class="s-phase-banner" id="phase-banner">Initializing...</div>
+    <svg class="arch-svg" viewBox="0 0 1100 520"
+         xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrowhead" ...> ... </marker>
+        <marker id="arrowLit" ...> ... </marker>
+      </defs>
+      <!-- group-box containers, source-box entities, arrow-path connections -->
+    </svg>
   </section>
 
-The diagram section uses font-family: var(--font-mono) internally.
-Scale may need adjustment for slide viewport — if components are
-too small, reduce max-width or increase component padding.
+The phase banner sits above the SVG, showing the current phase
+description in that phase's color. The SVG uses max-height:70vh
+to fit within the slide viewport.
 
 ===================================================================
 SLIDE 3 — COMPONENTS
@@ -326,9 +344,10 @@ SLIDE 3 — COMPONENTS
 SLIDE 4 — DATA FLOW
 ===================================================================
 
-Show the phase descriptions as a numbered step list or Mermaid diagram.
-Use CSS step cards for linear flows. Use Mermaid for branching/looping flows
-(see MERMAID IN SLIDES section below).
+For diagram-style data flow (convergence, fan-out, hub-spoke), use
+inline SVG — same class vocabulary as the hero diagram. For simple
+linear step lists, use CSS step cards. Reserve Mermaid for sequence
+diagrams or ER diagrams where auto-layout adds value.
 
   <section class="slide slide--content">
     <div style="width:100%;max-width:900px;">
@@ -691,16 +710,23 @@ SLIDE DECK RULES
 MERMAID IN SLIDES
 ===================================================================
 
-Mermaid diagrams ARE allowed in slides when they add information
-density that CSS step cards cannot:
+Mermaid is a SECONDARY diagram medium. For architecture diagrams,
+data source diagrams, pipeline topology, and consumer/output
+diagrams, always use inline SVG for spatial precision and
+phase-engine integration. Mermaid-rendered SVG does not expose
+element IDs for animation.
+
+  USE INLINE SVG when:
+    → The diagram shows how architectural components connect
+    → You need phase-engine highlighting
+    → Spatial layout matters (grouped containers, precise routing)
+    → The diagram is the hero or a major structural slide
 
   USE MERMAID when:
-    → The system has branching/looping flows (e.g., retry loops,
-      conditional paths, fan-out/fan-in)
-    → You need to show graph topology (which components connect
-      to which) rather than just a linear sequence
-    → A flow diagram with decision points would be flattened
-      into a misleading linear list without Mermaid
+    → Sequence diagrams (call flows between actors)
+    → ER diagrams (entity relationships)
+    → State machines (lifecycle states)
+    → Auto-layout adds value and phase highlighting is not needed
 
   USE CSS STEP CARDS when:
     → The flow is strictly linear (step 1 → 2 → 3 → done)

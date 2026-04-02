@@ -210,6 +210,20 @@ These are the building blocks available for report sections.
 Design the exact CSS fresh per project -- what follows describes
 WHAT each component is and WHEN to use it, not HOW to style it.
 
+INLINE SVG ARCHITECTURE DIAGRAM (default for all architecture visuals)
+  The primary component for architecture diagrams — hero overview,
+  data source topology, consumer/output views. Every visualization
+  that shows how components CONNECT uses inline SVG.
+  SVG gives pixel-perfect control over grouped containers, curved
+  arrow connectors, multi-line text labels, icon circles, and tag
+  badges. It scales responsively via viewBox. CSS classes on SVG
+  elements (.group-box, .source-box, .arrow-path) enable both
+  theming (via var(--surface) in fill/stroke) and phase-engine
+  animation (via .lit class + --glow-color custom property).
+  See svg-exemplar.md for the structural pattern and sizing.
+  Use for: hero architecture, data source diagrams, pipeline
+  topology, consumer/output views, any spatial relationship diagram.
+
 STAT DISPLAY
   A large prominent number with a small label beneath it.
   The number should be the largest element -- bold, mono or display
@@ -291,21 +305,6 @@ SVG ORBIT / RADIAL DIAGRAM
   where one component is central and others surround it.
   Use inline SVG for pixel-perfect control.
 
-INLINE SVG DIAGRAM
-  For complex mixed layouts where CSS grid is insufficient.
-  SVG gives pixel-perfect control over boxes of varying sizes,
-  embedded tables, arrow connectors of any length and direction,
-  and circle badges. Use CSS variables (var(--accent), var(--surface))
-  inside SVG attributes so themes still work.
-
-  Arrow markers:
-    <defs>
-      <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5"
-              markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M0,0 L10,5 L0,10" fill="var(--accent)"/>
-      </marker>
-    </defs>
-
 COMBINING TECHNIQUES:
   A great report uses 4-6 DIFFERENT component types across its
   sections. Do not build an entire report from cards alone.
@@ -344,9 +343,10 @@ A card grid where all items are the same depth looks flat and dead.
 
 DENSITY -- SINGLE-PAGE PREFERENCE
   The animated architecture diagram should prefer COMPACT, DENSE
-  layouts that fit within 1-2 viewport heights. Stack layers
-  top-to-bottom in a single scrollable column. Each layer is a
-  full-width card with icon, title, description, and tags.
+  layouts that fit within 1-2 viewport heights. Implement as an
+  inline SVG with a viewBox sized to contain all groups and
+  connections (see svg-exemplar.md). Stack layers top-to-bottom
+  or flow left-to-right within the SVG coordinate space.
 
   Layers with sub-components EXPAND INLINE: a parent layer card
   contains a nested grid of child components inside it. This keeps
@@ -406,22 +406,24 @@ ANIMATED PHASE ENGINE -- JS INTERFACE CONTRACT
   prev/next navigation) is documented in animation.md.
 
 RICH COMPONENTS -- NOT FLOWCHART BOXES
-  Diagram components should be full-width horizontal cards with
-  SVG icons, descriptions, and technology tags. NOT small centered
-  boxes with emoji. Think of each component as a rich card that
-  tells a story, not a label on a flowchart.
+  Diagram components should be rich elements with multiple text
+  layers: name, description, phase codes, and tag badges. NOT
+  small centered boxes with emoji. In SVG, this means <rect>
+  containers holding multiple <text> elements at different sizes,
+  icon <circle> elements, and nested sub-rects. Each component
+  tells a story, not just shows a label.
 
-  Use inline SVG icons (24x24, stroke-width 1.5) with colored
-  backgrounds -- not emoji. Emoji icons look unprofessional.
+  Use inline SVG icon circles (r=14, accent fill at low opacity)
+  with single-letter or small icon text -- not emoji.
 
 MULTIPLE DIAGRAM TECHNIQUES
   A great architecture visualization combines techniques:
-    -> Vertical layered stack for the animated overview
-    -> Horizontal flow row for linear pipelines
-    -> Inline SVG for complex mixed layouts
+    -> Inline SVG for architecture diagrams (primary technique)
+    -> Horizontal flow bars for pipeline progression summaries
     -> Side-by-side cards for methodology comparison
     -> Bar charts for performance data
     -> Entity clusters for relationship maps
+    -> Mermaid for supplementary sequence/ER diagrams
   The diagram should be as rich as the architecture it describes.
 
 ===================================================================
@@ -618,6 +620,11 @@ RESPONSIVE:
 ===================================================================
 12. MERMAID DIAGRAMS
 ===================================================================
+
+Mermaid is for SUPPLEMENTARY diagrams (sequence, ER, state) where
+auto-layout is sufficient. Architecture diagrams, data flow topology,
+and consumer/output views always use inline SVG for spatial precision
+and phase-engine integration.
 
 When including Mermaid diagrams (sequence, ER, state):
 

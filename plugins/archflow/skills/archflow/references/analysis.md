@@ -131,3 +131,8 @@ Quick decision:
   → Clear left-to-right request/response  → HORIZONTAL PIPELINE
   → Orchestrator spawning parallel agents → MULTI-AGENT HUB
   → ETL / medallion / staged transforms   → MEDALLION PIPELINE
+
+Once you choose a layout shape, implement it as inline SVG.
+Group containers become <rect class="group-box"> elements. Inter-group
+flow becomes <path class="arrow-path"> elements with arrowhead markers.
+See svg-exemplar.md for the structural pattern and sizing conventions.

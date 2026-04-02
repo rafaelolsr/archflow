@@ -1,9 +1,9 @@
 # Layout Reference
 
 Conceptual layout guide for animated architecture diagrams.
-Choose a layout based on the system's shape, then compose the HTML
-to match. See `templates/` for working examples — treat them as
-inspiration, not rigid skeletons.
+Choose a layout based on the system's shape, then compose inline
+SVG to match. See `svg-exemplar.md` for the structural pattern
+and `templates/` for working HTML examples.
 
 ===================================================================
 CORE PRINCIPLE — HIERARCHICAL SPATIAL COMPOSITION
@@ -44,13 +44,50 @@ Grouped containers that:
   - Use depth tiers to signal hierarchy level
 
 ===================================================================
+DEFAULT MEDIUM — INLINE SVG
+===================================================================
+
+Architecture diagrams are inline SVG, not CSS flex/grid or Mermaid.
+
+SVG provides pixel-perfect control over group containers, curved
+arrow paths, arrowhead markers, icon circles, and multi-line text
+labels. A single <svg class="arch-svg" viewBox="..."> scales
+responsively without media queries.
+
+  → Group containers are <rect class="group-box"> with rx corners
+  → Inter-group flow is <path class="arrow-path"> with Q/C curves
+  → Arrowhead markers live in <defs> (default + lit variants)
+  → Components inside groups are smaller <rect> elements
+  → Text labels, codes, and badges are <text> elements
+
+CSS custom properties (var(--surface), var(--border), var(--accent))
+work inside SVG fill and stroke attributes — the theme toggle
+applies automatically.
+
+CSS classes on SVG elements (.group-box, .source-box, .arrow-path)
+let the phase engine and theme system target them. The .lit class
+activates the highlight state during phase animation.
+
+CSS flex/grid is for NON-DIAGRAM content: card grids, stat displays,
+step lists, comparison panels. Anything that shows how components
+CONNECT to each other is SVG.
+
+See svg-exemplar.md for the full structural pattern, sizing
+conventions, and phase engine data structure.
+
+===================================================================
 GROUP CONTAINERS
 ===================================================================
 
 A group container is a bordered/backgrounded region that wraps
 related components. It replaces the flat "row of boxes" pattern.
 
-CSS pattern:
+In SVG diagrams (the default), a group container is a
+<rect class="group-box"> with rounded corners (rx:8) and a
+<text> label positioned near its top edge. The group visually
+wraps smaller component rects inside it.
+
+In HTML card-based layouts (non-diagram sections), the CSS pattern:
 
   .group {
     background: var(--surface);
@@ -88,21 +125,25 @@ NESTING — COMPONENTS INSIDE GROUPS
 Components inside a group use internal layout:
 
   VERTICAL STACK — for sequential internal steps
-    flex-direction: column; gap: 6px;
+    In SVG: smaller <rect> elements at 32px height, incrementing y
+    by 40px within the parent group-box coordinate space.
+    In HTML: flex-direction: column; gap: 6px;
     Use when: steps happen in order (Bronze → Silver → Gold)
 
   HORIZONTAL WRAP — for parallel/peer items
-    display: flex; flex-wrap: wrap; gap: 6px;
+    In SVG: rects placed side-by-side incrementing x.
+    In HTML: display: flex; flex-wrap: wrap; gap: 6px;
     Use when: items are peers (11 tools, 4 parsers, 6 contracts)
 
   GRID — for categorized items
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+    In SVG: rects arranged in rows and columns within the group.
+    In HTML: display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
     Use when: items have categories (tools by type, entities by layer)
 
 Components inside groups are SMALLER than top-level components:
-  → Reduced padding (8-10px vs 14px)
-  → Smaller font (8-9px vs 10px for labels)
-  → Dashed borders for optional/conditional items
+  → In SVG: 8-9px font for labels (vs 10-11px for group labels)
+  → In HTML: reduced padding (8-10px vs 14px), smaller font
+  → Dashed borders/strokes for optional/conditional items
 
 ===================================================================
 HORIZONTAL FLOW BETWEEN GROUPS
@@ -115,6 +156,11 @@ components inside groups.
 ```
   [Group A] ──arrow──> [Group B] ──arrow──> [Group C]
 ```
+
+In SVG, inter-group flow uses <path class="arrow-path"> elements
+with curved segments (Q quadratic or C cubic commands) and
+marker-end referencing arrowhead markers from <defs>. Paths
+connect group bounding boxes, not individual components.
 
 Each group handles its own internal layout. The top-level layout
 only cares about arranging groups horizontally with arrows between.
@@ -273,7 +319,13 @@ description, AND nested sub-items — not just a label in a box.
 ## Vertical Connector Alignment
 
 The single most common visual bug in generated diagrams is
-misaligned vertical connectors. One rule prevents it:
+misaligned vertical connectors.
+
+In SVG diagrams, connector alignment is handled by path coordinates
+and is inherently pixel-precise — no flex mirroring needed. Use
+exact x,y values in path d attributes.
+
+In HTML+CSS layouts, one rule prevents misalignment:
 
 **The connector row must replicate the flex structure of the row
 it connects to.**
@@ -285,10 +337,6 @@ Equal-width rows (e.g., agent cards with flex:1 and gap:12px):
 Mixed-width rows (e.g., component + arrow-col alternating):
   - Connector row replicates each slot's min-width or flex value
   - Arrow-col slots become empty spacers with matching flex/max-width
-
-Vertical (column) layouts are simpler — vert-lines center
-automatically via the parent's align-items:center. No mirroring
-needed unless the flow branches into a horizontal sub-row.
 
 Never:
   - Use fixed px gaps to align with flex:1 cards
@@ -307,10 +355,11 @@ feel the same:
   - **Grid**: 3-4 concept cards or entity summaries
   - **Single-column**: narrative text, detailed explanations
 
-The architecture diagram is the HERO section. Give it maximum
-visual weight — full width, generous padding, animated arrows,
-gradient backgrounds. Surrounding sections should be lighter
-so the diagram commands attention.
+The architecture diagram is the HERO section — an inline SVG
+element with full width and max-height:70vh. Give it maximum
+visual weight: generous padding, animated phase highlights,
+radial gradient backgrounds. Surrounding sections should be
+lighter so the diagram commands attention.
 
 ### Diagram density quick-reference
 
