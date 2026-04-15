@@ -182,6 +182,64 @@ For systems that don't fit in one horizontal row:
   ```
 
 ===================================================================
+FLOW SPINE
+===================================================================
+
+The flow spine is the single primary data path from entry to exit —
+the "storyline" a viewer traces to understand the system. Every
+diagram must have exactly one spine.
+
+  ONE SPINE PER DIAGRAM:
+    Left-to-right reading order. If you cannot trace arrows from
+    entry to exit, the diagram lacks a spine and needs rework.
+
+  EVERY GROUP ON THE SPINE OR CONNECTED TO IT:
+    Spine groups sit on the main data path (entry → processing →
+    output). Non-spine groups (tools, storage, external services)
+    connect to a spine group via branch arrows. No group floats
+    without a connection.
+
+  BRANCHES ARE SUBORDINATE:
+    Fan-out, loops, side-calls, and storage access are secondary
+    paths. Position them below or above the spine line, at a
+    recessed depth tier. They visually defer to the spine.
+
+  SPINE DETERMINES PHASE ORDER:
+    The phase engine walks the spine from entry to exit. Phase 0 =
+    entry/trigger. Each subsequent phase = next spine group + the
+    arrow leading to it. Branch phases interleave right after their
+    parent spine group — never appended at the end.
+
+  ANTI-PATTERN CLARIFICATION:
+    The [A] → [B] → [C] warning (see CORE PRINCIPLE above) is about
+    ungrouped flat boxes with no internal structure — NOT about
+    sequential flow. A spine connects GROUPS that contain rich
+    internal layouts. Sequential clarity and structural depth coexist.
+
+  ```
+    SPINE:
+      [Entry] ──> [Group A] ──> [Group B] ──> [Output]
+                       │              │
+    BRANCHES:     [Storage]      [Services]
+  ```
+
+  SPINE SPACING DISCIPLINE:
+    Spine groups sit in a horizontal row with dedicated arrow gaps
+    between them. No group should touch or overlap its neighbor.
+
+    Minimum gap between spine groups: 40px. This gap is reserved
+    for the arrow path — nothing else occupies it.
+
+    Branch groups sit in a row BELOW the spine (or above, for
+    lightweight elements). The vertical gap between spine bottom
+    edge and branch top edge must be at least 30px — enough for
+    arrow routing without collision.
+
+    When branch arrows need to reach a non-adjacent spine group,
+    route them through the gap space below (or above) the spine
+    row — never through an intervening group.
+
+===================================================================
 LAYOUT A — HORIZONTAL PIPELINE (with groups)
 ===================================================================
 

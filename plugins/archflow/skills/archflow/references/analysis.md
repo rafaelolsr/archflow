@@ -92,6 +92,21 @@ subsystems that contain related components — identify those groups.
     → Include branching: loops, retries, conditional paths
     → What does the system return? (the last phase)
 
+  FLOW SPINE — trace before listing phases:
+    → Identify the primary data path from entry to exit. This is the
+      "spine" — the single storyline a viewer follows to understand
+      the system. Number groups in spine order; this becomes the
+      phase sequence.
+    → Verify reachability: every group must be reachable from entry
+      by following arrows. If a group is disconnected, it's either
+      missing an arrow or doesn't belong in the diagram.
+    → Name entry and exit explicitly: these anchor the spine and
+      become phase 0 (entry/trigger) and the final phase (output).
+    → Map branches to parent spine groups: non-spine groups (storage,
+      services, tools) connect to a specific spine group — this
+      determines their phase timing. A branch phase appears right
+      after its parent spine group, not appended at the end.
+
   PHASE LABELS
   -------------------------------------------------------------------
   Write plain-language labels referencing actual code concepts:
