@@ -206,3 +206,100 @@ FINAL CHECKLIST — RUN BEFORE PRESENTING
   □ No overflow on mobile viewport
   □ Phase banner is readable in both themes
   □ If you swapped CSS between this report and another, someone WOULD notice
+
+===================================================================
+STRUCTURED REVIEW PROTOCOL
+===================================================================
+
+After generating the output HTML, re-read the file and validate
+each category below. Report findings with severity levels.
+
+This protocol is used by the REVIEW stage (Stage 5) of the
+archflow pipeline. Run every check. Report each as ✓, ⚠, or ✗
+with a brief note.
+
+  Category         What to check                                     Severity if failed
+  ─────────────────────────────────────────────────────────────────────────────────────────
+  Typography       2+ distinct font families used                    ERROR
+  Palette          ≤4 accent colors, semantic assignments             WARNING
+  Depth tiers      3+ different card depths used (report mode)        ERROR
+  Color variety    No monochrome card grids                          ERROR
+  Layout rhythm    No 3+ adjacent sections with same shape            WARNING
+  Backgrounds      Each section has unique background treatment       ERROR
+  HTML validity    No unclosed tags, no missing >, no broken nesting   CRITICAL
+  SVG structure    No orphan groups, all arrows connect boxes         CRITICAL
+  SVG text fit     All labels fit inside their rects with padding     ERROR
+  SVG label clash  Flow labels don't overlap group borders or arrows  ERROR
+  SVG arrows       No arrows crossing unconnected boxes              ERROR
+  Animation        Phase engine highlights every group at least once  CRITICAL
+  Theme toggle     CSS custom properties used (not hardcoded colors)  WARNING
+  Accessibility    prefers-reduced-motion rule present                WARNING
+
+  How to verify each check:
+
+    Typography     Count distinct font-family declarations. Must be ≥2
+                   distinct families (not variants of the same family).
+
+    Palette        Count unique accent colors used on cards/borders.
+                   Must be ≤4. Check semantic consistency (cyan=input, etc.).
+
+    Depth tiers    Count distinct card depth classes or shadow levels.
+                   Must be ≥3 (e.g., hero, elevated, recessed).
+
+    Color variety  In any card grid (3+ cards), check that not all cards
+                   share the same accent color.
+
+    Layout rhythm  Scan section layouts top-to-bottom. Flag if 3+
+                   adjacent sections use the same card/component shape.
+
+    Backgrounds    Each <section> must have a visually distinct background
+                   (gradient, texture, color, or atmosphere). No two adjacent
+                   sections should share the same flat background.
+
+    HTML validity  Scan every opening tag (<section, <div, <rect, <text,
+                   <path, <svg, etc.). Verify each has a closing >.
+                   Check that block elements (<section>, <div>, <article>)
+                   have matching closing tags. Look for attributes that end
+                   with a quote but no > before the next tag. This is the
+                   most damaging defect — a single missing > can collapse
+                   entire sections and make content render unstyled.
+
+    SVG structure  Every <g> group in the SVG must be connected by at least
+                   one arrow. No orphan groups floating disconnected.
+
+    SVG text fit   For each <text> inside a <rect>, estimate text width
+                   (chars × ~8.5px for 14px font, ~10px for 16px). Compare
+                   to rect width minus padding (16px each side). Flag if
+                   text may overflow.
+
+    SVG label clash For each flow label (<text> between groups), check that:
+                   - The label's x position is fully inside the gap between
+                     the source group's right edge and the target group's
+                     left edge. Estimate label half-width as (chars × font-size
+                     × 0.3) for text-anchor="middle".
+                   - The label's y position does not coincide with an arrow's
+                     y coordinate at the same x range (labels should sit
+                     above or below the arrow, not on top of it).
+                   - No label overlaps a group-box or source-box border.
+                   This is the most common SVG defect — inter-group gaps
+                   that are too narrow for the label text they contain.
+
+    SVG arrows     Trace each arrow path. It must connect two boxes that
+                   have a data-flow relationship. No arrows should cross
+                   over unrelated boxes without routing around them.
+
+    Animation      Check that the phase engine's phase definitions cover
+                   every component group. Each group must be highlighted
+                   in at least one phase.
+
+    Theme toggle   Search for hardcoded color values (#hex, rgb(), hsl())
+                   outside of CSS custom property definitions. All color
+                   usage should reference var(--*) properties.
+
+    Accessibility  Search for @media (prefers-reduced-motion: reduce).
+                   Must be present with animation/transition overrides.
+
+  VERDICT RULES:
+    PASS              → 0 CRITICAL, 0 ERROR
+    CONDITIONAL PASS  → 0 CRITICAL, 0 ERROR, WARNINGs only
+    FAIL              → any CRITICAL or ERROR → trigger FIX stage (Stage 6)

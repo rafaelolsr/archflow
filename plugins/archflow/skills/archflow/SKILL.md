@@ -24,115 +24,252 @@ OUTPUT MODES
   /archflow-slides    → Slide deck presentation
 
 ===================================================================
-WORKFLOW — FULL REPORT (default: /archflow)
+WORKFLOW — 7-STAGE PIPELINE (all modes)
 ===================================================================
 
-  1. ANALYZE
-     Read references/analysis.md → scan the codebase
-     Read references/layouts.md  → decide the diagram layout pattern
+Every output mode follows the same pipeline. Mode-specific behavior
+is noted inline. After each stage completes, print a one-line status.
 
-  2. THINK (commit to a visual direction before coding)
-     Read references/design-system.md → CSS patterns library
-     Read references/libraries.md     → fonts, Mermaid, CDN imports
-     Read references/design-qa.md     → quality gates
+-------------------------------------------------------------------
+STAGE 1: ANALYZE
+-------------------------------------------------------------------
 
-     Pick:
-       → A font pairing that matches the project character
-       → A color palette aesthetic (Blueprint, Terminal Mono, etc.)
-       → A background atmosphere (radial glow, dot grid, mesh)
+  Read references/analysis.md → scan the codebase.
+  Read references/layouts.md  → decide the diagram layout pattern.
 
-     Do NOT default to the same choices every time.
-     Each report should feel intentionally designed.
+  Extract: components, groups, flows, external services.
 
-  3. STRUCTURE
-     Read references/animation.md    → phase engine for the diagram
-     Read references/navigation.md   → TOC sidebar (if needed)
+  After completion, print:
+    ANALYZE   ✓  {N} files scanned, {M} components, {K} external services
 
-     Plan the report sections. Include at minimum:
-       → Header (project name, description, date)
-       → Executive summary
-       → KPI metrics
-       → Animated architecture diagram (MANDATORY — the hero section)
-       → Component directory or data table
-       → Supporting content as the project demands
-         (data flow, benchmarks, external services, insights, etc.)
-       → Code references
+-------------------------------------------------------------------
+STAGE 2: PLAN
+-------------------------------------------------------------------
 
-     Compose FREELY. Don't follow a rigid 10-section template.
-     Add sections the project needs. Skip sections it doesn't.
-     Create bespoke components (bar charts, comparison panels,
-     distribution bars) when the data calls for them.
+  Read references/design-system.md → CSS patterns library
+  Read references/libraries.md     → fonts, Mermaid, CDN imports
+  Read references/design-qa.md     → quality gates
+  Read references/animation.md     → phase engine for the diagram
+  Read references/navigation.md    → TOC sidebar (if needed)
 
-  4. STYLE
-     Write CUSTOM CSS for this specific report.
-     Don't reuse a generic template — design each report uniquely.
-     Use the patterns from design-system.md as building blocks,
-     but adapt them to this project's needs.
+  Produce a visible, structured architecture map BEFORE any HTML.
 
-     The animated diagram section uses its own CSS classes
-     (.component, .arrow-line, .vert-line, etc.) — keep those
-     as documented in design-system.md and animation.md.
+  Decide:
+    → Font pairing that matches the project character
+    → Color palette aesthetic (Blueprint, Terminal Mono, etc.)
+    → Background atmosphere (radial glow, dot grid, mesh)
+    → Layout pattern (pipeline, hub, medallion)
 
-  5. DELIVER
-     → Output to ./architecture-report.html
-     → Single self-contained HTML file
-     → External deps: Google Fonts CDN + optional Mermaid CDN
-     → Present the file
-     → Print a short summary
+  Do NOT default to the same choices every time.
 
-===================================================================
-WORKFLOW — DIAGRAM ONLY (/archflow-diagram)
-===================================================================
+  Plan the content:
+    REPORT MODE — plan report sections. Include at minimum:
+      → Header (project name, description, date)
+      → Executive summary
+      → KPI metrics
+      → Animated architecture diagram (MANDATORY — the hero section)
+      → Component directory or data table
+      → Supporting content as the project demands
+      → Code references
+      Compose FREELY. Add sections the project needs. Skip ones it doesn't.
 
-  1. ANALYZE
-     Read references/analysis.md → scan the codebase
-     Read references/layouts.md  → decide the diagram layout pattern
+    DIAGRAM-ONLY MODE — plan diagram layout and phases only.
 
-  2. THINK
-     Read references/design-system.md → CSS patterns + diagram classes
-     Read references/animation.md     → phase engine
+    SLIDE MODE — plan content → slide type mapping and chunk boundaries
+      (5-7 slides per chunk for chunked generation in BUILD).
 
-     Pick:
-       → A color palette aesthetic for the diagram
-       → A background atmosphere
-       → The layout pattern (pipeline, hub, or medallion)
+  Output the architecture map to the user:
 
-     Use templates/ as REFERENCE EXAMPLES only — don't copy them
-     rigidly. Compose the diagram HTML freely with custom CSS.
+    PLAN
+      Architecture: {N} components in {M} groups
+      Layout: {horizontal-pipeline | multi-agent-hub | medallion-pipeline}
+      Spine: {entry} → {group1} → {group2} → ... → {exit} ({P} phases)
+      Design: {font pairing} · {palette} · {atmosphere}
+      Sections: {N} sections planned
+      ─────────────────────────────────
+      Groups:
+        HERO     {group name} — {description}
+        ELEVATED {group name} — {description}
+        DEFAULT  {group name} — {description}
+        ...
 
-  3. COMPOSE
-     Write custom CSS + HTML for this specific diagram.
-     Use the diagram component classes from design-system.md
-     (.component, .arrow-line, .vert-line, .storage-pipeline, etc.)
-     and the phase engine from animation.md.
-     Adapt the layout to fit the actual codebase — don't force
-     it into a template if the system has a different shape.
+  This is the CONTRACT. The BUILD stage implements this map — it does
+  not re-decide architecture.
 
-  4. DELIVER
-     → Output to ./architecture-diagram.html
-     → Single self-contained HTML file
-     → ZERO external dependencies (no CDN fonts, no Mermaid)
-     → Self-contained fonts: 'JetBrains Mono', 'Fira Code', monospace
-     → Present the file + short summary
+  After completion, print:
+    PLAN      ✓  {M} groups, {P} phases, {layout} layout
 
-  Reference examples (for layout patterns, not rigid templates):
-    templates/horizontal-pipeline.html   → API / RAG / request-response
-    templates/multi-agent-hub.html       → orchestrator + parallel agents
-    templates/medallion-pipeline.html    → ETL / Delta Live Tables
+-------------------------------------------------------------------
+STAGE 3: BUILD
+-------------------------------------------------------------------
 
-===================================================================
-WORKFLOW — SLIDE DECK (/archflow-slides)
-===================================================================
+  Read remaining reference docs as needed (svg-exemplar.md, etc.).
+  Write HTML/CSS/SVG implementing the architecture map from PLAN.
 
-  1. Read references/analysis.md       → analyze the codebase
-  2. Read references/layouts.md        → decide the layout
-  3. Read references/design-system.md  → CSS patterns
-  4. Read references/libraries.md      → fonts, CDN imports
-  5. Read references/animation.md      → phase engine
-  6. Read references/slide-patterns.md → slide system
-  7. Compose slide deck freely with animated diagram as hero slide
-  8. Output to ./architecture-slides.html
-  9. Present + summary
+  Use the design-system.md patterns as BUILDING BLOCKS, not templates.
+  Compose unique CSS per project. Design each component fresh.
+
+  REPORT MODE:
+    → Write CUSTOM CSS for this specific report
+    → Dark/light theme toggle with localStorage persistence
+    → Responsive layout, prefers-reduced-motion support
+    → The animated diagram is the hero section — maximum visual weight
+
+  DIAGRAM-ONLY MODE:
+    → Fully self-contained — zero external dependencies
+    → Self-contained fonts: 'JetBrains Mono', 'Fira Code', monospace
+    → Reference examples (for layout patterns, not rigid templates):
+        templates/horizontal-pipeline.html
+        templates/multi-agent-hub.html
+        templates/medallion-pipeline.html
+
+  SLIDE MODE (chunked generation with per-chunk review):
+    1. PLAN stage defined chunk boundaries (5-7 slides per chunk)
+    2. For each chunk:
+       a. BUILD chunk:
+          - Chunk 1: <head>, CSS, opening <div class="deck">, slides 1-N
+          - Middle chunks: <section class="slide"> elements only
+          - Last chunk: remaining slides, closing </div>, SlideEngine JS
+       b. REVIEW chunk: spawn reviewer agent (see references/reviewer-agent.md)
+          on the chunk HTML (subset checks relevant to slides)
+       c. FIX chunk if CRITICAL or ERROR found (max 2 fix cycles per chunk)
+       d. Print per-chunk progress:
+            Chunk {i}/{M} (slides {start}-{end}): BUILD ✓  REVIEW ✓  (0C 0E 1W)
+    3. Assemble all validated chunks into single file
+    4. FINAL REVIEW on the assembled deck for cross-chunk issues:
+       - Duplicate CSS definitions or mismatched variables
+       - Slide count matching navigation dots
+       - Consistent styling across all sections
+
+  After completion, print:
+    BUILD     ✓  {output-mode} generated ({lines} lines, {M} chunks)
+
+-------------------------------------------------------------------
+STAGE 4: DELIVER
+-------------------------------------------------------------------
+
+  Write the output file:
+    REPORT MODE:   ./architecture-report.html
+    DIAGRAM MODE:  ./architecture-diagram.html
+    SLIDE MODE:    ./architecture-slides.html
+
+  Single self-contained HTML file. Call present_files.
+
+  After completion, print:
+    DELIVER   ✓  {output-path}
+
+-------------------------------------------------------------------
+STAGE 5: REVIEW (independent agent)
+-------------------------------------------------------------------
+
+  Spawn a separate reviewer agent (Sonnet) to validate the output.
+  See references/reviewer-agent.md for the full agent specification.
+
+  The reviewer reads the HTML cold — it did not build the output and
+  has no memory of what was intended. It only sees what was produced.
+  This objectivity catches issues that self-review misses.
+
+  The reviewer reads the generated HTML file and validates against
+  the STRUCTURED REVIEW PROTOCOL in design-qa.md.
+
+  It runs ALL check categories and produces a severity-scored report:
+
+    REVIEW
+      HTML validity ✓  All tags closed, no broken nesting
+      Typography    ✓  2 font families (Instrument Serif + DM Sans + Fira Code)
+      Palette       ✓  2 accents (cyan, orange) + neutrals
+      Depth tiers   ✓  3 tiers used (hero, elevated, recessed)
+      Color variety ✓  No monochrome grids
+      Layout rhythm ✓  5 distinct section layouts
+      Backgrounds   ✓  Each section has unique treatment
+      SVG structure ✓  No orphan groups, all arrows connect
+      SVG text fit  ⚠  WARNING: "VectorStoreIndex" may overflow rect at x=290 (est 148px, rect 150px)
+      SVG labels    ✓  All flow labels inside gaps, no border overlap
+      Animation     ✓  6 phases, all groups highlighted
+      Theme toggle  ✓  CSS variables used throughout
+      Accessibility ✓  prefers-reduced-motion supported
+      ─────────────────────────────────
+      VERDICT: PASS (0 CRITICAL, 0 ERROR, 1 WARNING)
+
+  Severity levels:
+    CRITICAL  Broken output (missing phase engine, no SVG, HTML syntax error)
+    ERROR     Quality gate failure (single font, flat backgrounds, orphan SVG groups, text overflow)
+    WARNING   Minor issue (tight text fit, same card shape 3x adjacent, could improve variety)
+    INFO      Suggestion (could add a quote slide for breathing room)
+
+  After completion, print:
+    REVIEW    ✓  {VERDICT} ({C}C {E}E {W}W)
+
+-------------------------------------------------------------------
+STAGE 6: FIX (conditional)
+-------------------------------------------------------------------
+
+  Skip this stage if REVIEW verdict is PASS or CONDITIONAL PASS
+  with only WARNINGs.
+
+  If REVIEW has CRITICAL or ERROR findings:
+    → Fix CRITICAL findings first — they break the output entirely.
+    → Apply targeted fixes. One edit per finding.
+    → Do NOT redesign — surgical corrections only.
+    → After EACH edit, verify the fix took effect by re-reading the
+      modified lines. A fix that doesn't change the output is not a fix.
+    → After all fixes applied, re-run the full REVIEW (Stage 5).
+      The re-review must confirm every previously-CRITICAL and
+      previously-ERROR finding is now resolved. If any CRITICAL
+      or ERROR persists, that is a failed fix cycle — loop again.
+    → Keep looping (fix → review) until the verdict is PASS or
+      CONDITIONAL PASS. Do not stop while CRITICAL or ERROR remain.
+    → Hard ceiling: 5 cycles. If still failing after 5 cycles,
+      something is fundamentally broken — present the full review
+      report to the user and ask for guidance. Do not continue.
+
+  After completion, print:
+    FIX       ✓  {N} cycle(s) ({M} finding(s) resolved)
+
+-------------------------------------------------------------------
+STAGE 7: PRESENT
+-------------------------------------------------------------------
+
+  Print final summary with the accumulated progress report.
+
+  REPORT / DIAGRAM MODE:
+
+    ARCHFLOW: {project-name}
+    ━━━━━━━━━━━━━━━━━━━━━━━━
+
+      ANALYZE   ✓  {N} files scanned, {M} components found
+      PLAN      ✓  {M} groups, {P} phases, {layout} layout
+      BUILD     ✓  {output-mode} generated ({lines} lines)
+      DELIVER   ✓  {output-path}
+      REVIEW    ✓  PASS (0C 0E 1W)
+      {FIX      ✓  1 cycle (1 warning resolved)}
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━
+    OUTPUT: {path}
+    QUALITY: {percentage}% ({warnings}W)
+
+  SLIDE MODE (includes per-chunk detail):
+
+    ARCHFLOW: {project-name}
+    ━━━━━━━━━━━━━━━━━━━━━━━━
+
+      ANALYZE   ✓  {N} files scanned, {M} components found
+      PLAN      ✓  {M} groups, {P} phases, {N} slides in {M} chunks
+
+      BUILD + REVIEW
+        Chunk 1/{M} (slides 1-{n}):       BUILD ✓  REVIEW ✓  (0C 0E 1W)
+        Chunk 2/{M} (slides {n+1}-{m}):   BUILD ✓  REVIEW ✗ → FIX ✓  (0C 0E 0W)
+        ...
+
+      ASSEMBLE  ✓  {M} chunks → {N} slides
+      DELIVER   ✓  {output-path}
+      FINAL REVIEW  ✓  PASS (0C 0E 1W)
+      {FIX      ✓  1 cycle (1 warning resolved)}
+
+    ━━━━━━━━━━━━━━━━━━━━━━━━
+    OUTPUT: {path}
+    QUALITY: {percentage}% ({warnings}W)
+    FIX CYCLES: {count} (chunks {list})
 
 ===================================================================
 DESIGN PRINCIPLES
