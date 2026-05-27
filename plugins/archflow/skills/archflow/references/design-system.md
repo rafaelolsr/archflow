@@ -451,6 +451,39 @@ CSS PATTERN -- define :root variables and override in body.light:
   dark and light backgrounds.
 
 ===================================================================
+7b. PRINT / PDF -- FIRST-CLASS OUTPUT
+===================================================================
+
+Every generated file must produce a usable PDF when the reader
+hits Cmd+P / Ctrl+P. The animated, dark-themed on-screen design
+collapses on paper unless an explicit print stylesheet is shipped.
+
+PRINCIPLES (full reference: print.md):
+  -> Print is a frozen snapshot of the on-screen design, not a
+     parallel "print version." Same content, frozen animation,
+     light theme, paginated correctly.
+  -> Force the light theme inside @media print so the printed
+     PDF doesn't waste ink on dark backgrounds.
+  -> Use print-color-adjust: exact so atmospheres and accent
+     colors survive — browsers strip them by default.
+  -> Replace clamp(... vw ...) sizes with fixed pt values inside
+     the print block. Viewport units against an A4 page produce
+     hero headings that collapse to body-text size.
+  -> Hide on-screen-only chrome (theme toggle, sticky nav, scroll
+     indicators) with display:none !important inside @media print.
+  -> Set @page { size: A4; margin: 16mm; } (landscape for diagram
+     and slide modes).
+  -> Apply break-inside: avoid to sections, KPI cells, cards,
+     and table rows. Use break-after: avoid on h1/h2/h3 to keep
+     headings with their content.
+  -> Freeze the phase engine via a beforeprint listener that
+     lights up EVERY group + arrow simultaneously (composite
+     snapshot). See animation.md for the JS pattern.
+
+The print stylesheet is mandatory output for all modes. The
+reviewer agent checks for its presence and structure.
+
+===================================================================
 8. ANIMATIONS -- TOOLKIT
 ===================================================================
 

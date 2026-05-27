@@ -205,6 +205,7 @@ FINAL CHECKLIST — RUN BEFORE PRESENTING
   □ Sections reveal on scroll (not all at once)
   □ No overflow on mobile viewport
   □ Phase banner is readable in both themes
+  □ Print stylesheet present (@media print + composite snapshot hook)
   □ If you swapped CSS between this report and another, someone WOULD notice
 
 ===================================================================
@@ -234,6 +235,7 @@ with a brief note.
   Animation        Phase engine highlights every group at least once  CRITICAL
   Theme toggle     CSS custom properties used (not hardcoded colors)  WARNING
   Accessibility    prefers-reduced-motion rule present                WARNING
+  Print/PDF        @media print rules + beforeprint composite hook    ERROR
 
   How to verify each check:
 
@@ -298,6 +300,19 @@ with a brief note.
 
     Accessibility  Search for @media (prefers-reduced-motion: reduce).
                    Must be present with animation/transition overrides.
+
+    Print/PDF      Search for @media print { … } and verify it contains
+                   at least: (a) light-theme variable overrides, (b)
+                   print-color-adjust: exact on backgrounds, (c) a
+                   @page rule with size + margin, (d) display:none on
+                   .theme-toggle (or equivalent on-screen-only element),
+                   (e) page-break/break-inside rules on sections,
+                   (f) fixed pt font sizes overriding clamp(). Then
+                   search for window.addEventListener('beforeprint',
+                   ...) — the composite snapshot hook must be wired so
+                   the diagram prints with all groups lit, not a
+                   single phase. See references/print.md for the
+                   canonical pattern.
 
   VERDICT RULES:
     PASS              → 0 CRITICAL, 0 ERROR

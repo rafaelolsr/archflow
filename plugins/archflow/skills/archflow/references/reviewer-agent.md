@@ -39,11 +39,12 @@ REVIEW PROCESS
 CHECK CATEGORIES
 ===================================================================
 
-Run all 12 checks from design-qa.md's STRUCTURED REVIEW PROTOCOL:
+Run all checks from design-qa.md's STRUCTURED REVIEW PROTOCOL:
 
   HTML validity, Typography, Palette, Depth tiers, Color variety,
   Layout rhythm, Backgrounds, SVG structure, SVG text fit,
-  SVG label clash, SVG arrows, Animation, Theme toggle, Accessibility
+  SVG label clash, SVG arrows, Animation, Theme toggle,
+  Accessibility, Print/PDF
 
 For SLIDE MODE, skip checks that don't apply:
   - Depth tiers (slides use slide types, not card depths)
@@ -76,6 +77,7 @@ Produce exactly this structure:
     Animation     {✓|⚠|✗}  {evidence}
     Theme toggle  {✓|⚠|✗}  {evidence}
     Accessibility {✓|⚠|✗}  {evidence}
+    Print/PDF     {✓|⚠|✗}  {evidence}
     ─────────────────────────────────
     VERDICT: {PASS | CONDITIONAL PASS | FAIL} ({C}C {E}E {W}W)
 

@@ -51,6 +51,7 @@ STAGE 2: PLAN
   Read references/design-qa.md     → quality gates
   Read references/animation.md     → phase engine for the diagram
   Read references/navigation.md    → TOC sidebar (if needed)
+  Read references/print.md         → print/PDF stylesheet + composite snapshot
 
   Produce a visible, structured architecture map BEFORE any HTML.
 
@@ -114,6 +115,9 @@ STAGE 3: BUILD
     → Dark/light theme toggle with localStorage persistence
     → Responsive layout, prefers-reduced-motion support
     → The animated diagram is the hero section — maximum visual weight
+    → Include @media print block per references/print.md — the
+      generated HTML must produce a usable PDF via Cmd+P, with the
+      phase engine frozen to a composite snapshot (every group lit)
 
   DIAGRAM-ONLY MODE:
     → Fully self-contained — zero external dependencies
@@ -122,8 +126,12 @@ STAGE 3: BUILD
         templates/horizontal-pipeline.html
         templates/multi-agent-hub.html
         templates/medallion-pipeline.html
+    → Include @media print block per references/print.md — landscape
+      A4 with the composite snapshot on a single page
 
   SLIDE MODE (chunked generation with per-chunk review):
+    → Include @media print block per references/print.md — landscape
+      A4, one slide per page, scroll-snap disabled in print
     1. PLAN stage defined chunk boundaries (5-7 slides per chunk)
     2. For each chunk:
        a. BUILD chunk:
@@ -317,6 +325,9 @@ OUTPUT RULES
     → Phase count: 4-8 phases (sweet spot for animation readability)
     → Max 8 components per row before layout gets crowded
     → After writing, call present_files
+    → Print/PDF support is mandatory — every output must include the
+      @media print block from references/print.md and the composite
+      snapshot beforeprint hook. Cmd+P must produce a usable PDF.
 
   REPORT MODE:
     → File: ./architecture-report.html
@@ -324,14 +335,18 @@ OUTPUT RULES
     → Dark/light theme toggle with localStorage persistence
     → Responsive layout (works on mobile)
     → prefers-reduced-motion support
+    → Print stylesheet: A4 portrait, light theme forced, hero on page 1,
+      composite-snapshot diagram, page-break rules per print.md
 
   DIAGRAM-ONLY MODE:
     → File: ./architecture-diagram.html
     → Fully self-contained — zero external dependencies
+    → Print stylesheet: A4 landscape, single-page composite snapshot
 
   SLIDE MODE:
     → File: ./architecture-slides.html
     → External deps: Google Fonts CDN
+    → Print stylesheet: A4 landscape, one slide per page, no scroll-snap
 
 ===================================================================
 ANALYSIS DEPTH

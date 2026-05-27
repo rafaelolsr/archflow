@@ -360,3 +360,55 @@ This disables both entrance animations AND the phase engine's
 CSS transitions (border-color, box-shadow). The setInterval
 still runs but visual changes are instantaneous rather than
 animated — content remains visible and functional.
+
+===================================================================
+PRINT — COMPOSITE SNAPSHOT
+===================================================================
+
+When the page is printed (Cmd+P / Ctrl+P) or rendered to PDF, the
+phase engine must freeze on a "composite" frame where every group,
+source, and arrow is lit simultaneously. A random single-phase
+capture would show the reader an arbitrary slice of the architecture
+instead of the whole thing.
+
+Hook this into the phase engine via the `beforeprint` window event:
+
+  function applyCompositePhase() {
+    if (typeof stopPhases === 'function') stopPhases();
+    if (typeof resetSvg === 'function') resetSvg();
+
+    const banner = document.getElementById('phase-banner');
+    if (banner) banner.textContent = '▶ Architecture overview — all phases';
+
+    const allGroups  = new Set();
+    const allSources = new Set();
+    const allArrows  = new Set();
+    (phases || []).forEach(p => {
+      (p.groups  || []).forEach(id => allGroups.add(id));
+      (p.sources || []).forEach(id => allSources.add(id));
+      (p.arrows  || []).forEach(id => allArrows.add(id));
+    });
+
+    const litColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent').trim() || '#0891b2';
+
+    [...allGroups, ...allSources, ...allArrows].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.setProperty('--glow-color', litColor);
+      el.classList.add('lit');
+    });
+  }
+
+  window.addEventListener('beforeprint', applyCompositePhase);
+  window.addEventListener('afterprint', () => {
+    if (typeof startPhases === 'function') startPhases();
+  });
+
+  if (window.matchMedia && window.matchMedia('print').matches) {
+    applyCompositePhase();
+  }
+
+This reuses the same `--glow-color` + `.lit` mechanism the live
+phase engine uses, so no new CSS state is needed. See print.md for
+the matching `@media print` stylesheet.
