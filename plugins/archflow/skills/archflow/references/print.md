@@ -19,11 +19,45 @@ PRINT IS A FROZEN SNAPSHOT, NOT A SECOND DESIGN
   rules. The reader should recognize the printed page as the same
   document they saw on screen.
 
-LIGHT THEME WINS ON PAPER
-  Ink-heavy dark backgrounds waste toner and look wrong in PDF
-  viewers. Force the light theme for print, regardless of what the
-  user picked on screen. Keep accent colors — they're the only thing
-  that survives black-and-white photocopying anyway.
+TWO PRINT STRATEGIES — PICK BY HOW THE PDF IS CONSUMED
+  There is no single right theme for paper. Choose up front, because
+  it changes the whole @media print block:
+
+  A) LIGHT-ON-PAPER (default for PRINTED handouts)
+     Ink-heavy dark backgrounds waste toner and look wrong when
+     physically printed. Remap to the light theme, kill the
+     atmospheres (see next principle), keep accent colors. This is
+     the safe default when you don't know how the reader will use it,
+     and the only sane choice for something going through an office
+     printer.
+
+  B) DARK-FIDELITY (for SCREEN-CONSUMED / AGENT-GENERATED PDFs)
+     When the PDF will be READ ON A SCREEN (shared as a file, attached
+     to a doc, viewed in a PDF app) and especially when a tool
+     GENERATES the PDF headlessly rather than a human hitting Cmd+P,
+     the reader expects the PDF to look like the site — dark ground,
+     glows, lit diagram. Forcing light there feels like a broken,
+     flattened downgrade. Keep the on-screen dark theme verbatim and
+     paint EVERYTHING (including atmospheres) with
+     print-color-adjust: exact. See section 4b for the skeleton.
+
+  DECISION RULE
+    - Human will physically print it, or you're unsure  → strategy A.
+    - PDF is delivered as a screen artifact, or YOU (an agent) render
+      it via headless Chromium  → strategy B.
+    - When a user says "the PDF should look exactly like the screen"
+      or "keep the dark theme" → strategy B, no argument.
+
+  CRITICAL CAVEAT FOR STRATEGY B
+    Browsers default the print dialog's "Background graphics" checkbox
+    to OFF, which strips the dark ground and gives an all-white page —
+    exactly the flattened look the user was trying to avoid. So a
+    dark-fidelity PDF is only reliable when RENDERED HEADLESSLY (where
+    backgrounds are on by default) or when the human is told to tick
+    "Background graphics". If neither holds, strategy A is safer.
+    Safari has no such checkbox but has its own clipping bugs — see
+    section 5. This is why agent-rendered delivery is the dependable
+    path for dark-fidelity.
 
 KEEP BACKGROUNDS — DON'T LET THE BROWSER STRIP THEM
   By default Chrome/Safari/Firefox remove all backgrounds in print.
@@ -240,6 +274,65 @@ WHY THIS WORKS
     the live page.
   - Reusing the existing `applyPhase` machinery (CSS custom properties
     + .lit class) means no new visual states to design.
+
+===================================================================
+4b. DARK-FIDELITY PRINT — KEEP THE SCREEN THEME ON PAPER
+===================================================================
+
+Use this INSTEAD of the section-3 light-remap when strategy B applies
+(screen-consumed / agent-rendered PDF; "make it look like the site").
+It is the inverse of everything the light path does: keep the dark
+tokens, and paint the atmospheres rather than hiding them.
+
+  @media print {
+    /* 1 -- FORCE the dark tokens, overriding body.light if the user
+       toggled the theme on screen. Use the project's real dark values. */
+    :root, body, body.light {
+      --bg: #0a0f16; --bg2: #0d141d;
+      --surface: #121a24; --surface-2: #172231;
+      --border: #223145; --border-2: #2e415b;
+      --text: #e6edf6; --text-dim: #9fb0c6; --text-muted: #64758c;
+      /* accents unchanged */
+    }
+    html, body { background: #0a0f16 !important; }
+
+    /* 2 -- paint EVERYTHING, atmospheres INCLUDED. This is the one
+       case where .atmos KEEPS print-color-adjust:exact — the dark
+       ground and glows are the whole point. List every colored
+       surface: sections, atmospheres, cards, diagram boxes, inner
+       boxes, code terminals, chips, table cells, state dots. */
+    html, body, section, .atmos, .card, .diagram-wrap, .kpi-cell,
+    .group-box, .source-box, .inner-box, .code-term, .chip,
+    .table-wrap, table, thead th, tbody td, .state-dot {
+      print-color-adjust: exact; -webkit-print-color-adjust: exact;
+    }
+
+    /* 3 -- everything else (fonts, page breaks, overflow, SVG bounds,
+       freeze) is IDENTICAL to the light path. Reuse sections 3 & 5.
+       The ONLY differences from light-on-paper are steps 1 and 2. */
+  }
+
+DELIVERY IS PART OF THE DESIGN FOR STRATEGY B
+  Dark-fidelity only survives if backgrounds are actually painted.
+  Two reliable delivery paths:
+
+  1. Ship a dedicated dark-print variant file and RENDER IT HEADLESSLY:
+       chrome --headless=new --disable-gpu --no-pdf-header-footer \
+         --virtual-time-budget=3000 \
+         --print-to-pdf=out.pdf "file:///abs/report.dark-print.html"
+     Headless Chromium paints backgrounds by default — no checkbox to
+     miss. This is how an AGENT should deliver a dark PDF.
+
+  2. If a human must Cmd+P it themselves, tell them explicitly to
+     enable "Background graphics" in the dialog, and to use Chrome or
+     Edge (Safari's clipping bugs, section 5, bite the dark path too).
+
+  Keeping the light-on-paper @media print in the primary file and
+  emitting a SEPARATE `*.dark-print.html` for headless rendering is a
+  clean split: browser-Cmd+P users get the safe light default; the
+  screen-artifact PDF gets full dark fidelity. Don't try to serve both
+  from one @media print block — the "Background graphics" default
+  makes a single dark block unreliable for interactive printing.
 
 ===================================================================
 5. PRINT-SPECIFIC RULES PER OUTPUT MODE
