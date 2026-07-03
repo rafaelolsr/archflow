@@ -27,9 +27,39 @@ LIGHT THEME WINS ON PAPER
 
 KEEP BACKGROUNDS — DON'T LET THE BROWSER STRIP THEM
   By default Chrome/Safari/Firefox remove all backgrounds in print.
-  This kills section atmospheres and card depth. Use
-  `print-color-adjust: exact` (and `-webkit-print-color-adjust: exact`
-  for older Safari) on the elements that carry color you care about.
+  This kills card depth and the surface tints that separate panels.
+  Use `print-color-adjust: exact` (and `-webkit-print-color-adjust:
+  exact` for older Safari) on the elements that carry color you care
+  about — cards, KPI cells, diagram boxes, code terminals.
+
+BUT KILL FULL-BLEED ATMOSPHERES ON PAPER — DON'T PRESERVE THEM
+  This is the #1 way a print export gets *destroyed*, and it is the
+  opposite failure from "my PDF is all white." Section atmospheres
+  (radial glows, grid overlays, `repeating-linear-gradient` stripes)
+  are almost always painted from the ACCENT variables — the one set
+  of colors the light-theme remap deliberately leaves untouched. So
+  when you slap `print-color-adjust: exact` on `.atmos`, you force
+  those full-saturation teal/amber grids to render at full strength
+  on white paper — as black grounds and neon vertical stripes across
+  every page. The dark ground you thought you neutralized is the
+  atmosphere layer, not `body`.
+
+  The fix is not to remap yet another variable. Atmospheres are pure
+  screen decoration; freeze them OUT of print entirely:
+
+    @media print {
+      .atmos, [class*="atmosphere"],
+      .hero .atmos::after { display: none !important; background: none !important; }
+    }
+
+  Then apply `print-color-adjust: exact` ONLY to the meaningful,
+  bounded color carriers (cards, boxes, code blocks) — never to a
+  full-bleed decorative layer. Card surface tints and accent text
+  survive; the page-wide glow noise does not.
+
+  Litmus test before you ship: if any `.atmos`/atmosphere selector
+  paints from `--accent`, `--signal`, or any accent-derived
+  `color-mix`, it MUST be `display:none` in print. No exceptions.
 
 FREEZE THE PHASE ENGINE
   Animations don't print. The phase engine cycles through 4-8 states;
@@ -118,13 +148,23 @@ class names. Keep what applies, drop what doesn't.
     .kpi-num { font-size: 28pt; }
     .label, .mono { font-size: 8pt; }
 
-    /* 5 -- page breaks */
-    section            { break-inside: avoid; padding: 28pt 0; }
-    section + section  { break-before: auto; }
-    .hero              { break-after: page; padding: 24pt 0; }
+    /* 5 -- page breaks
+       NEVER put break-inside:avoid on `section` itself. A section taller
+       than one page then cannot be placed anywhere, and the renderer
+       silently DROPS its overflow — the classic "the whole table/list
+       vanished from the PDF" bug. Apply avoid only to atomic children
+       that genuinely must not split (cards, rows, KPI cells). Let tall
+       containers (sections, tables, .table-wrap) break freely.
+       Also don't stack break-after:page on .hero AND break-before:page
+       on the next section — the double break strands a blank page
+       between them. Pick one side. */
+    section            { padding: 28pt 0; overflow: visible; }  /* NOT break-inside:avoid; overflow:visible undoes any screen overflow:hidden that would clip */
+    .hero              { padding: 24pt 0; }
+    .diagram-section   { break-before: page; }                  /* break BEFORE the target, not after the hero */
     .diagram-wrap      { break-inside: avoid; }
     h1, h2, h3         { break-after: avoid; }
-    table              { break-inside: auto; }
+    table, .table-wrap { break-inside: auto; }                  /* tall tables split across pages */
+    thead              { break-inside: avoid; }                 /* header row stays intact (and repeats per page) */
     tr, .kpi-cell, .insight-card { break-inside: avoid; }
 
     /* 6 -- shrink generous padding for paper */
@@ -237,21 +277,46 @@ Before declaring print support done, verify in the browser's print
 preview (Cmd+P / Ctrl+P), not just by reading the CSS:
 
   □ Light theme renders — no dark backgrounds bleeding ink
+  □ NO full-bleed atmosphere noise — zero teal/amber grids, stripes,
+    or radial glows painted across the page. If you see vertical
+    lines or a dark ground on any page, an .atmos layer survived
+    print and must be `display:none` (see "KILL FULL-BLEED
+    ATMOSPHERES" above). This is the single most destructive bug.
   □ Hero heading reads at the intended size (not ~19px)
   □ All KPI cells visible, not collapsed to one column
   □ Diagram shows EVERY group lit (composite snapshot active)
   □ Theme toggle hidden
-  □ Section atmospheres visible (gradients survived)
+  □ Card surfaces + accent text survived (depth preserved) — this is
+    the GOOD color; distinct from the atmosphere noise above
+  □ Every section's full content is present — scroll each printed
+    page and confirm nothing was dropped. A tall table or list that
+    silently disappears means a section carries break-inside:avoid
+    or overflow:hidden (see section 5).
+  □ Tall tables split cleanly across pages with the header repeating
+  □ No blank/near-empty pages between sections (double page-break)
   □ No section heading orphaned at end of page
   □ Page count is reasonable (target: 4-8 pages for report, 1
     for diagram-only, N+1 for slides where N = slide count)
   □ For slides: each slide on its own landscape page
 
-If verifying via headless rendering for a generated PDF:
-  - Use `--print-to-pdf` with `--no-pdf-header-footer`
-  - Pass `--virtual-time-budget=2000` to let fonts load
-  - Set `prefers-color-scheme: light` so any media-query branches
-    pick the light path (the print stylesheet should also force it)
+ALWAYS verify by actually rendering the PDF, not just reading the CSS.
+Print bugs (dropped content, atmosphere bleed, stranded pages) are
+invisible in the source and only appear in the rasterized output.
+Render headless and read back the pages:
+
+  CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  # macOS fallbacks if Chrome is absent: Microsoft Edge, Brave, Chromium
+  "$CHROME" --headless=new --disable-gpu --no-pdf-header-footer \
+    --virtual-time-budget=3000 \
+    --print-to-pdf=/tmp/archflow-print-check.pdf \
+    "file:///ABSOLUTE/PATH/report.html"
+
+  - `--virtual-time-budget=3000` lets web fonts + the composite
+    snapshot settle before capture.
+  - `prefers-color-scheme: light` so any media-query branches pick
+    the light path (the print stylesheet should also force it).
+  - Then open/read the resulting PDF and walk the checklist above
+    against the actual pages — that is the only reliable gate.
 
 ===================================================================
 7. ANTI-PATTERNS
@@ -267,5 +332,19 @@ If verifying via headless rendering for a generated PDF:
     (if it's not worth printing, it's not worth on screen either)
   → Forgetting `print-color-adjust: exact`
     (the most common cause of "my PDF is all white")
+  → Applying `print-color-adjust: exact` to full-bleed atmosphere
+    layers (the most common cause of "my PDF is all BLACK with neon
+    stripes" — accent-driven grids/glows paint at full strength on
+    white paper; `display:none` the atmospheres instead)
+  → Putting `break-inside: avoid` on `section` / any container taller
+    than a page (renderer can't place it and silently drops the
+    overflow — content vanishes from the PDF)
+  → Stacking `break-after: page` on one section AND `break-before:
+    page` on the next (double break strands a blank page between them)
+  → Leaving screen-only `overflow: hidden` on sections in print
+    (clips any content that extends past the box; reset to
+    `overflow: visible` in the print block)
+  → Declaring print "done" by reading the CSS instead of rendering
+    the actual PDF (every bug above is invisible in source)
   → Leaving `position: fixed` elements unhandled
     (they stamp on every page — toggles, sticky nav, banners)
