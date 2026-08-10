@@ -116,7 +116,8 @@ archflow/
 │       │       └── templates/
 │       │           ├── horizontal-pipeline.html  ← API / RAG systems
 │       │           ├── multi-agent-hub.html      ← orchestrator + parallel agents
-│       │           └── medallion-pipeline.html   ← ETL / Delta Live Tables
+│       │           ├── medallion-pipeline.html   ← ETL / Delta Live Tables
+│       │           └── walkthrough-pipeline.html ← rule-by-rule transform trace
 │       └── commands/
 │           └── archflow.md               ← /archflow:archflow slash command
 ├── README.md

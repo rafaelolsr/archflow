@@ -137,6 +137,72 @@ This step prevents the most common failure mode: producing a
 polished output that covers only 60% of the architecture.
 
 ===================================================================
+STEP 3c — TRANSFORMATION EXTRACTION (walkthrough mode only)
+===================================================================
+
+Walkthrough mode narrates how a record CHANGES stage-by-stage, so it
+needs the transformation RULES, not just the stage boxes. Run this
+step only for /archflow-walkthrough. Other modes skip it.
+
+CODE-FIRST. Read the transform layer and extract rules automatically:
+
+  → SQL / dbt models        SELECT expressions, CASE, CAST, COALESCE,
+                            JOINs (conforming), window dedup, MERGE
+  → Delta Live Tables       @dlt.expect* (expectations), apply_changes
+                            (SCD1/SCD2), streaming vs materialized
+  → PySpark / Spark SQL     withColumn, cast, when/otherwise, dropDup,
+                            watermark, join
+  → Great Expectations /    not_null, unique, regex, range — these are
+    dbt tests / *.yml         the red "reject/quarantine" rules
+  → Ingestion config        SFTP/CDC/Kafka/API — the landing mechanism
+
+For EACH rule extract:
+
+  { stage        : "silver",              // which transition it fires in
+    rule         : "mask_ssn",            // actual function/model/test name
+    type         : "mask | cast | dedup | merge_scd2 | expectation | ...",
+    status       : "green | yellow | red",// stoplight: pass / coerce / reject
+    before_field : "ssn",                 // input field(s)
+    after_field  : "ssn_masked",          // output field(s)
+    change       : "keep last4, mask rest",
+    code_ref     : "dlt/silver.sql:mask_ssn" }  // file:symbol — REQUIRED
+
+Also capture the INGESTION MECHANISM for the pipeline head:
+  { mechanism: "SFTP batch", cadence: "daily 02:00", format: "fixed-width" }
+
+And pick a SAMPLE RECORD to morph through the pipeline — a realistic
+row (real field names, plausible values) that visibly exercises the
+rules. One record, tracked entry to exit.
+
+-------------------------------------------------------------------
+GAP PROMPT — code-first, ask for what code can't tell you
+-------------------------------------------------------------------
+
+Business rules often live outside code (mapping docs, tribal
+knowledge). After extraction, if any of these are true — a silver
+transition has a stage box but no derivable rules, a rule's intent is
+opaque (magic number, undocumented CASE), or the sample record can't
+be filled from code — DO NOT invent them. Emit a GAP block and pause
+for the user before BUILD:
+
+  GAPS — confirm or fill before building the walkthrough
+  ─────────────────────────────────────────────────────
+    silver: found 4 rules in dlt/silver.sql; the mapping doc referenced
+            in the header comment (mapping_v3.xlsx) was not readable.
+      → Are there silver rules beyond: cast_amount, mask_ssn,
+        dedup_on_acct, expect_not_null_ts?
+    sample: could not derive a realistic `amount` overpunch value.
+      → Provide one sample row, or confirm the placeholder is fine.
+
+Rules the user supplies are treated as ground truth (same schema
+above, code_ref = "user-supplied"). Rules that remain unknown after
+the prompt are rendered as GAP chips in the output (neutral status,
+"unverified"), never silently dropped — see walkthrough.md.
+
+This gap checkpoint is unique to walkthrough mode. It lands in the
+PLAN stage, before any HTML is written.
+
+===================================================================
 STEP 4 — DECIDE THE LAYOUT
 ===================================================================
 
@@ -146,6 +212,10 @@ Quick decision:
   → Clear left-to-right request/response  → HORIZONTAL PIPELINE
   → Orchestrator spawning parallel agents → MULTI-AGENT HUB
   → ETL / medallion / staged transforms   → MEDALLION PIPELINE
+  → Rule-by-rule transform trace (walkthrough mode)
+                                          → MEDALLION PIPELINE + the
+                                            rule-annotated transition
+                                            primitive (walkthrough.md)
 
 Once you choose a layout shape, implement it as inline SVG.
 Group containers become <rect class="group-box"> elements. Inter-group
