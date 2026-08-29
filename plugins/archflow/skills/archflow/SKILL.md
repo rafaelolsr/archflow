@@ -59,12 +59,20 @@ STAGE 2: PLAN
   Read references/libraries.md     → fonts, Mermaid, CDN imports
   Read references/design-qa.md     → quality gates
   Read references/animation.md     → phase engine for the diagram
+  Read references/hero-manifest.md → deterministic hero geometry and validation
   Read references/navigation.md    → TOC sidebar (if needed)
   Read references/print.md         → print/PDF stylesheet + composite snapshot
   Read references/walkthrough.md   → (walkthrough mode) rule-annotated
                                      transition primitive + scroll driver
 
   Produce a visible, structured architecture map BEFORE any HTML.
+
+  For REPORT and DIAGRAM modes, express the connected hero as an
+  `archflow_hero: 1` JSON manifest. The manifest is part of the PLAN
+  contract: explicit frames, orthogonal flows, narrative chapters, and
+  source evidence. Keep the diagram compact only when that serves the
+  system; visual adaptability comes from changing the manifest layout,
+  not from removing architectural detail.
 
   Decide:
     → Font pairing that matches the project character
@@ -129,6 +137,21 @@ STAGE 3: BUILD
 
   Read remaining reference docs as needed (svg-exemplar.md, etc.).
   Write HTML/CSS/SVG implementing the architecture map from PLAN.
+
+  REPORT and DIAGRAM modes use the original Archflow hero pipeline:
+    1. Author the hero manifest described in references/hero-manifest.md.
+    2. Validate it against the analyzed repository:
+         node scripts/hero-diagram.mjs validate <hero.json> --repo-root <repo>
+    3. Put `<!-- ARCHFLOW_HERO -->` exactly once in the bespoke HTML.
+    4. Render atomically with `hero-diagram.mjs render ... --template ...`.
+    5. Keep the manifest beside the report so architecture, geometry,
+       evidence, and animation coverage remain inspectable.
+
+  The renderer owns stable SVG structure, geometry checks, and phase
+  hooks. The agent still owns editorial hierarchy, section composition,
+  typography, color, atmosphere, responsive behavior, and the architectural
+  decisions encoded in the manifest. Do not hand-author a second hero SVG
+  after rendering; correct the manifest and render again.
 
   Use the design-system.md patterns as BUILDING BLOCKS, not templates.
   Compose unique CSS per project. Design each component fresh.

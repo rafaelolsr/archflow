@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive architecture report for the StarBase metadata Catalog.">
+  <title>StarBase Catalog — Architecture Report</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #070b14;
+      --page-soft: #0b1220;
+      --panel: rgba(17, 26, 44, .78);
+      --panel-solid: #111a2c;
+      --panel-raised: #172239;
+      --ink: #edf4ff;
+      --muted: #93a2bb;
+      --faint: #53617a;
+      --line: rgba(142, 164, 198, .18);
+      --mint: #5eead4;
+      --amber: #f4b860;
+      --violet: #a78bfa;
+      --blue: #73a8ff;
+      --on-accent: #07110f;
+      --shadow: 0 28px 90px rgba(0, 0, 0, .34);
+      --shadow-mid: 0 16px 45px rgba(0, 0, 0, .18);
+      --recessed: rgba(2, 7, 15, .38);
+      --display: "Bodoni 72 Smallcaps", Didot, Georgia, serif;
+      --body: "Avenir Next", Avenir, Corbel, sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --afh-bg: #09111f;
+      --afh-zone-fill: #101a2c;
+      --afh-zone-stroke: #2b3a59;
+      --afh-card: #151f34;
+      --afh-card-active: #192a3f;
+      --afh-line: #34435f;
+      --afh-edge: #6f819f;
+      --afh-icon: #24334f;
+      --afh-shadow: #02040a;
+      --afh-ink: #edf4ff;
+      --afh-muted: #98a7c0;
+      --afh-accent: #5eead4;
+      --afh-accent-2: #f4b860;
+      --afh-body: var(--body);
+      --afh-mono: var(--mono);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --page: #f4f1e9;
+      --page-soft: #ebe7dc;
+      --panel: rgba(255, 255, 255, .72);
+      --panel-solid: #fffdf7;
+      --panel-raised: #ffffff;
+      --ink: #172033;
+      --muted: #5d687a;
+      --faint: #8992a0;
+      --line: rgba(31, 45, 68, .14);
+      --mint: #087f73;
+      --amber: #a25905;
+      --violet: #7052bd;
+      --blue: #245eb1;
+      --on-accent: #fff;
+      --shadow: 0 24px 70px rgba(47, 43, 35, .13);
+      --shadow-mid: 0 12px 34px rgba(47, 43, 35, .1);
+      --recessed: rgba(72, 68, 58, .06);
+      --afh-bg: #f8f5ed;
+      --afh-zone-fill: #eeebe2;
+      --afh-zone-stroke: #c8c3b7;
+      --afh-card: #fffdf7;
+      --afh-card-active: #f5fff9;
+      --afh-line: #c9c3b7;
+      --afh-edge: #778398;
+      --afh-icon: #dce8e2;
+      --afh-shadow: #a6a094;
+      --afh-ink: #172033;
+      --afh-muted: #647084;
+      --afh-accent: #087f73;
+      --afh-accent-2: #a25905;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 78% 8%, color-mix(in srgb, var(--violet) 10%, transparent), transparent 30rem),
+        radial-gradient(circle at 4% 30%, color-mix(in srgb, var(--mint) 7%, transparent), transparent 25rem),
+        var(--page);
+      color: var(--ink);
+      font: 15px/1.55 var(--body);
+      transition: background .25s ease, color .25s ease;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .28;
+      background-image: radial-gradient(var(--line) 1px, transparent 1px);
+      background-size: 22px 22px;
+      mask-image: linear-gradient(to bottom, #000 0, transparent 72%);
+    }
+
+    a { color: inherit; }
+    button { font: inherit; }
+    .skip-link { position: fixed; left: 1rem; top: -4rem; z-index: 100; padding: .65rem 1rem; background: var(--mint); color: var(--on-accent); }
+    .skip-link:focus { top: 1rem; }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .rail {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 100vh;
+      border-right: 1px solid var(--line);
+      background: color-mix(in srgb, var(--page) 88%, transparent);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 0 .9rem;
+    }
+
+    .mark {
+      width: 38px;
+      height: 38px;
+      border: 1px solid color-mix(in srgb, var(--mint) 50%, var(--line));
+      display: grid;
+      place-items: center;
+      font: 800 12px var(--mono);
+      color: var(--mint);
+      box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--mint) 5%, transparent);
+    }
+
+    .rail-nav { display: grid; gap: .8rem; }
+    .rail-nav a {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--faint);
+      text-decoration: none;
+      font: 700 10px var(--mono);
+      border: 1px solid transparent;
+    }
+    .rail-nav a:hover, .rail-nav a:focus-visible { color: var(--ink); border-color: var(--line); outline: none; }
+
+    .theme-toggle {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    main { min-width: 0; }
+    .wrap { width: min(1510px, calc(100% - 5vw)); margin: 0 auto; }
+
+    .masthead {
+      min-height: 82vh;
+      padding: clamp(4rem, 9vw, 9rem) 0 4rem;
+      display: grid;
+      align-content: center;
+      position: relative;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      margin-bottom: 1.5rem;
+      color: var(--mint);
+      font: 700 11px var(--mono);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 34px; height: 1px; background: currentColor; }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 1100px;
+      margin-bottom: 1.3rem;
+      font: 760 clamp(4.2rem, 10vw, 9.4rem)/.82 var(--display);
+      letter-spacing: -.072em;
+      text-transform: uppercase;
+    }
+    h1 span { color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--ink) 65%, transparent); }
+    .dek { max-width: 760px; color: var(--muted); font-size: clamp(1.05rem, 1.5vw, 1.28rem); }
+
+    .mast-meta {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .mast-meta div { padding: 1rem 1.2rem 1rem 0; border-right: 1px solid var(--line); }
+    .mast-meta div:not(:first-child) { padding-left: 1.2rem; }
+    .mast-meta div:last-child { border-right: 0; }
+    .mast-meta span { display: block; color: var(--faint); font: 700 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .mast-meta strong { display: block; margin-top: .25rem; font-weight: 620; }
+
+    section { scroll-margin-top: 2rem; }
+    .section { padding: clamp(5rem, 8vw, 8rem) 0; }
+    #summary, #seam, #components, #invariants, #references { position: relative; isolation: isolate; }
+    #summary::before, #seam::before, #components::before, #invariants::before, #references::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+      border-radius: 48px;
+    }
+    #summary::before { inset: 2rem -2vw; background: radial-gradient(circle at 12% 20%, color-mix(in srgb, var(--mint) 9%, transparent), transparent 44%); }
+    #seam::before { inset: 1rem -2vw; background: linear-gradient(110deg, color-mix(in srgb, var(--blue) 6%, transparent), transparent 52%); border-block: 1px solid color-mix(in srgb, var(--blue) 12%, transparent); }
+    #components::before { inset: 1rem -2vw; background: linear-gradient(135deg, color-mix(in srgb, var(--amber) 5%, transparent), transparent 46%, color-mix(in srgb, var(--violet) 4%, transparent)); }
+    #invariants::before { inset: 1.5rem -2vw; background: radial-gradient(circle at 88% 54%, color-mix(in srgb, var(--violet) 7%, transparent), transparent 48%); }
+    #references::before { inset: 2rem -2vw; background: linear-gradient(90deg, var(--recessed), transparent); border: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+    .section-head { display: grid; grid-template-columns: minmax(160px, .36fr) 1fr; gap: 3rem; margin-bottom: 2.7rem; align-items: end; }
+    .kicker { color: var(--amber); font: 700 10px var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+    h2 { margin: 0; font: 720 clamp(2.1rem, 4.5vw, 4.4rem)/.96 var(--display); letter-spacing: -.045em; text-transform: uppercase; }
+    .section-intro { max-width: 690px; margin: 0 0 .3rem auto; color: var(--muted); }
+
+    .hero-section { padding-top: 2rem; }
+    .hero-frame {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--panel-solid) 92%, var(--mint) 2%), var(--page-soft));
+      box-shadow: var(--shadow);
+    }
+    .hero-frame::before {
+      content: "SYSTEM MAP / LIVE";
+      position: absolute;
+      z-index: 3;
+      left: 1.5rem;
+      top: 1.25rem;
+      color: var(--mint);
+      font: 700 9px var(--mono);
+      letter-spacing: .15em;
+    }
+    .hero-canvas { padding: 2.9rem 1.15rem .75rem; min-height: 510px; display: grid; place-items: center; }
+
+    .phase-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      border-top: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel-solid) 72%, transparent);
+    }
+    .phase {
+      min-height: 67px;
+      padding: .75rem .8rem;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      cursor: pointer;
+      font: 680 10px/1.35 var(--mono);
+      letter-spacing: .02em;
+      transition: background .2s ease, color .2s ease;
+    }
+    .phase:last-child { border-right: 0; }
+    .phase::before { content: attr(data-step); display: block; margin-bottom: .25rem; color: var(--faint); font-size: 9px; }
+    .phase[aria-pressed="true"] { color: var(--ink); background: color-mix(in srgb, var(--mint) 10%, transparent); box-shadow: inset 0 3px 0 var(--mint); }
+    .phase:hover, .phase:focus-visible { color: var(--ink); outline: none; background: color-mix(in srgb, var(--ink) 4%, transparent); }
+
+    .hero-caption { display: flex; justify-content: space-between; gap: 2rem; padding: .9rem 1.3rem; color: var(--faint); font: 600 9px var(--mono); letter-spacing: .07em; text-transform: uppercase; border-top: 1px solid var(--line); }
+
+    .summary-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 1.25rem; }
+    .thesis {
+      min-height: 420px;
+      padding: clamp(2rem, 4vw, 4rem);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(145deg, color-mix(in srgb, var(--mint) 8%, transparent), transparent 48%),
+        var(--panel);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-mid);
+    }
+    .thesis blockquote { margin: 0; max-width: 850px; font: 630 clamp(2rem, 4vw, 4rem)/1.02 var(--display); letter-spacing: -.04em; }
+    .thesis blockquote em { color: var(--mint); font-style: normal; }
+    .thesis footer { margin-top: 3rem; color: var(--muted); max-width: 650px; }
+
+    .metrics { display: grid; gap: 1.25rem; }
+    .metric {
+      padding: 1.5rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: inset 3px 0 0 var(--metric-accent, var(--amber));
+    }
+    .metric:nth-child(1) { --metric-accent: var(--blue); }
+    .metric:nth-child(2) { --metric-accent: var(--mint); }
+    .metric:nth-child(3) { --metric-accent: var(--amber); }
+    .metric strong { font: 750 3.25rem/.85 var(--display); letter-spacing: -.05em; color: var(--metric-accent); }
+    .metric span { color: var(--muted); font-size: .9rem; }
+
+    .seam {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      gap: clamp(2rem, 5vw, 5rem);
+      padding: clamp(2rem, 4vw, 4rem);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+    }
+    .seam-divider { background: linear-gradient(to bottom, transparent, var(--mint), transparent); }
+    .seam h3 { margin-bottom: .55rem; font: 700 1.55rem var(--display); text-transform: uppercase; }
+    .seam p { color: var(--muted); }
+    .seam ul { margin: 1.4rem 0 0; padding: 0; list-style: none; display: grid; gap: .7rem; }
+    .seam li { display: flex; gap: .75rem; align-items: baseline; }
+    .seam li::before { content: "/"; color: var(--mint); font: 700 11px var(--mono); }
+
+    .component-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; }
+    .component { position: relative; min-height: 210px; padding: 1.6rem; background: var(--panel-solid); }
+    .component::before { content: ""; position: absolute; inset: 0 auto auto 0; width: 54px; height: 3px; background: var(--component-accent, var(--mint)); }
+    .component:nth-child(4n+1) { --component-accent: var(--blue); }
+    .component:nth-child(4n+2) { --component-accent: var(--mint); }
+    .component:nth-child(4n+3) { --component-accent: var(--amber); }
+    .component:nth-child(4n) { --component-accent: var(--violet); }
+    .component .index { color: var(--faint); font: 700 10px var(--mono); letter-spacing: .1em; }
+    .component h3 { margin: 2.8rem 0 .65rem; font: 700 1.4rem var(--display); text-transform: uppercase; }
+    .component p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .component code { display: inline-block; margin-top: 1.1rem; color: var(--mint); font: 600 10px var(--mono); }
+
+    .invariants { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    .invariant { position: relative; min-height: 230px; padding: 2rem; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--panel); }
+    .invariant::after { content: attr(data-number); position: absolute; right: .8rem; bottom: -.65rem; color: color-mix(in srgb, var(--ink) 5%, transparent); font: 800 8rem/.8 var(--display); }
+    .invariant h3 { font: 700 1.5rem var(--display); text-transform: uppercase; }
+    .invariant p { max-width: 570px; color: var(--muted); position: relative; z-index: 1; }
+    .invariant strong { color: var(--mint); }
+
+    .refs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 0 1.2rem;
+      background: var(--recessed);
+      box-shadow: inset 0 1px 18px color-mix(in srgb, var(--page) 24%, transparent);
+    }
+    .ref { padding: 1.2rem 1.2rem 1.2rem 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 42px 1fr; gap: .75rem; }
+    .ref:nth-child(odd) { border-right: 1px solid var(--line); }
+    .ref:nth-child(even) { padding-left: 1.2rem; }
+    .ref .num { color: var(--amber); font: 700 10px var(--mono); }
+    .ref code { color: var(--ink); font: 600 11px/1.5 var(--mono); overflow-wrap: anywhere; }
+    .ref span { display: block; color: var(--muted); font-size: .82rem; margin-top: .25rem; }
+
+    .closing { padding: 6rem 0 3rem; display: flex; justify-content: space-between; gap: 2rem; border-top: 1px solid var(--line); color: var(--muted); }
+    .closing strong { color: var(--ink); }
+    .closing code { font: 600 10px var(--mono); }
+
+    @media (max-width: 1100px) {
+      .summary-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .metric { grid-template-columns: 1fr; }
+      .component-grid { grid-template-columns: repeat(2, 1fr); }
+      .phase-bar { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 720px) {
+      .shell { grid-template-columns: 1fr; }
+      .rail { position: fixed; inset: auto 0 0; width: 100%; height: 58px; flex-direction: row; padding: .5rem 1rem; border: 1px solid var(--line); border-width: 1px 0 0; }
+      .rail-nav { display: none; }
+      main { padding-bottom: 58px; }
+      .wrap { width: min(100% - 1.5rem, 1510px); }
+      .masthead { min-height: 72vh; }
+      h1 { font-size: clamp(3.2rem, 18vw, 5.7rem); }
+      .mast-meta, .section-head, .metrics, .component-grid, .invariants, .refs { grid-template-columns: 1fr; }
+      .mast-meta div, .mast-meta div:not(:first-child) { padding: .85rem 0; border-right: 0; border-bottom: 1px solid var(--line); }
+      .mast-meta div:last-child { border-bottom: 0; }
+      .section-head { gap: 1rem; }
+      .section-intro { margin-left: 0; }
+      .hero-frame { border-radius: 16px; }
+      .hero-canvas { overflow-x: auto; justify-content: start; padding-left: .5rem; padding-right: .5rem; }
+      .hero-canvas .archflow-hero { min-width: 1040px; }
+      .phase-bar { grid-template-columns: 1fr 1fr; }
+      .hero-caption { display: none; }
+      .seam { grid-template-columns: 1fr; }
+      .seam-divider { height: 1px; }
+      .component-grid { gap: 1px; }
+      .ref:nth-child(odd) { border-right: 0; }
+      .ref:nth-child(even) { padding-left: 0; }
+      .closing { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+
+    @page { size: A4 portrait; margin: 10mm; }
+    @media print {
+      :root, [data-theme="dark"], [data-theme="light"] {
+        color-scheme: light;
+        --page: #fff;
+        --page-soft: #fff;
+        --panel: #fff;
+        --panel-solid: #fff;
+        --panel-raised: #fff;
+        --ink: #142033;
+        --muted: #586578;
+        --faint: #7c8796;
+        --line: rgba(20,32,51,.18);
+        --mint: #087f73;
+        --amber: #9a570a;
+        --afh-bg: #fff;
+        --afh-zone-fill: #f4f5f3;
+        --afh-zone-stroke: #bac1c8;
+        --afh-card: #fff;
+        --afh-card-active: #fff;
+        --afh-line: #aeb7c2;
+        --afh-edge: #41536d;
+        --afh-icon: #e1eee9;
+        --afh-shadow: transparent;
+        --afh-ink: #142033;
+        --afh-muted: #59687c;
+        --afh-accent: #087f73;
+        --afh-accent-2: #9a570a;
+      }
+      .hero-frame, .thesis, .metric, .seam, .component, .invariant, .refs { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      body { background: #fff; font-size: 9pt; }
+      body::before, #summary::before, #seam::before, #components::before, #invariants::before, #references::before, .rail, .phase-bar, .hero-caption { display: none !important; }
+      .shell { display: block; }
+      .wrap { width: 100%; }
+      .masthead { min-height: auto; padding: 5mm 0 8mm; }
+      h1 { font-size: 48pt; }
+      h2 { font-size: 27pt; line-height: 1; }
+      h3, .component h3, .invariant h3, .seam h3 { font-size: 14pt; line-height: 1.1; }
+      .dek { font-size: 12pt; }
+      .metric strong { font-size: 28pt; }
+      .thesis blockquote { font-size: 25pt; line-height: 1.04; }
+      .kicker, .eyebrow, .component code, .ref code { font-size: 7.5pt; }
+      .section { padding: 6mm 0; }
+      .hero-section { break-after: page; }
+      .hero-frame { box-shadow: none; border-radius: 0; }
+      .hero-canvas { min-height: 0; padding: 8mm 2mm 2mm; }
+      .archflow-hero { max-height: 160mm; }
+      .afh-entity, .afh-flow, .afh-zone { opacity: 1 !important; }
+      .section-head { margin-bottom: 4mm; }
+      .thesis, .metric, .seam, .component, .invariant { break-inside: avoid; box-shadow: none; }
+      .component-grid { grid-template-columns: repeat(3, 1fr); }
+      .closing { padding: 5mm 0 0; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to report</a>
+  <div class="shell">
+    <aside class="rail" aria-label="Report navigation">
+      <div class="mark" aria-label="StarBase Catalog">SB</div>
+      <nav class="rail-nav">
+        <a href="#system" aria-label="System map">01</a>
+        <a href="#summary" aria-label="Summary">02</a>
+        <a href="#seam" aria-label="Architecture seam">03</a>
+        <a href="#components" aria-label="Components">04</a>
+        <a href="#invariants" aria-label="Invariants">05</a>
+        <a href="#references" aria-label="Code references">06</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme" title="Switch color theme">◐</button>
+    </aside>
+
+    <main id="main">
+      <header class="masthead wrap">
+        <div>
+          <div class="eyebrow">Architecture field report · 28 Aug 2026</div>
+          <h1>StarBase <span>Catalog</span></h1>
+          <p class="dek">A metadata compiler disguised as a package: it combines four runtime sources with curated domains and optional samples, produces one canonical graph, and publishes three purpose-built read models without leaking application dependencies into ingestion.</p>
+          <div class="mast-meta" aria-label="Report facts">
+            <div><span>Runtime</span><strong>Python 3.11+</strong></div>
+            <div><span>Primary store</span><strong>Cosmos DB</strong></div>
+            <div><span>Search plane</span><strong>Azure AI Search</strong></div>
+            <div><span>Delivery</span><strong>CLI / scheduled runner</strong></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="section hero-section wrap" id="system" aria-labelledby="system-title">
+        <div class="section-head">
+          <div><div class="kicker">01 / System map</div><h2 id="system-title">Evidence becomes an interface.</h2></div>
+          <p class="section-intro">Select a chapter to isolate one stage of the run. The final chapter reveals the full data plane and its separate control rail.</p>
+        </div>
+        <div class="hero-frame">
+          <div class="hero-canvas">
+            <svg class="archflow-hero" data-archflow-hero="1" viewBox="0 0 1600 760" role="img" aria-labelledby="afh-title afh-description" xmlns="http://www.w3.org/2000/svg"><title id="afh-title">StarBase Catalog</title><desc id="afh-description">Runtime metadata, curated domains, and optional samples become one governed graph and three read projections</desc><metadata id="afh-chapters">[{&quot;id&quot;:&quot;chapter-evidence&quot;,&quot;label&quot;:&quot;01 · Collect evidence&quot;,&quot;color&quot;:&quot;blue&quot;,&quot;zones&quot;:[&quot;zone-evidence&quot;],&quot;entities&quot;:[&quot;fabric-model&quot;,&quot;metadata-repo&quot;,&quot;warehouse&quot;,&quot;pbip-reports&quot;,&quot;domain-manifests&quot;,&quot;sample-data&quot;,&quot;extractors&quot;],&quot;flows&quot;:[&quot;fabric-extract&quot;,&quot;repo-extract&quot;,&quot;warehouse-extract&quot;,&quot;pbip-extract&quot;,&quot;manifests-build&quot;,&quot;samples-build&quot;]},{&quot;id&quot;:&quot;chapter-canonical&quot;,&quot;label&quot;:&quot;02 · Build canon&quot;,&quot;color&quot;:&quot;mint&quot;,&quot;zones&quot;:[&quot;zone-canonical&quot;],&quot;entities&quot;:[&quot;extractors&quot;,&quot;canonical-builder&quot;,&quot;pipeline-control&quot;],&quot;flows&quot;:[&quot;extract-build&quot;,&quot;control-build&quot;]},{&quot;id&quot;:&quot;chapter-persist&quot;,&quot;label&quot;:&quot;03 · Persist + enrich&quot;,&quot;color&quot;:&quot;mint&quot;,&quot;zones&quot;:[&quot;zone-canonical&quot;],&quot;entities&quot;:[&quot;canonical-builder&quot;,&quot;canonical-store&quot;,&quot;enrichment&quot;],&quot;flows&quot;:[&quot;build-store&quot;,&quot;store-enrich&quot;,&quot;enrich-store&quot;]},{&quot;id&quot;:&quot;chapter-project&quot;,&quot;label&quot;:&quot;04 · Project for reads&quot;,&quot;color&quot;:&quot;amber&quot;,&quot;zones&quot;:[&quot;zone-projections&quot;],&quot;entities&quot;:[&quot;canonical-store&quot;,&quot;pipeline-control&quot;,&quot;projectors&quot;,&quot;search-index&quot;,&quot;adjacency-view&quot;,&quot;domain-views&quot;],&quot;flows&quot;:[&quot;store-project&quot;,&quot;control-project&quot;,&quot;project-search&quot;,&quot;project-graph&quot;,&quot;project-views&quot;]},{&quot;id&quot;:&quot;chapter-consume&quot;,&quot;label&quot;:&quot;05 · Serve consumers&quot;,&quot;color&quot;:&quot;violet&quot;,&quot;zones&quot;:[&quot;zone-consumption&quot;],&quot;entities&quot;:[&quot;search-index&quot;,&quot;adjacency-view&quot;,&quot;domain-views&quot;,&quot;catalog-sdk&quot;,&quot;advisor&quot;],&quot;flows&quot;:[&quot;search-sdk&quot;,&quot;graph-sdk&quot;,&quot;views-sdk&quot;,&quot;sdk-advisor&quot;]},{&quot;id&quot;:&quot;chapter-system&quot;,&quot;label&quot;:&quot;06 · Complete system&quot;,&quot;color&quot;:&quot;white&quot;,&quot;zones&quot;:[&quot;zone-evidence&quot;,&quot;zone-canonical&quot;,&quot;zone-projections&quot;,&quot;zone-consumption&quot;],&quot;entities&quot;:[&quot;fabric-model&quot;,&quot;metadata-repo&quot;,&quot;warehouse&quot;,&quot;pbip-reports&quot;,&quot;domain-manifests&quot;,&quot;sample-data&quot;,&quot;extractors&quot;,&quot;canonical-builder&quot;,&quot;canonical-store&quot;,&quot;enrichment&quot;,&quot;pipeline-control&quot;,&quot;projectors&quot;,&quot;search-index&quot;,&quot;adjacency-view&quot;,&quot;domain-views&quot;,&quot;catalog-sdk&quot;,&quot;advisor&quot;],&quot;flows&quot;:[&quot;fabric-extract&quot;,&quot;repo-extract&quot;,&quot;warehouse-extract&quot;,&quot;pbip-extract&quot;,&quot;manifests-build&quot;,&quot;samples-build&quot;,&quot;extract-build&quot;,&quot;build-store&quot;,&quot;store-enrich&quot;,&quot;enrich-store&quot;,&quot;store-project&quot;,&quot;control-build&quot;,&quot;control-project&quot;,&quot;project-search&quot;,&quot;project-graph&quot;,&quot;project-views&quot;,&quot;search-sdk&quot;,&quot;graph-sdk&quot;,&quot;views-sdk&quot;,&quot;sdk-advisor&quot;]}]</metadata><defs><marker id="afh-arrow" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z"/></marker><filter id="afh-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter></defs><style>.archflow-hero{width:100%;height:auto;display:block;overflow:visible}.afh-zone{opacity:.76;transition:opacity .35s ease}.afh-zone-frame{fill:var(--afh-zone-fill,#121b2f);stroke:var(--afh-zone-stroke,#2b3a59);stroke-width:1}.afh-zone-title{fill:var(--afh-muted,#8290aa);font:600 11px var(--afh-mono,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase}.afh-entity{opacity:.46;transition:opacity .3s ease,filter .3s ease}.afh-entity-shadow{fill:var(--afh-shadow,#050810);opacity:.44;filter:url(#afh-soft)}.afh-entity-frame{fill:var(--afh-card,#172137);stroke:var(--afh-line,#33425f);stroke-width:1.2;transition:stroke .3s ease,fill .3s ease}.afh-icon rect{fill:var(--afh-icon,#24334f)}.afh-icon text{fill:var(--afh-accent,#5eead4);font:700 8px var(--afh-mono,ui-monospace,monospace);letter-spacing:.05em}.afh-entity-title{fill:var(--afh-ink,#edf4ff);font:650 12px var(--afh-body,system-ui,sans-serif)}.afh-entity-caption{fill:var(--afh-muted,#95a4bd);font:500 9.5px var(--afh-body,system-ui,sans-serif)}.afh-tag{paint-order:stroke;stroke:var(--afh-bg,#08101f);stroke-width:5;stroke-linejoin:round;fill:var(--afh-accent-2,#f4b860);font:700 8px var(--afh-mono,ui-monospace,monospace);letter-spacing:.08em}.afh-flow{opacity:.22;transition:opacity .3s ease}.afh-flow-halo{fill:none;stroke:var(--afh-bg,#08101f);stroke-width:7;stroke-linejoin:round}.afh-flow-path{fill:none;stroke:var(--afh-edge,#6d7f9f);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.afh-flow-label{paint-order:stroke;stroke:var(--afh-bg,#08101f);stroke-width:7;stroke-linejoin:round;fill:var(--afh-muted,#95a4bd);font:650 8.5px var(--afh-mono,ui-monospace,monospace);letter-spacing:.04em}.afh-entity.is-active{opacity:1}.afh-entity.is-active .afh-entity-frame{stroke:var(--afh-accent,#5eead4);fill:var(--afh-card-active,#1b2a42)}.afh-flow.is-active{opacity:1}.afh-flow.is-active .afh-flow-path{stroke:var(--afh-accent,#5eead4);stroke-width:2.5}.afh-zone.is-active{opacity:1}.afh-zone.is-active .afh-zone-frame{stroke:var(--afh-accent,#5eead4);stroke-opacity:.5}@media(prefers-reduced-motion:reduce){.afh-zone,.afh-entity,.afh-flow{transition:none}}</style><g id="zone-evidence" class="afh-zone" data-af-zone="zone-evidence" data-af-tone="cool"><rect class="afh-zone-frame" x="20" y="58" width="260" height="650" rx="24"/><text class="afh-zone-title" x="42" y="89">Evidence plane</text></g><g id="zone-canonical" class="afh-zone" data-af-zone="zone-canonical" data-af-tone="mint"><rect class="afh-zone-frame" x="320" y="58" width="500" height="650" rx="24"/><text class="afh-zone-title" x="342" y="89">Canonical plane</text></g><g id="zone-projections" class="afh-zone" data-af-zone="zone-projections" data-af-tone="amber"><rect class="afh-zone-frame" x="860" y="58" width="420" height="650" rx="24"/><text class="afh-zone-title" x="882" y="89">Projection plane</text></g><g id="zone-consumption" class="afh-zone" data-af-zone="zone-consumption" data-af-tone="violet"><rect class="afh-zone-frame" x="1320" y="58" width="260" height="650" rx="24"/><text class="afh-zone-title" x="1342" y="89">Consumption plane</text></g><g id="fabric-extract" class="afh-flow" data-af-flow="fabric-extract" data-af-kind="data"><path class="afh-flow-halo" d="M 255 136 L 276 136 L 276 160 L 350 160"/><path class="afh-flow-path" d="M 255 136 L 276 136 L 276 160 L 350 160" marker-end="url(#afh-arrow)"/></g><g id="repo-extract" class="afh-flow" data-af-flow="repo-extract" data-af-kind="data"><path class="afh-flow-halo" d="M 255 231 L 288 231 L 288 173 L 350 173"/><path class="afh-flow-path" d="M 255 231 L 288 231 L 288 173 L 350 173" marker-end="url(#afh-arrow)"/></g><g id="warehouse-extract" class="afh-flow" data-af-flow="warehouse-extract" data-af-kind="data"><path class="afh-flow-halo" d="M 255 326 L 300 326 L 300 186 L 350 186"/><path class="afh-flow-path" d="M 255 326 L 300 326 L 300 186 L 350 186" marker-end="url(#afh-arrow)"/></g><g id="pbip-extract" class="afh-flow" data-af-flow="pbip-extract" data-af-kind="data"><path class="afh-flow-halo" d="M 255 421 L 312 421 L 312 198 L 350 198"/><path class="afh-flow-path" d="M 255 421 L 312 421 L 312 198 L 350 198" marker-end="url(#afh-arrow)"/></g><g id="manifests-build" class="afh-flow" data-af-flow="manifests-build" data-af-kind="data"><path class="afh-flow-halo" d="M 255 516 L 324 516 L 324 211 L 350 211"/><path class="afh-flow-path" d="M 255 516 L 324 516 L 324 211 L 350 211" marker-end="url(#afh-arrow)"/></g><g id="samples-build" class="afh-flow" data-af-flow="samples-build" data-af-kind="data"><path class="afh-flow-halo" d="M 255 611 L 336 611 L 336 224 L 350 224"/><path class="afh-flow-path" d="M 255 611 L 336 611 L 336 224 L 350 224" marker-end="url(#afh-arrow)"/></g><g id="extract-build" class="afh-flow" data-af-flow="extract-build" data-af-kind="data"><path class="afh-flow-halo" d="M 530 192 L 560 192 L 560 307 L 590 307"/><path class="afh-flow-path" d="M 530 192 L 560 192 L 560 307 L 590 307" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="572" y="252.5" text-anchor="start">set</text></g><g id="build-store" class="afh-flow" data-af-flow="build-store" data-af-kind="data"><path class="afh-flow-halo" d="M 685 354 L 685 367 L 570 367 L 570 380"/><path class="afh-flow-path" d="M 685 354 L 685 367 L 570 367 L 570 380" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="520" y="350" text-anchor="middle">canonical records</text></g><g id="store-enrich" class="afh-flow" data-af-flow="store-enrich" data-af-kind="data"><path class="afh-flow-halo" d="M 530 478 L 530 535"/><path class="afh-flow-path" d="M 530 478 L 530 535" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="585" y="495" text-anchor="middle">candidates</text></g><g id="enrich-store" class="afh-flow" data-af-flow="enrich-store" data-af-kind="data"><path class="afh-flow-halo" d="M 510 535 L 510 478"/><path class="afh-flow-path" d="M 510 535 L 510 478" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="445" y="520" text-anchor="middle">grounded fields</text></g><g id="store-project" class="afh-flow" data-af-flow="store-project" data-af-kind="data"><path class="afh-flow-halo" d="M 670 429 L 780 429 L 780 361 L 890 361"/><path class="afh-flow-path" d="M 670 429 L 780 429 L 780 361 L 890 361" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="725" y="416" text-anchor="middle">canonical set</text></g><g id="control-build" class="afh-flow" data-af-flow="control-build" data-af-kind="data"><path class="afh-flow-halo" d="M 685 209 L 685 260"/><path class="afh-flow-path" d="M 685 209 L 685 260" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="697" y="237.5" text-anchor="start">coordinates</text></g><g id="control-project" class="afh-flow" data-af-flow="control-project" data-af-kind="data"><path class="afh-flow-halo" d="M 780 162 L 850 162 L 850 280 L 975 280 L 975 315"/><path class="afh-flow-path" d="M 780 162 L 850 162 L 850 280 L 975 280 L 975 315" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="912.5" y="267" text-anchor="middle">gates + checks</text></g><g id="project-search" class="afh-flow" data-af-flow="project-search" data-af-kind="data"><path class="afh-flow-halo" d="M 1060 337 L 1072 337 L 1072 154 L 1090 154"/><path class="afh-flow-path" d="M 1060 337 L 1072 337 L 1072 154 L 1090 154" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="1084" y="248.5" text-anchor="start">search docs</text></g><g id="project-graph" class="afh-flow" data-af-flow="project-graph" data-af-kind="data"><path class="afh-flow-halo" d="M 1060 361 L 1090 361"/><path class="afh-flow-path" d="M 1060 361 L 1090 361" marker-end="url(#afh-arrow)"/></g><g id="project-views" class="afh-flow" data-af-flow="project-views" data-af-kind="data"><path class="afh-flow-halo" d="M 1060 385 L 1084 385 L 1084 568 L 1090 568"/><path class="afh-flow-path" d="M 1060 385 L 1084 385 L 1084 568 L 1090 568" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="1096" y="479.5" text-anchor="start">domain materialization</text></g><g id="search-sdk" class="afh-flow" data-af-flow="search-sdk" data-af-kind="data"><path class="afh-flow-halo" d="M 1250 154 L 1276 154 L 1276 278 L 1350 278"/><path class="afh-flow-path" d="M 1250 154 L 1276 154 L 1276 278 L 1350 278" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="1215" y="225" text-anchor="middle">hybrid search</text></g><g id="graph-sdk" class="afh-flow" data-af-flow="graph-sdk" data-af-kind="data"><path class="afh-flow-halo" d="M 1250 361 L 1290 361 L 1290 302 L 1350 302"/><path class="afh-flow-path" d="M 1250 361 L 1290 361 L 1290 302 L 1350 302" marker-end="url(#afh-arrow)"/></g><g id="views-sdk" class="afh-flow" data-af-flow="views-sdk" data-af-kind="data"><path class="afh-flow-halo" d="M 1250 568 L 1304 568 L 1304 326 L 1350 326"/><path class="afh-flow-path" d="M 1250 568 L 1304 568 L 1304 326 L 1350 326" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="1210" y="486" text-anchor="middle">platform + domains</text></g><g id="sdk-advisor" class="afh-flow" data-af-flow="sdk-advisor" data-af-kind="data"><path class="afh-flow-halo" d="M 1445 349 L 1445 449"/><path class="afh-flow-path" d="M 1445 349 L 1445 449" marker-end="url(#afh-arrow)"/><text class="afh-flow-label" x="1457" y="402" text-anchor="start">typed reads</text></g><g id="fabric-model" class="afh-entity" data-af-entity="fabric-model" data-af-kind="source"><rect class="afh-entity-shadow" x="47" y="105" width="210" height="72" rx="16"/><rect class="afh-entity-frame" x="45" y="100" width="210" height="72" rx="16"/><g class="afh-icon" transform="translate(58 113)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">IN</text></g><text class="afh-tag" x="248" y="93" text-anchor="end">API</text><text class="afh-entity-title" x="95" y="126">Fabric semantic model</text><text class="afh-entity-caption" x="59" y="150">Tables · columns · measures ·</text><text class="afh-entity-caption" x="59" y="163">relationships</text></g><g id="metadata-repo" class="afh-entity" data-af-entity="metadata-repo" data-af-kind="source"><rect class="afh-entity-shadow" x="47" y="200" width="210" height="72" rx="16"/><rect class="afh-entity-frame" x="45" y="195" width="210" height="72" rx="16"/><g class="afh-icon" transform="translate(58 208)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">IN</text></g><text class="afh-tag" x="248" y="188" text-anchor="end">GIT</text><text class="afh-entity-title" x="95" y="221">StarBaseMetadata repo</text><text class="afh-entity-caption" x="59" y="245">Entity and job YAML · SQL/KQL</text><text class="afh-entity-caption" x="59" y="258">transforms</text></g><g id="warehouse" class="afh-entity" data-af-entity="warehouse" data-af-kind="source"><rect class="afh-entity-shadow" x="47" y="295" width="210" height="72" rx="16"/><rect class="afh-entity-frame" x="45" y="290" width="210" height="72" rx="16"/><g class="afh-icon" transform="translate(58 303)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">IN</text></g><text class="afh-tag" x="248" y="283" text-anchor="end">SQL</text><text class="afh-entity-title" x="95" y="316">Fabric Warehouse</text><text class="afh-entity-caption" x="59" y="340">INFORMATION_SCHEMA tables and</text><text class="afh-entity-caption" x="59" y="353">columns</text></g><g id="pbip-reports" class="afh-entity" data-af-entity="pbip-reports" data-af-kind="source"><rect class="afh-entity-shadow" x="47" y="390" width="210" height="72" rx="16"/><rect class="afh-entity-frame" x="45" y="385" width="210" height="72" rx="16"/><g class="afh-icon" transform="translate(58 398)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">IN</text></g><text class="afh-tag" x="248" y="378" text-anchor="end">FILES</text><text class="afh-entity-title" x="95" y="411">PBIP reports</text><text class="afh-entity-caption" x="59" y="435">Visuals · KPI references · report</text><text class="afh-entity-caption" x="59" y="448">bindings</text></g><g id="domain-manifests" class="afh-entity" data-af-entity="domain-manifests" data-af-kind="source"><rect class="afh-entity-shadow" x="47" y="485" width="210" height="72" rx="16"/><rect class="afh-entity-frame" x="45" y="480" width="210" height="72" rx="16"/><g class="afh-icon" transform="translate(58 493)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">IN</text></g><text class="afh-tag" x="248" y="473" text-anchor="end">YAML</text><text class="afh-entity-title" x="95" y="506">Domain manifests</text><text class="afh-entity-caption" x="59" y="530">Curated domains · schemas · facts</text></g><g id="sample-data" class="afh-entity" data-af-entity="sample-data" data-af-kind="source"><rect class="afh-entity-shadow" x="47" y="580" width="210" height="72" rx="16"/><rect class="afh-entity-frame" x="45" y="575" width="210" height="72" rx="16"/><g class="afh-icon" transform="translate(58 588)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">IN</text></g><text class="afh-tag" x="248" y="568" text-anchor="end">DAX</text><text class="afh-entity-title" x="95" y="601">Optional samples</text><text class="afh-entity-caption" x="59" y="625">Row counts · values · bounded</text><text class="afh-entity-caption" x="59" y="638">statistics</text></g><g id="extractors" class="afh-entity" data-af-entity="extractors" data-af-kind="process"><rect class="afh-entity-shadow" x="352" y="150" width="180" height="94" rx="16"/><rect class="afh-entity-frame" x="350" y="145" width="180" height="94" rx="16"/><g class="afh-icon" transform="translate(363 158)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">FX</text></g><text class="afh-tag" x="523" y="138" text-anchor="end">03</text><text class="afh-entity-title" x="400" y="171">Typed extractors</text><text class="afh-entity-caption" x="364" y="195">Immutable source snapshots;</text><text class="afh-entity-caption" x="364" y="208">no merging</text></g><g id="canonical-builder" class="afh-entity" data-af-entity="canonical-builder" data-af-kind="process"><rect class="afh-entity-shadow" x="592" y="265" width="190" height="94" rx="16"/><rect class="afh-entity-frame" x="590" y="260" width="190" height="94" rx="16"/><g class="afh-icon" transform="translate(603 273)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">FX</text></g><text class="afh-tag" x="773" y="253" text-anchor="end">04</text><text class="afh-entity-title" x="640" y="286">Canonical builder</text><text class="afh-entity-caption" x="604" y="310">Pure merge · provenance ·</text><text class="afh-entity-caption" x="604" y="323">edges · hashes</text></g><g id="canonical-store" class="afh-entity" data-af-entity="canonical-store" data-af-kind="store"><rect class="afh-entity-shadow" x="472" y="385" width="200" height="98" rx="16"/><rect class="afh-entity-frame" x="470" y="380" width="200" height="98" rx="16"/><g class="afh-icon" transform="translate(483 393)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">DB</text></g><text class="afh-tag" x="663" y="373" text-anchor="end">COSMOS</text><text class="afh-entity-title" x="520" y="406">Canonical Cosmos</text><text class="afh-entity-title" x="520" y="421">store</text><text class="afh-entity-caption" x="484" y="445">Per-kind records · idempotent</text><text class="afh-entity-caption" x="484" y="458">content hashes</text></g><g id="enrichment" class="afh-entity" data-af-entity="enrichment" data-af-kind="process"><rect class="afh-entity-shadow" x="352" y="540" width="190" height="94" rx="16"/><rect class="afh-entity-frame" x="350" y="535" width="190" height="94" rx="16"/><g class="afh-icon" transform="translate(363 548)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">FX</text></g><text class="afh-tag" x="533" y="528" text-anchor="end">06</text><text class="afh-entity-title" x="400" y="561">Grounded enrichment</text><text class="afh-entity-caption" x="364" y="585">Descriptions · tags ·</text><text class="afh-entity-caption" x="364" y="598">synonyms · cached LLM calls</text></g><g id="pipeline-control" class="afh-entity" data-af-entity="pipeline-control" data-af-kind="control"><rect class="afh-entity-shadow" x="592" y="120" width="190" height="94" rx="16"/><rect class="afh-entity-frame" x="590" y="115" width="190" height="94" rx="16"/><g class="afh-icon" transform="translate(603 128)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">OK</text></g><text class="afh-tag" x="773" y="108" text-anchor="end">ORCH</text><text class="afh-entity-title" x="640" y="141">Pipeline control</text><text class="afh-entity-caption" x="604" y="165">Order · retries · consistency</text><text class="afh-entity-caption" x="604" y="178">· run manifest</text></g><g id="projectors" class="afh-entity" data-af-entity="projectors" data-af-kind="process"><rect class="afh-entity-shadow" x="892" y="320" width="170" height="92" rx="16"/><rect class="afh-entity-frame" x="890" y="315" width="170" height="92" rx="16"/><g class="afh-icon" transform="translate(903 328)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">FX</text></g><text class="afh-tag" x="1053" y="308" text-anchor="end">07–09</text><text class="afh-entity-title" x="940" y="341">Projection</text><text class="afh-entity-title" x="940" y="356">fan-out</text><text class="afh-entity-caption" x="904" y="380">Materializes independent</text><text class="afh-entity-caption" x="904" y="393">read surfaces</text></g><g id="search-index" class="afh-entity" data-af-entity="search-index" data-af-kind="view"><rect class="afh-entity-shadow" x="1092" y="117" width="160" height="84" rx="16"/><rect class="afh-entity-frame" x="1090" y="112" width="160" height="84" rx="16"/><g class="afh-icon" transform="translate(1103 125)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">VW</text></g><text class="afh-entity-title" x="1140" y="138">AI Search index</text><text class="afh-entity-caption" x="1104" y="162">Slim documents · vectors</text><text class="afh-entity-caption" x="1104" y="175">· orphan cleanup</text></g><g id="adjacency-view" class="afh-entity" data-af-entity="adjacency-view" data-af-kind="view"><rect class="afh-entity-shadow" x="1092" y="324" width="160" height="84" rx="16"/><rect class="afh-entity-frame" x="1090" y="319" width="160" height="84" rx="16"/><g class="afh-icon" transform="translate(1103 332)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">VW</text></g><text class="afh-entity-title" x="1140" y="345">Adjacency graph</text><text class="afh-entity-caption" x="1104" y="369">Mirrored lineage edges</text><text class="afh-entity-caption" x="1104" y="382">by graph node</text></g><g id="domain-views" class="afh-entity" data-af-entity="domain-views" data-af-kind="view"><rect class="afh-entity-shadow" x="1092" y="531" width="160" height="84" rx="16"/><rect class="afh-entity-frame" x="1090" y="526" width="160" height="84" rx="16"/><g class="afh-icon" transform="translate(1103 539)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">VW</text></g><text class="afh-entity-title" x="1140" y="552">Domain views</text><text class="afh-entity-caption" x="1104" y="576">Platform views · domain</text><text class="afh-entity-caption" x="1104" y="589">views · grounded reports</text></g><g id="catalog-sdk" class="afh-entity" data-af-entity="catalog-sdk" data-af-kind="interface"><rect class="afh-entity-shadow" x="1352" y="260" width="190" height="94" rx="16"/><rect class="afh-entity-frame" x="1350" y="255" width="190" height="94" rx="16"/><g class="afh-icon" transform="translate(1363 268)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">API</text></g><text class="afh-tag" x="1533" y="248" text-anchor="end">QUERY</text><text class="afh-entity-title" x="1400" y="281">Catalog read SDK</text><text class="afh-entity-caption" x="1364" y="305">Records · search · lineage ·</text><text class="afh-entity-caption" x="1364" y="318">views</text></g><g id="advisor" class="afh-entity" data-af-entity="advisor" data-af-kind="interface"><rect class="afh-entity-shadow" x="1352" y="454" width="190" height="94" rx="16"/><rect class="afh-entity-frame" x="1350" y="449" width="190" height="94" rx="16"/><g class="afh-icon" transform="translate(1363 462)"><rect width="27" height="27" rx="8"/><text x="13.5" y="17.5" text-anchor="middle">API</text></g><text class="afh-tag" x="1533" y="442" text-anchor="end">APP</text><text class="afh-entity-title" x="1400" y="475">Advisor workflows</text><text class="afh-entity-caption" x="1364" y="499">Schema and comparison tools</text><text class="afh-entity-caption" x="1364" y="512">consume the SDK</text></g></svg>
+          </div>
+          <div class="phase-bar" aria-label="Architecture chapters"></div>
+          <div class="hero-caption"><span>Orthogonal routes · source-backed nodes · validated bounds</span><span id="phase-status" aria-live="polite">Chapter 1 of 6</span></div>
+        </div>
+      </section>
+
+      <section class="section wrap" id="summary" aria-labelledby="summary-title">
+        <div class="section-head">
+          <div><div class="kicker">02 / Executive summary</div><h2 id="summary-title">One truth. Many read shapes.</h2></div>
+          <p class="section-intro">The important boundary is not a service boundary. It is the point where unstable source evidence becomes stable canonical contracts.</p>
+        </div>
+        <div class="summary-grid">
+          <article class="thesis">
+            <blockquote>StarBase keeps the expensive reasoning in the <em>write path</em>, so consumers receive a narrow, typed, read-optimized surface.</blockquote>
+            <footer>Extraction, merging, provenance, enrichment, and projection are allowed to be complex. Advisor workflows are not: they depend on the query SDK and the materialized views it composes.</footer>
+          </article>
+          <div class="metrics" aria-label="Architecture metrics">
+            <div class="metric"><strong>6</strong><span>input surfaces: four runtime sources, curated domains, and optional samples</span></div>
+            <div class="metric"><strong>1</strong><span>canonical record set carrying provenance and content hashes</span></div>
+            <div class="metric"><strong>3</strong><span>read surfaces: search, adjacency, and domain/platform views</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section wrap" id="seam" aria-labelledby="seam-title">
+        <div class="section-head">
+          <div><div class="kicker">03 / Governing seam</div><h2 id="seam-title">Write broad. Read narrow.</h2></div>
+          <p class="section-intro">The package’s strongest architectural decision is an asymmetric API: production can see every source-specific detail; consumers see only stable contracts and projections.</p>
+        </div>
+        <div class="seam">
+          <article>
+            <h3>Write / ingestion</h3>
+            <p>Source adapters and orchestration own volatility. They fetch, reconcile, enrich, persist, project, and record consistency evidence.</p>
+            <ul><li>Dependency-injected SDK clients</li><li>Pure canonical build step</li><li>Content-hash-gated writes</li><li>Retry and checkpoint ownership</li></ul>
+          </article>
+          <div class="seam-divider" aria-hidden="true"></div>
+          <article>
+            <h3>Read / consumption</h3>
+            <p>The query layer composes point reads, lineage, search, and pre-rolled views behind one typed in-process facade.</p>
+            <ul><li>Presentation-neutral contracts</li><li>Optional search capability</li><li>Explicit client lifecycle</li><li>No ingestion dependency in Advisor</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section wrap" id="components" aria-labelledby="components-title">
+        <div class="section-head">
+          <div><div class="kicker">04 / Component directory</div><h2 id="components-title">The catalog in six moves.</h2></div>
+          <p class="section-intro">Each move has one job and an observable hand-off. The orchestration layer sequences them without absorbing their implementations.</p>
+        </div>
+        <div class="component-grid">
+          <article class="component"><span class="index">01 / EXTRACT</span><h3>Evidence adapters</h3><p>Four core adapters plus the optional sampler return immutable snapshots and deliberately avoid inference, merging, or persistence.</p><code>catalog/extractors/</code></article>
+          <article class="component"><span class="index">02 / BUILD</span><h3>Canonical compiler</h3><p>A pure merge constructs records, resolves layers, derives business metrics, and builds evidence-owned edges.</p><code>catalog/builder/merge.py</code></article>
+          <article class="component"><span class="index">03 / PERSIST</span><h3>Record store</h3><p>Per-kind Cosmos containers make canonical entities addressable while content hashes suppress unchanged writes.</p><code>catalog/store/</code></article>
+          <article class="component"><span class="index">04 / ENRICH</span><h3>Grounded prose</h3><p>Cached LLM enrichment adds discoverability fields while preserving structural domain truth and validating grounding.</p><code>catalog/builder/enrich.py</code></article>
+          <article class="component"><span class="index">05 / PROJECT</span><h3>Read models</h3><p>Independent projectors materialize semantic search, mirrored adjacency, and deterministic domain/platform views.</p><code>catalog/projectors/</code></article>
+          <article class="component"><span class="index">06 / SERVE</span><h3>Query facade</h3><p>A typed client composes the projections for Advisor and other in-process consumers.</p><code>catalog/query/</code></article>
+        </div>
+      </section>
+
+      <section class="section wrap" id="invariants" aria-labelledby="invariants-title">
+        <div class="section-head">
+          <div><div class="kicker">05 / Load-bearing invariants</div><h2 id="invariants-title">What must remain true.</h2></div>
+          <p class="section-intro">These are the constraints that make reruns safe and the catalog trustworthy—not incidental implementation details.</p>
+        </div>
+        <div class="invariants">
+          <article class="invariant" data-number="1"><h3>Canonical before clever</h3><p>LLM output may improve prose, but it cannot assign the structural <strong>domain</strong>. Domain remains a deterministic builder concern.</p></article>
+          <article class="invariant" data-number="2"><h3>Hashes gate mutation</h3><p>Canonical writes and every projector carry stable content or input hashes, keeping unchanged reruns <strong>cheap and idempotent</strong>.</p></article>
+          <article class="invariant" data-number="3"><h3>Upsert before delete</h3><p>Projection cleanup runs only after successful materialization and uses caps plus empty-source guards to avoid destructive transient states.</p></article>
+          <article class="invariant" data-number="4"><h3>Order has an owner</h3><p>The orchestrator owns sequencing, retries, consistency, and manifests; concrete Azure clients remain injected at the CLI boundary.</p></article>
+        </div>
+      </section>
+
+      <section class="section wrap" id="references" aria-labelledby="references-title">
+        <div class="section-head">
+          <div><div class="kicker">06 / Source evidence</div><h2 id="references-title">Follow the code.</h2></div>
+          <p class="section-intro">The system map is anchored to these implementation ranges. The full manifest contains evidence for every rendered node.</p>
+        </div>
+        <div class="refs">
+          <div class="ref"><span class="num">01</span><div><code>catalog/orchestrator/pipeline.py:184</code><span>Authoritative phase order and dependency-injection boundary.</span></div></div>
+          <div class="ref"><span class="num">02</span><div><code>catalog/builder/merge.py:72</code><span>Pure canonical record-set construction.</span></div></div>
+          <div class="ref"><span class="num">03</span><div><code>catalog/builder/enrich.py:1</code><span>Cached, grounded descriptive enrichment.</span></div></div>
+          <div class="ref"><span class="num">04</span><div><code>catalog/store/cosmos_catalog_store.py:202</code><span>Cosmos implementation of the canonical store contract.</span></div></div>
+          <div class="ref"><span class="num">05</span><div><code>catalog/projectors/search/projector.py:1</code><span>Vector and slim-document projection semantics.</span></div></div>
+          <div class="ref"><span class="num">06</span><div><code>catalog/projectors/graph/projector.py:1</code><span>Mirrored adjacency and safe orphan cleanup.</span></div></div>
+          <div class="ref"><span class="num">07</span><div><code>catalog/projectors/views/projector.py:1</code><span>Domain, platform, and grounded report views.</span></div></div>
+          <div class="ref"><span class="num">08</span><div><code>catalog/query/client.py:146</code><span>Typed read facade over records, adjacency, views, and search.</span></div></div>
+        </div>
+      </section>
+
+      <footer class="closing wrap">
+        <div><strong>StarBase Catalog</strong><br>Architecture report generated by Archflow.</div>
+        <code>manifest v1 · 17 entities · 20 flows · 6 chapters</code>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const toggle = document.querySelector('.theme-toggle');
+      const saved = localStorage.getItem('starbase-catalog-theme');
+      if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+      else if (matchMedia('(prefers-color-scheme: light)').matches) root.dataset.theme = 'light';
+      toggle.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('starbase-catalog-theme', root.dataset.theme);
+      });
+
+      const svg = document.querySelector('[data-archflow-hero="1"]');
+      const metadata = svg.querySelector('#afh-chapters');
+      const chapters = JSON.parse(metadata.textContent);
+      const bar = document.querySelector('.phase-bar');
+      const status = document.querySelector('#phase-status');
+      let activeIndex = 0;
+      let timer = null;
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+      const selectAll = (attribute) => [...svg.querySelectorAll(`[${attribute}]`)];
+      const setActive = (index, announce = true) => {
+        activeIndex = (index + chapters.length) % chapters.length;
+        const chapter = chapters[activeIndex];
+        const chapterColors = { blue: 'var(--blue)', mint: 'var(--mint)', amber: 'var(--amber)', violet: 'var(--violet)', white: 'var(--ink)' };
+        svg.style.setProperty('--afh-accent', chapterColors[chapter.color] || 'var(--mint)');
+        const active = {
+          'data-af-zone': new Set(chapter.zones || []),
+          'data-af-entity': new Set(chapter.entities || []),
+          'data-af-flow': new Set(chapter.flows || [])
+        };
+        Object.entries(active).forEach(([attribute, ids]) => {
+          selectAll(attribute).forEach((node) => node.classList.toggle('is-active', ids.has(node.getAttribute(attribute))));
+        });
+        [...bar.children].forEach((button, buttonIndex) => button.setAttribute('aria-pressed', String(buttonIndex === activeIndex)));
+        status.textContent = `Chapter ${activeIndex + 1} of ${chapters.length} · ${chapter.label.replace(/^\d+\s*·\s*/, '')}`;
+        if (announce) restart();
+      };
+
+      const restart = () => {
+        clearInterval(timer);
+        if (!reduced.matches && !document.hidden) timer = setInterval(() => setActive(activeIndex + 1, false), 4300);
+      };
+
+      chapters.forEach((chapter, index) => {
+        const button = document.createElement('button');
+        button.className = 'phase';
+        button.type = 'button';
+        button.dataset.step = String(index + 1).padStart(2, '0');
+        button.textContent = chapter.label.replace(/^\d+\s*·\s*/, '');
+        button.setAttribute('aria-pressed', 'false');
+        button.addEventListener('click', () => setActive(index));
+        bar.append(button);
+      });
+
+      document.addEventListener('visibilitychange', restart);
+      reduced.addEventListener?.('change', restart);
+      window.addEventListener('beforeprint', () => {
+        clearInterval(timer);
+        selectAll('data-af-zone').forEach((node) => node.classList.add('is-active'));
+        selectAll('data-af-entity').forEach((node) => node.classList.add('is-active'));
+        selectAll('data-af-flow').forEach((node) => node.classList.add('is-active'));
+      });
+      window.addEventListener('afterprint', () => { setActive(activeIndex, false); restart(); });
+      setActive(0, false);
+      restart();
+    })();
+  </script>
+</body>
+</html>
