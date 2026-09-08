@@ -56,6 +56,14 @@ For DIAGRAM-ONLY MODE, skip:
   - Depth tiers, Layout rhythm, Backgrounds (single diagram, no sections)
   - Theme toggle (diagram mode has no theme switcher)
 
+For WALKTHROUGH MODE, ALSO run the walkthrough-only checks from
+design-qa.md's STRUCTURED REVIEW PROTOCOL:
+  - Stage coverage, Transition coverage, Rule completeness,
+    Rule code refs, Stoplight status, Record morph, Ingestion named,
+    Dual driver, Silver detail, Print freeze
+These are the reason the mode exists — a polished output that
+summarizes the silver rules instead of showing them FAILS.
+
 ===================================================================
 OUTPUT FORMAT
 ===================================================================
@@ -78,6 +86,18 @@ Produce exactly this structure:
     Theme toggle  {✓|⚠|✗}  {evidence}
     Accessibility {✓|⚠|✗}  {evidence}
     Print/PDF     {✓|⚠|✗}  {evidence}
+    ─────────────────────────────────
+    (walkthrough mode only — append these rows:)
+    Stage coverage   {✓|⚠|✗}  {evidence}
+    Transition cover {✓|⚠|✗}  {evidence}
+    Rule completeness{✓|⚠|✗}  {evidence}
+    Rule code refs   {✓|⚠|✗}  {evidence}
+    Stoplight status {✓|⚠|✗}  {evidence}
+    Record morph     {✓|⚠|✗}  {evidence}
+    Ingestion named  {✓|⚠|✗}  {evidence}
+    Dual driver      {✓|⚠|✗}  {evidence}
+    Silver detail    {✓|⚠|✗}  {evidence}
+    Print freeze     {✓|⚠|✗}  {evidence}
     ─────────────────────────────────
     VERDICT: {PASS | CONDITIONAL PASS | FAIL} ({C}C {E}E {W}W)
 

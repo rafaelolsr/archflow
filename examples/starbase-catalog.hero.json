@@ -1,0 +1,213 @@
+{
+  "archflow_hero": 1,
+  "project": {
+    "title": "StarBase Catalog",
+    "subtitle": "Runtime metadata, curated domains, and optional samples become one governed graph and three read projections"
+  },
+  "canvas": { "width": 1600, "height": 760 },
+  "zones": [
+    { "id": "zone-evidence", "title": "Evidence plane", "tone": "cool", "frame": { "x": 20, "y": 58, "w": 260, "h": 650 } },
+    { "id": "zone-canonical", "title": "Canonical plane", "tone": "mint", "frame": { "x": 320, "y": 58, "w": 500, "h": 650 } },
+    { "id": "zone-projections", "title": "Projection plane", "tone": "amber", "frame": { "x": 860, "y": 58, "w": 420, "h": 650 } },
+    { "id": "zone-consumption", "title": "Consumption plane", "tone": "violet", "frame": { "x": 1320, "y": 58, "w": 260, "h": 650 } }
+  ],
+  "entities": [
+    {
+      "id": "fabric-model",
+      "title": "Fabric semantic model",
+      "caption": "Tables · columns · measures · relationships",
+      "kind": "source",
+      "zone": "zone-evidence",
+      "tag": "API",
+      "frame": { "x": 45, "y": 100, "w": 210, "h": 72 },
+      "evidence": [{ "path": "catalog/extractors/fabric.py", "start_line": 1, "end_line": 15 }]
+    },
+    {
+      "id": "metadata-repo",
+      "title": "StarBaseMetadata repo",
+      "caption": "Entity and job YAML · SQL/KQL transforms",
+      "kind": "source",
+      "zone": "zone-evidence",
+      "tag": "GIT",
+      "frame": { "x": 45, "y": 195, "w": 210, "h": 72 },
+      "evidence": [{ "path": "catalog/extractors/repo.py", "start_line": 1, "end_line": 8 }]
+    },
+    {
+      "id": "warehouse",
+      "title": "Fabric Warehouse",
+      "caption": "INFORMATION_SCHEMA tables and columns",
+      "kind": "source",
+      "zone": "zone-evidence",
+      "tag": "SQL",
+      "frame": { "x": 45, "y": 290, "w": 210, "h": 72 },
+      "evidence": [{ "path": "catalog/extractors/warehouse.py", "start_line": 1, "end_line": 15 }]
+    },
+    {
+      "id": "pbip-reports",
+      "title": "PBIP reports",
+      "caption": "Visuals · KPI references · report bindings",
+      "kind": "source",
+      "zone": "zone-evidence",
+      "tag": "FILES",
+      "frame": { "x": 45, "y": 385, "w": 210, "h": 72 },
+      "evidence": [{ "path": "catalog/extractors/pbip.py", "start_line": 1, "end_line": 18 }]
+    },
+    {
+      "id": "domain-manifests",
+      "title": "Domain manifests",
+      "caption": "Curated domains · schemas · facts",
+      "kind": "source",
+      "zone": "zone-evidence",
+      "tag": "YAML",
+      "frame": { "x": 45, "y": 480, "w": 210, "h": 72 },
+      "evidence": [{ "path": "catalog/manifests/builder_set.py", "start_line": 24, "end_line": 60 }]
+    },
+    {
+      "id": "sample-data",
+      "title": "Optional samples",
+      "caption": "Row counts · values · bounded statistics",
+      "kind": "source",
+      "zone": "zone-evidence",
+      "tag": "DAX",
+      "frame": { "x": 45, "y": 575, "w": 210, "h": 72 },
+      "evidence": [{ "path": "catalog/extractors/sample.py", "start_line": 1, "end_line": 30 }]
+    },
+    {
+      "id": "extractors",
+      "title": "Typed extractors",
+      "caption": "Immutable source snapshots; no merging",
+      "kind": "process",
+      "zone": "zone-canonical",
+      "tag": "03",
+      "frame": { "x": 350, "y": 145, "w": 180, "h": 94 },
+      "evidence": [{ "path": "catalog/orchestrator/pipeline.py", "start_line": 192, "end_line": 214 }]
+    },
+    {
+      "id": "canonical-builder",
+      "title": "Canonical builder",
+      "caption": "Pure merge · provenance · edges · hashes",
+      "kind": "process",
+      "zone": "zone-canonical",
+      "tag": "04",
+      "frame": { "x": 590, "y": 260, "w": 190, "h": 94 },
+      "evidence": [{ "path": "catalog/builder/merge.py", "start_line": 72, "end_line": 113 }]
+    },
+    {
+      "id": "canonical-store",
+      "title": "Canonical Cosmos store",
+      "caption": "Per-kind records · idempotent content hashes",
+      "kind": "store",
+      "zone": "zone-canonical",
+      "tag": "COSMOS",
+      "frame": { "x": 470, "y": 380, "w": 200, "h": 98 },
+      "evidence": [{ "path": "catalog/store/cosmos_catalog_store.py", "start_line": 202, "end_line": 225 }, { "path": "catalog/store/cosmos_catalog_store.py", "start_line": 291, "end_line": 297 }]
+    },
+    {
+      "id": "enrichment",
+      "title": "Grounded enrichment",
+      "caption": "Descriptions · tags · synonyms · cached LLM calls",
+      "kind": "process",
+      "zone": "zone-canonical",
+      "tag": "06",
+      "frame": { "x": 350, "y": 535, "w": 190, "h": 94 },
+      "evidence": [{ "path": "catalog/builder/enrich.py", "start_line": 1, "end_line": 30 }]
+    },
+    {
+      "id": "pipeline-control",
+      "title": "Pipeline control",
+      "caption": "Order · retries · consistency · run manifest",
+      "kind": "control",
+      "zone": "zone-canonical",
+      "tag": "ORCH",
+      "frame": { "x": 590, "y": 115, "w": 190, "h": 94 },
+      "evidence": [{ "path": "catalog/orchestrator/pipeline.py", "start_line": 184, "end_line": 189 }, { "path": "catalog/orchestrator/pipeline.py", "start_line": 696, "end_line": 736 }]
+    },
+    {
+      "id": "projectors",
+      "title": "Projection fan-out",
+      "caption": "Materializes independent read surfaces",
+      "kind": "process",
+      "zone": "zone-projections",
+      "tag": "07–09",
+      "frame": { "x": 890, "y": 315, "w": 170, "h": 92 },
+      "evidence": [{ "path": "catalog/orchestrator/pipeline.py", "start_line": 184, "end_line": 189 }]
+    },
+    {
+      "id": "search-index",
+      "title": "AI Search index",
+      "caption": "Slim documents · vectors · orphan cleanup",
+      "kind": "view",
+      "zone": "zone-projections",
+      "frame": { "x": 1090, "y": 112, "w": 160, "h": 84 },
+      "evidence": [{ "path": "catalog/projectors/search/projector.py", "start_line": 1, "end_line": 13 }]
+    },
+    {
+      "id": "adjacency-view",
+      "title": "Adjacency graph",
+      "caption": "Mirrored lineage edges by graph node",
+      "kind": "view",
+      "zone": "zone-projections",
+      "frame": { "x": 1090, "y": 319, "w": 160, "h": 84 },
+      "evidence": [{ "path": "catalog/projectors/graph/projector.py", "start_line": 1, "end_line": 20 }]
+    },
+    {
+      "id": "domain-views",
+      "title": "Domain views",
+      "caption": "Platform views · domain views · grounded reports",
+      "kind": "view",
+      "zone": "zone-projections",
+      "frame": { "x": 1090, "y": 526, "w": 160, "h": 84 },
+      "evidence": [{ "path": "catalog/projectors/views/projector.py", "start_line": 1, "end_line": 25 }]
+    },
+    {
+      "id": "catalog-sdk",
+      "title": "Catalog read SDK",
+      "caption": "Records · search · lineage · views",
+      "kind": "interface",
+      "zone": "zone-consumption",
+      "tag": "QUERY",
+      "frame": { "x": 1350, "y": 255, "w": 190, "h": 94 },
+      "evidence": [{ "path": "catalog/query/client.py", "start_line": 146, "end_line": 178 }]
+    },
+    {
+      "id": "advisor",
+      "title": "Advisor workflows",
+      "caption": "Schema and comparison tools consume the SDK",
+      "kind": "interface",
+      "zone": "zone-consumption",
+      "tag": "APP",
+      "frame": { "x": 1350, "y": 449, "w": 190, "h": 94 },
+      "evidence": [{ "path": "src/workflows/modules/advisor/adapters/__init__.py", "start_line": 269, "end_line": 299 }]
+    }
+  ],
+  "flows": [
+    { "id": "fabric-extract", "source": "fabric-model", "target": "extractors", "target_offset": -32, "via": [[276, 136], [276, 160]] },
+    { "id": "repo-extract", "source": "metadata-repo", "target": "extractors", "target_offset": -19, "via": [[288, 231], [288, 173]] },
+    { "id": "warehouse-extract", "source": "warehouse", "target": "extractors", "target_offset": -6, "via": [[300, 326], [300, 186]] },
+    { "id": "pbip-extract", "source": "pbip-reports", "target": "extractors", "target_offset": 6, "via": [[312, 421], [312, 198]] },
+    { "id": "manifests-build", "source": "domain-manifests", "target": "extractors", "target_offset": 19, "via": [[324, 516], [324, 211]] },
+    { "id": "samples-build", "source": "sample-data", "target": "extractors", "target_offset": 32, "via": [[336, 611], [336, 224]] },
+    { "id": "extract-build", "source": "extractors", "target": "canonical-builder", "label": "set" },
+    { "id": "build-store", "source": "canonical-builder", "target": "canonical-store", "label": "canonical records", "source_port": "bottom", "target_port": "top", "label_at": [520, 350] },
+    { "id": "store-enrich", "source": "canonical-store", "target": "enrichment", "label": "candidates", "source_port": "bottom", "source_offset": -40, "target_port": "top", "target_offset": 85, "label_at": [585, 495] },
+    { "id": "enrich-store", "source": "enrichment", "target": "canonical-store", "label": "grounded fields", "source_port": "top", "source_offset": 65, "target_port": "bottom", "target_offset": -60, "label_at": [445, 520] },
+    { "id": "store-project", "source": "canonical-store", "target": "projectors", "label": "canonical set" },
+    { "id": "control-build", "source": "pipeline-control", "target": "canonical-builder", "label": "coordinates", "source_port": "bottom", "target_port": "top" },
+    { "id": "control-project", "source": "pipeline-control", "target": "projectors", "label": "gates + checks", "via": [[850, 162], [850, 280], [975, 280]], "target_port": "top" },
+    { "id": "project-search", "source": "projectors", "target": "search-index", "label": "search docs", "source_offset": -24, "via": [[1072, 337], [1072, 154]] },
+    { "id": "project-graph", "source": "projectors", "target": "adjacency-view" },
+    { "id": "project-views", "source": "projectors", "target": "domain-views", "label": "domain materialization", "source_offset": 24, "via": [[1084, 385], [1084, 568]] },
+    { "id": "search-sdk", "source": "search-index", "target": "catalog-sdk", "label": "hybrid search", "target_offset": -24, "via": [[1276, 154], [1276, 278]], "label_at": [1215, 225] },
+    { "id": "graph-sdk", "source": "adjacency-view", "target": "catalog-sdk", "target_offset": 0, "via": [[1290, 361], [1290, 302]] },
+    { "id": "views-sdk", "source": "domain-views", "target": "catalog-sdk", "label": "platform + domains", "target_offset": 24, "via": [[1304, 568], [1304, 326]], "label_at": [1210, 486] },
+    { "id": "sdk-advisor", "source": "catalog-sdk", "target": "advisor", "label": "typed reads", "source_port": "bottom", "target_port": "top" }
+  ],
+  "chapters": [
+    { "id": "chapter-evidence", "label": "01 · Collect evidence", "color": "blue", "zones": ["zone-evidence"], "entities": ["fabric-model", "metadata-repo", "warehouse", "pbip-reports", "domain-manifests", "sample-data", "extractors"], "flows": ["fabric-extract", "repo-extract", "warehouse-extract", "pbip-extract", "manifests-build", "samples-build"] },
+    { "id": "chapter-canonical", "label": "02 · Build canon", "color": "mint", "zones": ["zone-canonical"], "entities": ["extractors", "canonical-builder", "pipeline-control"], "flows": ["extract-build", "control-build"] },
+    { "id": "chapter-persist", "label": "03 · Persist + enrich", "color": "mint", "zones": ["zone-canonical"], "entities": ["canonical-builder", "canonical-store", "enrichment"], "flows": ["build-store", "store-enrich", "enrich-store"] },
+    { "id": "chapter-project", "label": "04 · Project for reads", "color": "amber", "zones": ["zone-projections"], "entities": ["canonical-store", "pipeline-control", "projectors", "search-index", "adjacency-view", "domain-views"], "flows": ["store-project", "control-project", "project-search", "project-graph", "project-views"] },
+    { "id": "chapter-consume", "label": "05 · Serve consumers", "color": "violet", "zones": ["zone-consumption"], "entities": ["search-index", "adjacency-view", "domain-views", "catalog-sdk", "advisor"], "flows": ["search-sdk", "graph-sdk", "views-sdk", "sdk-advisor"] },
+    { "id": "chapter-system", "label": "06 · Complete system", "color": "white", "zones": ["zone-evidence", "zone-canonical", "zone-projections", "zone-consumption"], "entities": ["fabric-model", "metadata-repo", "warehouse", "pbip-reports", "domain-manifests", "sample-data", "extractors", "canonical-builder", "canonical-store", "enrichment", "pipeline-control", "projectors", "search-index", "adjacency-view", "domain-views", "catalog-sdk", "advisor"], "flows": ["fabric-extract", "repo-extract", "warehouse-extract", "pbip-extract", "manifests-build", "samples-build", "extract-build", "build-store", "store-enrich", "enrich-store", "store-project", "control-build", "control-project", "project-search", "project-graph", "project-views", "search-sdk", "graph-sdk", "views-sdk", "sdk-advisor"] }
+  ]
+}

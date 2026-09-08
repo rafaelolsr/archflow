@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>[System Name] — Data Flow Walkthrough</title>
+<!--
+  WALKTHROUGH TEMPLATE — rule-annotated transition demo.
+  This is an EXAMPLE of the walkthrough primitive, not a rigid template.
+  It shows: pinned SVG pipeline + scroll/autoplay driver sharing one
+  active index + record morph (field-level diff) + stoplight rule chips
+  + collapsible engineer cards. Compose fresh CSS/typography per project.
+  See references/walkthrough.md for the full spec.
+-->
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#080c10; --card:#0d1117; --border:#21262d; --border-hi:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --dim:#4a5568;
+    --accent:#4aa8ff;               /* project palette accent */
+    --ok:#3fb950; --coerce:#d29922; --reject:#f85149; /* stoplight status */
+  }
+  body.light {
+    --bg:#f4f5f7; --card:#fff; --border:#d0d5dd; --border-hi:#c0c5cc;
+    --text:#1a1a2e; --muted:#5b6472; --dim:#8b8b9e;
+    --accent:#1f6feb; --ok:#1a7f37; --coerce:#9a6700; --reject:#cf222e;
+  }
+  body { background:var(--bg); color:var(--text); padding:32px 20px 60vh;
+    font-family:'DM Sans',system-ui,sans-serif; line-height:1.5; }
+  .mono { font-family:'JetBrains Mono','Fira Code',monospace; }
+  h1 { font-family:'Instrument Serif',Georgia,serif; font-size:40px; font-weight:400; }
+  .sub { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--dim); }
+  .theme-toggle { position:fixed; top:16px; right:16px; z-index:100; cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:6px 12px; font-size:13px; color:var(--muted); }
+
+  /* --- pinned pipeline hero --- */
+  .stage-wrap { display:grid; grid-template-columns:1fr 360px; gap:32px; max-width:1200px; margin:0 auto; }
+  .pin { position:sticky; top:24px; align-self:start; }
+  .arch-svg { width:100%; height:auto; background:radial-gradient(120% 120% at 50% 0,rgba(74,168,255,0.06),transparent 60%);
+    border:1px solid var(--border); border-radius:14px; }
+  .group-box { fill:var(--card); stroke:var(--border-hi); stroke-width:1.5; transition:.4s; }
+  .group-box.lit { stroke:var(--accent); filter:drop-shadow(0 0 8px rgba(74,168,255,.5)); }
+  .group-label { fill:var(--muted); font:600 11px 'JetBrains Mono',monospace; letter-spacing:1px; }
+  .arrow-path { stroke:var(--border-hi); stroke-width:2; fill:none; marker-end:url(#ah); transition:.4s; }
+  .arrow-path.lit { stroke:var(--accent); }
+  .ingest-tag { fill:var(--accent); font:600 9px 'JetBrains Mono',monospace; }
+
+  /* --- steps column (scroll sentinels) --- */
+  .steps { display:flex; flex-direction:column; gap:32vh; }
+  .step { opacity:.35; transition:opacity .3s; }
+  .step.active { opacity:1; }
+  .step h3 { font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+
+  /* --- record morph (analyst layer) --- */
+  .morph { border:1px solid var(--border); border-radius:10px; background:var(--card); padding:14px; margin-bottom:14px; }
+  .rec { font-size:12px; }
+  .rec .field { display:flex; justify-content:space-between; gap:8px; padding:3px 0; opacity:.4; transition:.3s; }
+  .rec .field.changed { opacity:1; background:rgba(74,168,255,.08); border-radius:4px; padding:3px 6px; }
+  .rec .k { color:var(--muted); }
+  .rec .v { color:var(--text); }
+  .morph .arrow { text-align:center; color:var(--dim); font-size:16px; margin:6px 0; }
+
+  /* --- rule chips (stoplight) --- */
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { cursor:pointer; font-size:11px; padding:5px 10px 5px 8px; border-radius:14px;
+    border:1px solid var(--border); border-left-width:3px; background:var(--card); color:var(--text); }
+  .chip::before { content:''; display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+  .chip.ok    { border-left-color:var(--ok); }     .chip.ok::before    { background:var(--ok); }
+  .chip.coerce{ border-left-color:var(--coerce); } .chip.coerce::before{ background:var(--coerce); }
+  .chip.reject{ border-left-color:var(--reject); } .chip.reject::before{ background:var(--reject); }
+  .chip.gap   { border-left-color:var(--dim); border-style:dashed; } .chip.gap::before { background:var(--dim); }
+
+  /* --- engineer cards (collapsed) --- */
+  .ecard { display:none; margin-top:8px; border:1px solid var(--border); border-left:3px solid var(--accent);
+    border-radius:8px; padding:10px 12px; font-size:12px; background:var(--card); }
+  .ecard.open { display:block; }
+  .ecard .diff { font-size:12px; margin:4px 0; }
+  .ecard .ref { color:var(--accent); font-size:11px; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before { transition:none !important; animation:none !important; } }
+  @media (max-width:900px) { .stage-wrap { grid-template-columns:1fr; } .pin { position:static; } }
+
+  @media print {
+    :root { --bg:#fff; --card:#fff; --text:#111; }
+    body { padding:0; color:#111; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .theme-toggle { display:none; }
+    .pin { position:static; } .steps { gap:16px; } .step { opacity:1 !important; }
+    .ecard { display:block !important; }        /* engineer cards forced open */
+    .rec .field { opacity:1 !important; }        /* final state, nothing dimmed */
+    @page { size:A4 portrait; margin:14mm; }
+  }
+</style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="document.body.classList.toggle('light')">◐ theme</button>
+
+  <header style="max-width:1200px;margin:0 auto 28px">
+    <div class="sub">Data Flow Walkthrough</div>
+    <h1>[System Name]</h1>
+    <p class="mono" style="color:var(--muted);font-size:12px;margin-top:6px">
+      INGEST: SFTP batch · daily 02:00 · fixed-width → BRONZE → SILVER → GOLD
+    </p>
+  </header>
+
+  <div class="stage-wrap">
+    <!-- PINNED PIPELINE -->
+    <div class="pin">
+      <svg class="arch-svg" viewBox="0 0 520 220" role="img" aria-label="Pipeline">
+        <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="var(--border-hi)"/></marker></defs>
+        <text x="60" y="26" text-anchor="middle" class="ingest-tag">SFTP ▸ daily</text>
+        <g id="g-ingest"><rect class="group-box" x="16" y="36" width="88" height="120" rx="8"/>
+          <text x="60" y="102" text-anchor="middle" class="group-label">SOURCE</text></g>
+        <path class="arrow-path" id="a-1" d="M104,96 Q120,96 132,96"/>
+        <g id="g-bronze"><rect class="group-box" x="132" y="36" width="88" height="120" rx="8"/>
+          <text x="176" y="102" text-anchor="middle" class="group-label">BRONZE</text></g>
+        <path class="arrow-path" id="a-2" d="M220,96 Q236,96 248,96"/>
+        <g id="g-silver"><rect class="group-box" x="248" y="36" width="88" height="120" rx="8"/>
+          <text x="292" y="102" text-anchor="middle" class="group-label">SILVER</text></g>
+        <path class="arrow-path" id="a-3" d="M336,96 Q352,96 364,96"/>
+        <g id="g-gold"><rect class="group-box" x="364" y="36" width="88" height="120" rx="8"/>
+          <text x="408" y="102" text-anchor="middle" class="group-label">GOLD</text></g>
+      </svg>
+    </div>
+
+    <!-- SCROLL STEPS -->
+    <div class="steps">
+      <!-- STEP: → Bronze -->
+      <section class="step" data-i="0" data-lit="g-ingest,g-bronze,a-1">
+        <h3>Ingest → Bronze</h3>
+        <div class="morph"><div class="rec">
+          <div class="field changed"><span class="k">acct</span><span class="v mono">"0000123456"</span></div>
+          <div class="field changed"><span class="k">_load_ts</span><span class="v mono">2026-07-29T02:00Z</span></div>
+        </div></div>
+        <div class="chips">
+          <span class="chip ok" onclick="tog(this)">land_raw</span>
+          <span class="chip ok" onclick="tog(this)">add_metadata</span>
+        </div>
+        <div class="ecard"><div class="diff mono">+ _load_ts, + _source_file, + _batch_id</div>
+          <div>Raw landing, no coercion. Columns mirror source as-is.</div>
+          <div class="ref mono">bronze/land.sql:ingest_tsys()</div></div>
+      </section>
+
+      <!-- STEP: → Silver (HERO transition) -->
+      <section class="step" data-i="1" data-lit="g-bronze,g-silver,a-2">
+        <h3>Bronze → Silver · transformation rules</h3>
+        <div class="morph"><div class="rec">
+          <div class="field changed"><span class="k">acct</span><span class="v mono">"0000123456"</span></div>
+          <div class="field changed"><span class="k">ssn</span><span class="v mono">"123-45-6789"</span></div>
+          <div class="field changed"><span class="k">amt</span><span class="v mono">"0000150000CR"</span></div>
+          <div class="field changed"><span class="k">ts</span><span class="v mono">null</span></div>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="rec">
+          <div class="field changed"><span class="k">acct_id</span><span class="v mono">123456</span></div>
+          <div class="field changed"><span class="k">ssn_masked</span><span class="v mono">"***-**-6789"</span></div>
+          <div class="field changed"><span class="k">amount</span><span class="v mono">1500.00</span></div>
+          <div class="field changed"><span class="k">ts</span><span class="v mono">⚠ QUARANTINE</span></div>
+        </div></div>
+        <div class="chips">
+          <span class="chip ok" onclick="tog(this)">cast_fixed_width</span>
+          <span class="chip coerce" onclick="tog(this)">mask_ssn</span>
+          <span class="chip ok" onclick="tog(this)">scd2_merge</span>
+          <span class="chip reject" onclick="tog(this)">expect_not_null_ts</span>
+          <span class="chip gap" onclick="tog(this)">fx_convert · unverified</span>
+        </div>
+        <div class="ecard">
+          <div class="diff mono">amt "0000150000CR" → 1500.00 · ssn → "***-**-6789"</div>
+          <div>Overpunch decode + trailing-sign; keep last4 of SSN, mask rest;
+               SCD2 adds valid_from/valid_to; rows with null ts routed to quarantine.</div>
+          <div class="ref mono">dlt/silver.sql · expectations.yml:not_null</div></div>
+      </section>
+
+      <!-- STEP: → Gold -->
+      <section class="step" data-i="2" data-lit="g-silver,g-gold,a-3">
+        <h3>Silver → Gold</h3>
+        <div class="morph"><div class="rec">
+          <div class="field changed"><span class="k">acct_id</span><span class="v mono">123456</span></div>
+          <div class="field changed"><span class="k">daily_bal</span><span class="v mono">1500.00</span></div>
+        </div></div>
+        <div class="chips"><span class="chip ok" onclick="tog(this)">aggregate_daily</span></div>
+        <div class="ecard"><div class="diff mono">GROUP BY acct_id, load_date → daily_bal</div>
+          <div class="ref mono">gold/daily_balance.sql</div></div>
+      </section>
+    </div>
+  </div>
+
+<script>
+  // ---- shared active-index state; scroll + autoplay both write it ----
+  const steps = [...document.querySelectorAll('.step')];
+  let userScrolled = false;
+
+  function setActive(i){
+    steps.forEach(s => s.classList.toggle('active', +s.dataset.i === i));
+    document.querySelectorAll('.lit').forEach(e => e.classList.remove('lit'));
+    const lit = (steps[i]?.dataset.lit || '').split(',').filter(Boolean);
+    lit.forEach(id => document.getElementById(id)?.classList.add('lit'));
+  }
+  function tog(chip){ chip.closest('.step').querySelector('.ecard').classList.toggle('open'); }
+
+  // SCROLL driver — IntersectionObserver, fires when a step hits viewport center
+  const io = new IntersectionObserver((ents) => {
+    ents.forEach(e => { if (e.isIntersecting){ userScrolled = true; setActive(+e.target.dataset.i); } });
+  }, { rootMargin:'-45% 0px -45% 0px', threshold:0 });
+  steps.forEach(s => io.observe(s));
+
+  // AUTOPLAY driver — same setActive; yields to scroll
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let ai = 0;
+  if (!reduce) setInterval(() => { if (!userScrolled){ ai = (ai+1) % steps.length; setActive(ai); } }, 2600);
+
+  // KEYBOARD
+  addEventListener('keydown', e => {
+    const cur = steps.findIndex(s => s.classList.contains('active'));
+    if (e.key==='ArrowDown'||e.key==='ArrowRight') setActive(Math.min(cur+1, steps.length-1));
+    if (e.key==='ArrowUp'||e.key==='ArrowLeft')   setActive(Math.max(cur-1, 0));
+  });
+
+  // PRINT — expand everything, freeze morph at final state
+  addEventListener('beforeprint', () => {
+    steps.forEach(s => s.classList.add('active'));
+    document.querySelectorAll('.ecard').forEach(c => c.classList.add('open'));
+    document.querySelectorAll('.group-box,.arrow-path').forEach(e => e.classList.add('lit'));
+  });
+
+  setActive(0);
+</script>
+</body>
+</html>
