@@ -553,8 +553,27 @@ reviewer agent checks for its presence and structure.
 8. Scroll-triggered reveal:
   Use IntersectionObserver to add a .visible class to sections
   as they enter the viewport. Sections start with opacity:0 and
-  translateY(20px), then transition to their visible state.
-  Use cubic-bezier(0.16, 1, 0.3, 1) for smooth deceleration.
+  translateY(40px), then transition to their visible state over
+  0.8s using cubic-bezier(0.16, 1, 0.3, 1) for smooth deceleration.
+
+  CRITICAL — observer config:
+    new IntersectionObserver(cb, {
+      threshold: 0,
+      rootMargin: '0px 0px -8% 0px'
+    })
+
+  The -8% bottom rootMargin is the key trick: it triggers the
+  reveal 8% BEFORE the section bottom reaches the viewport edge,
+  so motion feels anticipated rather than late. Without it, reveals
+  fire only after the user has already seen the section, defeating
+  the purpose. One-shot only -- never remove .visible on exit, or
+  content vanishes when the user scrolls back up.
+
+  Observe a curated selector list of structural elements (section
+  headers, card grids, figure frames, callouts), NOT every element
+  -- per-element observers create staggered chaos. Tag them with
+  .reveal at runtime via JS so the class is only applied when the
+  observer is wired, ensuring graceful no-JS fallback.
 
 REDUCED MOTION:
   @media (prefers-reduced-motion: reduce) {

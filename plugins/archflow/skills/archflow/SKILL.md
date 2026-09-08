@@ -117,7 +117,14 @@ STAGE 3: BUILD
     → The animated diagram is the hero section — maximum visual weight
     → Include @media print block per references/print.md — the
       generated HTML must produce a usable PDF via Cmd+P, with the
-      phase engine frozen to a composite snapshot (every group lit)
+      phase engine frozen to a composite snapshot (every group lit).
+      Pick a print STRATEGY (references/print.md §1): light-on-paper
+      is the default; use dark-fidelity (keep the on-screen dark
+      theme, §4b) when the PDF is a screen artifact or the user asks
+      for a PDF that "looks exactly like the screen." For dark
+      fidelity, also emit a *.dark-print.html variant for headless
+      rendering, since the browser's "Background graphics" default
+      makes interactive Cmd+P unreliable for dark backgrounds.
 
   DIAGRAM-ONLY MODE:
     → Fully self-contained — zero external dependencies
@@ -328,6 +335,10 @@ OUTPUT RULES
     → Print/PDF support is mandatory — every output must include the
       @media print block from references/print.md and the composite
       snapshot beforeprint hook. Cmd+P must produce a usable PDF.
+      Choose the print strategy per references/print.md §1: light-on-
+      paper by default, dark-fidelity (§4b) for screen-consumed or
+      agent-rendered PDFs and whenever the user wants the PDF to match
+      the on-screen dark theme.
 
   REPORT MODE:
     → File: ./architecture-report.html
