@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "StarBase Catalog — Data Plane",
+    "output": "examples/starbase-catalog-archify.html",
+    "quality_profile": "showcase",
+    "viewBox": [1080, 560],
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "dashed": { "label": "conditional path", "visible": true }
+      }
+    },
+    "views": [
+      {
+        "id": "evidence-path",
+        "label": "Evidence path",
+        "focus": ["fabric-runtime", "metadata-repo", "curated-evidence", "typed-extractors"],
+        "note": "Runtime metadata, repository facts, curated domains, and optional samples become typed snapshots."
+      },
+      {
+        "id": "canonical-loop",
+        "label": "Canonical loop",
+        "focus": ["typed-extractors", "canonical-builder", "canonical-store", "grounded-enrichment"],
+        "note": "The pure builder persists structural truth; enrichment reads and writes through the canonical store."
+      },
+      {
+        "id": "read-surfaces",
+        "label": "Read surfaces",
+        "focus": ["canonical-store", "search-index", "adjacency-graph", "domain-views", "catalog-sdk", "advisor-workflows"],
+        "note": "Three independent projections meet behind the typed Catalog SDK."
+      }
+    ]
+  },
+  "stages": [
+    { "label": "Evidence" },
+    { "label": "Normalize" },
+    { "label": "Canonical" },
+    { "label": "Project" },
+    { "label": "Consume" }
+  ],
+  "nodes": [
+    {
+      "id": "fabric-runtime",
+      "type": "cloud",
+      "label": "Fabric runtime metadata",
+      "sublabel": "semantic model + warehouse",
+      "tag": "API / SQL",
+      "stage": 0,
+      "row": 0,
+      "width": 152
+    },
+    {
+      "id": "metadata-repo",
+      "type": "external",
+      "label": "StarBaseMetadata repo",
+      "sublabel": "entities · jobs · SQL/KQL",
+      "tag": "Git",
+      "stage": 0,
+      "row": 1,
+      "width": 152
+    },
+    {
+      "id": "curated-evidence",
+      "type": "external",
+      "label": "Curated inputs",
+      "sublabel": "PBIP · domains · optional samples",
+      "tag": "files / DAX",
+      "stage": 0,
+      "row": 2,
+      "width": 152
+    },
+    {
+      "id": "typed-extractors",
+      "type": "backend",
+      "label": "Typed extractors",
+      "sublabel": "immutable source snapshots",
+      "tag": "phase 03",
+      "stage": 1,
+      "row": 1,
+      "width": 170
+    },
+    {
+      "id": "canonical-builder",
+      "type": "backend",
+      "label": "Canonical builder",
+      "sublabel": "pure merge · provenance · edges",
+      "tag": "phase 04",
+      "stage": 2,
+      "row": 0,
+      "width": 170
+    },
+    {
+      "id": "canonical-store",
+      "type": "database",
+      "label": "Canonical Cosmos store",
+      "sublabel": "per-kind records · content hashes",
+      "tag": "Cosmos DB",
+      "stage": 2,
+      "row": 1,
+      "width": 170
+    },
+    {
+      "id": "grounded-enrichment",
+      "type": "backend",
+      "label": "Grounded enrichment",
+      "sublabel": "descriptions · tags · synonyms",
+      "tag": "phase 06",
+      "stage": 2,
+      "row": 2,
+      "width": 170
+    },
+    {
+      "id": "search-index",
+      "type": "cloud",
+      "label": "Azure AI Search",
+      "sublabel": "slim docs + vectors",
+      "tag": "search",
+      "stage": 3,
+      "row": 0,
+      "width": 170
+    },
+    {
+      "id": "adjacency-graph",
+      "type": "database",
+      "label": "Adjacency graph",
+      "sublabel": "mirrored lineage edges",
+      "tag": "Cosmos DB",
+      "stage": 3,
+      "row": 1,
+      "width": 152
+    },
+    {
+      "id": "domain-views",
+      "type": "database",
+      "label": "Domain + platform views",
+      "sublabel": "deterministic views + reports",
+      "tag": "Cosmos DB",
+      "stage": 3,
+      "row": 2,
+      "width": 170
+    },
+    {
+      "id": "catalog-sdk",
+      "type": "backend",
+      "label": "Catalog read SDK",
+      "sublabel": "records · search · lineage · views",
+      "tag": "query",
+      "stage": 4,
+      "row": 1,
+      "width": 152
+    },
+    {
+      "id": "advisor-workflows",
+      "type": "frontend",
+      "label": "Advisor workflows",
+      "sublabel": "schema + comparison tools",
+      "tag": "consumer",
+      "stage": 4,
+      "row": 2,
+      "width": 170
+    }
+  ],
+  "flows": [
+    {
+      "id": "fabric-snapshot",
+      "from": "fabric-runtime",
+      "to": "typed-extractors",
+      "label": "semantic + warehouse snapshots",
+      "classification": "runtime evidence",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [[205, 157], [205, 215], [315, 215]],
+      "labelAt": [255, 200]
+    },
+    {
+      "id": "repository-snapshot",
+      "from": "metadata-repo",
+      "to": "typed-extractors",
+      "label": "YAML",
+      "classification": "declared metadata",
+      "variant": "default",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [[100, 325], [315, 325]],
+      "labelAt": [100, 325]
+    },
+    {
+      "id": "curated-snapshot",
+      "from": "curated-evidence",
+      "to": "typed-extractors",
+      "label": "reports + manifests + samples",
+      "classification": "curated evidence",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "via": [[100, 445], [410, 445], [410, 271]],
+      "labelAt": [100, 445]
+    },
+    {
+      "id": "build-canonical",
+      "from": "typed-extractors",
+      "to": "canonical-builder",
+      "label": "typed snapshots",
+      "classification": "immutable inputs",
+      "variant": "emphasis"
+    },
+    {
+      "id": "persist-canonical",
+      "from": "canonical-builder",
+      "to": "canonical-store",
+      "label": "canonical records",
+      "classification": "content-hash gated",
+      "variant": "emphasis",
+      "labelAt": [520, 220]
+    },
+    {
+      "id": "select-enrichment",
+      "from": "canonical-store",
+      "to": "grounded-enrichment",
+      "label": "select records",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [[420, 271], [420, 385]],
+      "labelAt": [365, 385]
+    },
+    {
+      "id": "write-enrichment",
+      "from": "grounded-enrichment",
+      "to": "canonical-store",
+      "label": "grounded fields",
+      "classification": "validated prose",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [[630, 385], [630, 315], [530, 315]],
+      "labelAt": [575, 315]
+    },
+    {
+      "id": "project-search",
+      "from": "canonical-store",
+      "to": "search-index",
+      "label": "slim docs + embeddings",
+      "classification": "read projection",
+      "variant": "default",
+      "labelAt": [745, 220]
+    },
+    {
+      "id": "canonical-query",
+      "from": "canonical-store",
+      "to": "catalog-sdk",
+      "label": "canonical reads",
+      "classification": "point + list",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [[650, 271], [650, 105], [1060, 105], [1060, 271]],
+      "labelAt": [850, 105]
+    },
+    {
+      "id": "project-lineage",
+      "from": "canonical-store",
+      "to": "adjacency-graph",
+      "label": "folded edges",
+      "variant": "default",
+      "labelAt": [745, 316]
+    },
+    {
+      "id": "project-views",
+      "from": "canonical-store",
+      "to": "domain-views",
+      "label": "domain views",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [[640, 271], [640, 338], [745, 338]],
+      "labelAt": [700, 338]
+    },
+    {
+      "id": "search-query",
+      "from": "search-index",
+      "to": "catalog-sdk",
+      "label": "hybrid search",
+      "classification": "read only",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [[850, 157], [850, 215], [960, 215]],
+      "labelAt": [900, 200]
+    },
+    {
+      "id": "lineage-query",
+      "from": "adjacency-graph",
+      "to": "catalog-sdk",
+      "label": "lineage",
+      "classification": "read only",
+      "variant": "default"
+    },
+    {
+      "id": "views-query",
+      "from": "domain-views",
+      "to": "catalog-sdk",
+      "label": "platform + domain reads",
+      "classification": "read only",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "bottom",
+      "via": [[870, 385], [870, 325], [960, 325]],
+      "labelAt": [860, 340]
+    },
+    {
+      "id": "advisor-consumption",
+      "from": "catalog-sdk",
+      "to": "advisor-workflows",
+      "label": "typed catalog access",
+      "classification": "in-process facade",
+      "variant": "emphasis",
+      "labelAt": [1025, 428]
+    }
+  ]
+}
